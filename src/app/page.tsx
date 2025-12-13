@@ -16,6 +16,8 @@ export default function Home() {
   const [isMounted, setIsMounted] = useState(false);
   const { state: channelState, addChannel, removeChannel } = useChannels();
 
+  const SIDEBAR_WIDTH = 350;
+
   // クライアントサイドでのみマウント状態を有効化
   useEffect(() => {
     setIsMounted(true);
@@ -117,7 +119,7 @@ export default function Home() {
       )}
 
       <main className={styles.mainContent}>
-        <PanelContainer />
+        <PanelContainer sidebarWidth={sidebarVisible ? SIDEBAR_WIDTH : 0} />
       </main>
     </div>
   );

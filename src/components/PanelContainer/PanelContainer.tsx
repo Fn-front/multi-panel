@@ -11,10 +11,14 @@ import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
 import styles from './PanelContainer.module.scss';
 
+type PanelContainerProps = {
+  sidebarWidth?: number;
+};
+
 /**
  * グリッドレイアウトを管理するコンテナコンポーネント
  */
-export function PanelContainer() {
+export function PanelContainer({ sidebarWidth = 0 }: PanelContainerProps) {
   const { state, updateLayout, addPanel } = usePanels();
 
   const layout: Layout[] = useMemo(
@@ -44,7 +48,7 @@ export function PanelContainer() {
 
   return (
     <div className={styles.container}>
-      <div className={styles.toolbar}>
+      <div className={styles.toolbar} style={{ paddingLeft: sidebarWidth > 0 ? '64px' : '16px' }}>
         <button
           type='button'
           className={styles.addButton}
