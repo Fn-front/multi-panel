@@ -20,7 +20,7 @@ const initialState: ChannelsState = {
 // Reducer
 function channelsReducer(
   state: ChannelsState,
-  action: ChannelsAction
+  action: ChannelsAction,
 ): ChannelsState {
   switch (action.type) {
     case 'ADD_CHANNEL':
@@ -33,7 +33,7 @@ function channelsReducer(
       return {
         ...state,
         channels: state.channels.filter(
-          (channel) => channel.id !== action.payload
+          (channel) => channel.id !== action.payload,
         ),
       };
 
@@ -43,7 +43,7 @@ function channelsReducer(
         channels: state.channels.map((channel) =>
           channel.id === action.payload.id
             ? { ...channel, ...action.payload.updates }
-            : channel
+            : channel,
         ),
       };
 
@@ -69,7 +69,7 @@ type ChannelsContextType = {
 
 // Context 作成
 const ChannelsContext = createContext<ChannelsContextType | undefined>(
-  undefined
+  undefined,
 );
 
 // Provider Props

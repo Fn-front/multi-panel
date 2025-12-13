@@ -26,7 +26,10 @@ export type ChannelsState = {
 export type ChannelsAction =
   | { type: 'ADD_CHANNEL'; payload: Channel }
   | { type: 'REMOVE_CHANNEL'; payload: string }
-  | { type: 'UPDATE_CHANNEL'; payload: { id: string; updates: Partial<Channel> } }
+  | {
+      type: 'UPDATE_CHANNEL';
+      payload: { id: string; updates: Partial<Channel> };
+    }
   | { type: 'LOAD_CHANNELS'; payload: Channel[] };
 
 /**

@@ -40,7 +40,13 @@ export function VolumeControl({
         onClick={toggleMute}
         aria-label={muted ? 'ミュート解除' : 'ミュート'}
       >
-        {muted ? '🔇' : volumePercent === 0 ? '🔇' : volumePercent < 50 ? '🔉' : '🔊'}
+        {muted
+          ? '🔇'
+          : volumePercent === 0
+            ? '🔇'
+            : volumePercent < 50
+              ? '🔉'
+              : '🔊'}
       </button>
       <input
         type='range'

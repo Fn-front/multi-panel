@@ -39,7 +39,7 @@ function panelsReducer(state: PanelsState, action: PanelsAction): PanelsState {
         panels: state.panels.map((panel) =>
           panel.id === action.payload.id
             ? { ...panel, ...action.payload.updates }
-            : panel
+            : panel,
         ),
       };
 

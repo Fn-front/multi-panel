@@ -28,7 +28,10 @@ export type FavoritesState = {
 export type FavoritesAction =
   | { type: 'ADD_FAVORITE'; payload: Favorite }
   | { type: 'REMOVE_FAVORITE'; payload: string }
-  | { type: 'UPDATE_FAVORITE'; payload: { id: string; updates: Partial<Favorite> } }
+  | {
+      type: 'UPDATE_FAVORITE';
+      payload: { id: string; updates: Partial<Favorite> };
+    }
   | { type: 'REORDER_FAVORITES'; payload: Favorite[] }
   | { type: 'LOAD_FAVORITES'; payload: Favorite[] };
 

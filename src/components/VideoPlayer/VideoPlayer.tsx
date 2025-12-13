@@ -43,7 +43,7 @@ export const VideoPlayer = forwardRef<ReactPlayer, VideoPlayerProps>(
         />
       </div>
     );
-  }
+  },
 );
 
 VideoPlayer.displayName = 'VideoPlayer';

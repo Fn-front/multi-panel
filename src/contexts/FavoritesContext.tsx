@@ -20,7 +20,7 @@ const initialState: FavoritesState = {
 // Reducer
 function favoritesReducer(
   state: FavoritesState,
-  action: FavoritesAction
+  action: FavoritesAction,
 ): FavoritesState {
   switch (action.type) {
     case 'ADD_FAVORITE':
@@ -33,7 +33,7 @@ function favoritesReducer(
       return {
         ...state,
         favorites: state.favorites.filter(
-          (favorite) => favorite.id !== action.payload
+          (favorite) => favorite.id !== action.payload,
         ),
       };
 
@@ -43,7 +43,7 @@ function favoritesReducer(
         favorites: state.favorites.map((favorite) =>
           favorite.id === action.payload.id
             ? { ...favorite, ...action.payload.updates }
-            : favorite
+            : favorite,
         ),
       };
 
@@ -76,7 +76,7 @@ type FavoritesContextType = {
 
 // Context 作成
 const FavoritesContext = createContext<FavoritesContextType | undefined>(
-  undefined
+  undefined,
 );
 
 // Provider Props
