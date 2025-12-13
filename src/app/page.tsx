@@ -16,7 +16,7 @@ export default function Home() {
   const [isMounted, setIsMounted] = useState(false);
   const { state: channelState, addChannel, removeChannel } = useChannels();
 
-  const SIDEBAR_WIDTH = 350;
+  const SIDEBAR_WIDTH = 450;
 
   // クライアントサイドでのみマウント状態を有効化
   useEffect(() => {

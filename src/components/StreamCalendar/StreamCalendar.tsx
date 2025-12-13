@@ -1,26 +1,16 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Calendar, dateFnsLocalizer, Views } from 'react-big-calendar';
-import { format, parse, startOfWeek, getDay } from 'date-fns';
-import { ja } from 'date-fns/locale';
+import { useCallback, useEffect, useState } from 'react';
+import FullCalendar from '@fullcalendar/react';
+import dayGridPlugin from '@fullcalendar/daygrid';
+import timeGridPlugin from '@fullcalendar/timegrid';
+import interactionPlugin from '@fullcalendar/interaction';
+import jaLocale from '@fullcalendar/core/locales/ja';
 import type { CalendarEvent } from '@/types/youtube';
 import { getMultipleChannelsSchedule } from '@/lib/youtube-api';
+import { Modal } from '@/components/Modal';
 import styles from './StreamCalendar.module.scss';
-import 'react-big-calendar/lib/css/react-big-calendar.css';
-
-// date-fns のローカライザー設定
-const locales = {
-  ja,
-};
-
-const localizer = dateFnsLocalizer({
-  format,
-  parse,
-  startOfWeek: () => startOfWeek(new Date(), { locale: ja }),
-  getDay,
-  locales,
-});
+import './fullcalendar-custom.css';
 
 interface StreamCalendarProps {
   /** お気に入りチャンネルIDのリスト */
@@ -31,6 +21,60 @@ interface StreamCalendarProps {
   refreshInterval?: number;
 }
 
+// モックデータ生成（開発用）
+const generateMockEvents = (): CalendarEvent[] => {
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+  return [
+    {
+      id: 'mock-1',
+      title: '【生配信】朝の雑談配信',
+      start: new Date(today.getTime() + 10 * 60 * 60 * 1000), // 10:00
+      end: new Date(today.getTime() + 12 * 60 * 60 * 1000), // 12:00
+      eventType: 'upcoming',
+      url: 'https://www.youtube.com/watch?v=mock1',
+      channelName: 'テストチャンネル1',
+    },
+    {
+      id: 'mock-2',
+      title: '【ゲーム実況】新作ゲームをプレイ！',
+      start: new Date(today.getTime() + 15 * 60 * 60 * 1000), // 15:00
+      end: new Date(today.getTime() + 17 * 60 * 60 * 1000), // 17:00
+      eventType: 'live',
+      url: 'https://www.youtube.com/watch?v=mock2',
+      channelName: 'テストチャンネル2',
+    },
+    {
+      id: 'mock-3',
+      title: '【歌枠】夜の歌配信',
+      start: new Date(today.getTime() + 20 * 60 * 60 * 1000), // 20:00
+      end: new Date(today.getTime() + 22 * 60 * 60 * 1000), // 22:00
+      eventType: 'upcoming',
+      url: 'https://www.youtube.com/watch?v=mock3',
+      channelName: 'テストチャンネル3',
+    },
+    {
+      id: 'mock-4',
+      title: '【雑談】お昼の配信',
+      start: new Date(today.getTime() + 12 * 60 * 60 * 1000), // 12:00
+      end: new Date(today.getTime() + 13 * 60 * 60 * 1000), // 13:00
+      eventType: 'upcoming',
+      url: 'https://www.youtube.com/watch?v=mock4',
+      channelName: 'テストチャンネル4',
+    },
+    {
+      id: 'mock-5',
+      title: '【お絵描き】イラスト配信',
+      start: new Date(today.getTime() + 18 * 60 * 60 * 1000), // 18:00
+      end: new Date(today.getTime() + 20 * 60 * 60 * 1000), // 20:00
+      eventType: 'live',
+      url: 'https://www.youtube.com/watch?v=mock5',
+      channelName: 'テストチャンネル5',
+    },
+  ];
+};
+
 export default function StreamCalendar({
   channelIds,
   onEventClick,
@@ -39,10 +83,17 @@ export default function StreamCalendar({
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [view, setView] = useState<(typeof Views)[keyof typeof Views]>(Views.MONTH);
+  const [showMonthModal, setShowMonthModal] = useState(false);
 
   // スケジュール取得
   const fetchSchedule = useCallback(async () => {
+    // 開発用: 常にモックデータを表示
+    setEvents(generateMockEvents());
+    setIsLoading(false);
+    return;
+
+    // 以下は実際のAPI使用時のコード
+    // eslint-disable-next-line no-unreachable
     if (channelIds.length === 0) {
       setEvents([]);
       setIsLoading(false);
@@ -87,7 +138,8 @@ export default function StreamCalendar({
     } finally {
       setIsLoading(false);
     }
-  }, [channelIds]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // 初回読み込みと定期更新
   useEffect(() => {
@@ -98,17 +150,38 @@ export default function StreamCalendar({
     return () => clearInterval(interval);
   }, [fetchSchedule, refreshInterval]);
 
-  // イベントスタイルのカスタマイズ
-  const eventStyleGetter = useCallback((event: CalendarEvent) => {
-    const className = event.eventType;
-    return {
-      className,
-    };
-  }, []);
+  // カレンダーマウント後に現在時刻までスクロール
+  useEffect(() => {
+    if (!isLoading && events.length > 0) {
+      const timer = setTimeout(() => {
+        const scrollableElement = document.querySelector('.fc-scroller-liquid-absolute');
+        if (scrollableElement) {
+          const now = new Date();
+          const currentHour = now.getHours();
+          const currentMinute = now.getMinutes();
 
-  // イベント選択時の処理
-  const handleSelectEvent = useCallback(
-    (event: CalendarEvent) => {
+          // 1時間あたりのピクセル数（FullCalendarのデフォルトは約50px）
+          const pixelsPerHour = 50;
+          const currentTimePosition = (currentHour + currentMinute / 60) * pixelsPerHour;
+
+          // ビューポートの高さの半分を引いて、現在時刻が中央に来るようにする
+          const viewportHeight = scrollableElement.clientHeight;
+          const scrollPosition = currentTimePosition - viewportHeight / 2;
+
+          scrollableElement.scrollTop = Math.max(0, scrollPosition);
+        }
+      }, 100);
+
+      return () => clearTimeout(timer);
+    }
+  }, [isLoading, events]);
+
+  // イベントクリック時の処理
+  const handleEventClick = useCallback(
+    (info: any) => {
+      const event = events.find((e) => e.id === info.event.id);
+      if (!event) return;
+
       if (onEventClick) {
         onEventClick(event);
       } else {
@@ -116,28 +189,15 @@ export default function StreamCalendar({
         window.open(event.url, '_blank', 'noopener,noreferrer');
       }
     },
-    [onEventClick],
+    [events, onEventClick],
   );
 
-  // メッセージのカスタマイズ
-  const messages = useMemo(
-    () => ({
-      today: '今日',
-      previous: '前へ',
-      next: '次へ',
-      month: '月',
-      week: '週',
-      day: '日',
-      agenda: '予定',
-      date: '日付',
-      time: '時間',
-      event: 'イベント',
-      noEventsInRange: 'この期間にイベントはありません',
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      showMore: (total: any) => `+${total} 件`,
-    }),
-    [],
-  );
+  // イベントの色設定
+  const getEventClassNames = useCallback((info: any) => {
+    const event = info.event;
+    const eventType = event.extendedProps?.eventType || 'upcoming';
+    return [`event-${eventType}`];
+  }, []);
 
   if (isLoading) {
     return (
@@ -164,49 +224,89 @@ export default function StreamCalendar({
     );
   }
 
+  // FullCalendar用のイベントデータに変換
+  const fullCalendarEvents = events.map((event) => ({
+    id: event.id,
+    title: event.title,
+    start: event.start,
+    end: event.end,
+    extendedProps: {
+      eventType: event.eventType,
+      url: event.url,
+      channelName: event.channelName,
+    },
+  }));
+
   return (
-    <div className={styles.calendarContainer}>
-      <div className={styles.header}>
-        <h2>配信カレンダー</h2>
-        <div className={styles.controls}>
-          <button
-            className={view === Views.MONTH ? styles.active : ''}
-            onClick={() => setView(Views.MONTH)}
-            type='button'
-          >
-            月
-          </button>
-          <button
-            className={view === Views.WEEK ? styles.active : ''}
-            onClick={() => setView(Views.WEEK)}
-            type='button'
-          >
-            週
-          </button>
-          <button
-            className={view === Views.DAY ? styles.active : ''}
-            onClick={() => setView(Views.DAY)}
-            type='button'
-          >
-            日
-          </button>
+    <>
+      <div className={styles.calendarContainer}>
+        <div className={styles.header}>
+          <h2>配信カレンダー</h2>
+          <div className={styles.controls}>
+            <button onClick={() => setShowMonthModal(true)} type='button'>
+              月表示
+            </button>
+          </div>
+        </div>
+        <div className={styles.calendarWrapper}>
+          <FullCalendar
+            plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+            initialView='timeGridWeek'
+            locale={jaLocale}
+            headerToolbar={{
+              left: 'prev,next today',
+              center: 'title',
+              right: 'timeGridWeek,timeGridDay',
+            }}
+            buttonText={{
+              today: '今日',
+              week: '週',
+              day: '日',
+            }}
+            dayHeaderContent={(args) => {
+              const date = args.date;
+              const day = date.getDate();
+              const weekdays = ['日', '月', '火', '水', '木', '金', '土'];
+              const weekday = weekdays[date.getDay()];
+              return `${day}\n${weekday}`;
+            }}
+            events={fullCalendarEvents}
+            eventClick={handleEventClick}
+            eventClassNames={getEventClassNames}
+            height='100%'
+            slotMinTime='00:00:00'
+            slotMaxTime='24:00:00'
+            allDaySlot={false}
+          />
         </div>
       </div>
-      <div className={styles.calendarWrapper}>
-        <Calendar
-          localizer={localizer}
-          events={events}
-          view={view}
-          onView={setView}
-          startAccessor='start'
-          endAccessor='end'
-          style={{ height: '100%' }}
-          eventPropGetter={eventStyleGetter}
-          onSelectEvent={handleSelectEvent}
-          messages={messages}
-          culture='ja'
-        />
-      </div>
-    </div>
+
+      <Modal
+        isOpen={showMonthModal}
+        onClose={() => setShowMonthModal(false)}
+        title='配信カレンダー（月表示）'
+      >
+        <div className={styles.modalCalendar}>
+          <FullCalendar
+            plugins={[dayGridPlugin, interactionPlugin]}
+            initialView='dayGridMonth'
+            locale={jaLocale}
+            headerToolbar={{
+              left: 'prev,next today',
+              center: 'title',
+              right: '',
+            }}
+            buttonText={{
+              today: '今日',
+            }}
+            events={fullCalendarEvents}
+            eventClick={handleEventClick}
+            eventClassNames={getEventClassNames}
+            height='100%'
+            dayMaxEventRows={false}
+          />
+        </div>
+      </Modal>
+    </>
   );
 }
