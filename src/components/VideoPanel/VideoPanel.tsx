@@ -1,7 +1,5 @@
 'use client';
 
-import { useRef } from 'react';
-import ReactPlayer from 'react-player';
 import { VideoPlayer } from '@/components/VideoPlayer';
 import { URLInput } from '@/components/URLInput';
 import { VolumeControl } from '@/components/VolumeControl';
@@ -17,7 +15,6 @@ type VideoPanelProps = {
  * 動画パネルコンポーネント
  */
 export function VideoPanel({ panel }: VideoPanelProps) {
-  const playerRef = useRef<ReactPlayer>(null);
   const { updatePanel, removePanel } = usePanels();
 
   const handleUrlChange = (url: string) => {
@@ -58,7 +55,6 @@ export function VideoPanel({ panel }: VideoPanelProps) {
       <div className={styles.videoContainer}>
         {panel.url ? (
           <VideoPlayer
-            ref={playerRef}
             url={panel.url}
             volume={panel.volume}
             muted={panel.isMuted}
