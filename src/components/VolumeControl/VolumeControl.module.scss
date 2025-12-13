@@ -87,24 +87,40 @@
   }
 }
 
+.controls {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs, 4px);
+  width: 100%;
+  justify-content: space-between;
+}
+
 .volumeLabel {
-  font-size: var(--text-xs, 12px);
-  color: var(--text-secondary, #b3b3b3);
+  font-size: var(--text-sm, 14px);
+  font-weight: var(--font-bold, 700);
+  color: var(--text-primary, #ffffff);
   text-align: center;
+  min-width: 40px;
 }
 
 .muteButton {
   background: transparent;
-  color: var(--text-secondary, #b3b3b3);
-  border: 1px solid var(--border-color, #404040);
-  padding: var(--spacing-xs, 4px) var(--spacing-sm, 8px);
+  border: none;
+  padding: var(--spacing-xs, 4px);
   border-radius: 4px;
   cursor: pointer;
-  font-size: var(--text-xs, 12px);
+  font-size: 16px;
   transition: all var(--transition-base, 200ms ease-in-out);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
   &:hover {
     background: var(--bg-tertiary, #3a3a3a);
-    border-color: var(--accent-primary, #3b82f6);
+    transform: scale(1.1);
+  }
+
+  &:active {
+    transform: scale(0.95);
   }
 }

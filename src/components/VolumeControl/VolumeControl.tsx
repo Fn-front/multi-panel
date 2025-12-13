@@ -91,14 +91,17 @@ export function VolumeControl({
             aria-label='音量'
             orient='vertical'
           />
-          <span className={styles.volumeLabel}>{volumePercent}%</span>
-          <button
-            type='button'
-            className={styles.muteButton}
-            onClick={toggleMute}
-          >
-            {muted ? 'ミュート解除' : 'ミュート'}
-          </button>
+          <div className={styles.controls}>
+            <span className={styles.volumeLabel}>{volumePercent}%</span>
+            <button
+              type='button'
+              className={styles.muteButton}
+              onClick={toggleMute}
+              aria-label={muted ? 'ミュート解除' : 'ミュート'}
+            >
+              {muted ? '🔇' : '🔊'}
+            </button>
+          </div>
         </div>
       )}
     </div>
