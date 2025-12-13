@@ -13,7 +13,6 @@
     "jsx-quotes": [2, "prefer-single"],
     "import/no-named-as-default": "off",
     "import/no-unresolved": "off",
-    "@typescript-eslint/no-explicit-any": "off",
     "react/jsx-uses-react": "off",
     "react/react-in-jsx-scope": "off",
     "react/no-array-index-key": 2

@@ -1,12 +1,12 @@
 'use client';
 
 import dynamic from 'next/dynamic';
+import type { ReactPlayerProps } from 'react-player/types';
 import styles from './VideoPlayer.module.scss';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const ReactPlayer = dynamic(() => import('react-player'), {
   ssr: false,
-}) as any;
+}) as unknown as React.FC<ReactPlayerProps>;
 
 type VideoPlayerProps = {
   url: string;
@@ -36,7 +36,7 @@ export function VideoPlayer({
   return (
     <div className={styles.container}>
       <ReactPlayer
-        url={url}
+        src={url}
         width='100%'
         height='100%'
         volume={volume}
