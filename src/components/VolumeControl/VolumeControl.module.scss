@@ -87,29 +87,13 @@
   }
 }
 
-.controls {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-xs, 4px);
-  width: 100%;
-  justify-content: space-between;
-}
-
-.volumeLabel {
-  font-size: var(--text-sm, 14px);
-  font-weight: var(--font-bold, 700);
-  color: var(--text-primary, #ffffff);
-  text-align: center;
-  min-width: 40px;
-}
-
 .muteButton {
   background: transparent;
   border: none;
-  padding: var(--spacing-xs, 4px);
+  padding: var(--spacing-sm, 8px);
   border-radius: 4px;
   cursor: pointer;
-  font-size: 16px;
+  font-size: 20px;
   transition: all var(--transition-base, 200ms ease-in-out);
   display: flex;
   align-items: center;
