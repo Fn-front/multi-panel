@@ -92,7 +92,6 @@ export function VolumeControl({
             value={volume}
             onChange={handleVolumeChange}
             aria-label='音量'
-            orient='vertical'
           />
           <button
             type='button'

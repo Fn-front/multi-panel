@@ -13,10 +13,12 @@ export const VALIDATION_CONSTANTS = {
 // 正規表現パターン（共通化）
 export const PATTERNS = {
   /** 制御文字 */
+  // eslint-disable-next-line no-control-regex
   CONTROL_CHARS: /[\x00-\x1F\x7F]/g,
   /** HTMLタグ */
   HTML_TAGS: /<[^>]*>/g,
   /** null文字 */
+  // eslint-disable-next-line no-control-regex
   NULL_BYTE: /\0/g,
   /** YouTube動画ID（英数字、ハイフン、アンダースコアのみ） */
   YOUTUBE_VIDEO_ID: /^[a-zA-Z0-9_-]{11}$/,
