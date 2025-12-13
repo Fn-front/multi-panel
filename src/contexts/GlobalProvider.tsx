@@ -2,8 +2,9 @@
 
 import { type ReactNode } from 'react';
 import { PanelsProvider } from './PanelsContext';
-import { ChannelsProvider } from './ChannelsContext';
+import { ChannelsProvider as OldChannelsProvider } from './ChannelsContext';
 import { FavoritesProvider } from './FavoritesContext';
+import { ChannelProvider } from './ChannelContext';
 
 type GlobalProviderProps = {
   children: ReactNode;
@@ -15,9 +16,11 @@ type GlobalProviderProps = {
 export function GlobalProvider({ children }: GlobalProviderProps) {
   return (
     <PanelsProvider>
-      <ChannelsProvider>
-        <FavoritesProvider>{children}</FavoritesProvider>
-      </ChannelsProvider>
+      <OldChannelsProvider>
+        <FavoritesProvider>
+          <ChannelProvider>{children}</ChannelProvider>
+        </FavoritesProvider>
+      </OldChannelsProvider>
     </PanelsProvider>
   );
 }
