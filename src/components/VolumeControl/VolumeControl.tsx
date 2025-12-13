@@ -1,6 +1,10 @@
 'use client';
 
 import { useCallback, useMemo, useState, useRef, useEffect } from 'react';
+import {
+  HiSpeakerWave,
+  HiSpeakerXMark,
+} from 'react-icons/hi2';
 import styles from './VolumeControl.module.scss';
 
 type VolumeControlProps = {
@@ -62,6 +66,11 @@ export function VolumeControl({
     }
   }, [isOpen]);
 
+  const VolumeIcon = useMemo(() => {
+    if (muted || volumePercent === 0) return HiSpeakerXMark;
+    return HiSpeakerWave;
+  }, [muted, volumePercent]);
+
   return (
     <div className={styles.container} ref={containerRef}>
       <button
@@ -70,13 +79,7 @@ export function VolumeControl({
         onClick={togglePopover}
         aria-label='音量調整'
       >
-        {muted
-          ? '🔇'
-          : volumePercent === 0
-            ? '🔇'
-            : volumePercent < 50
-              ? '🔉'
-              : '🔊'}
+        <VolumeIcon />
       </button>
       {isOpen && (
         <div className={styles.popover}>
@@ -99,7 +102,7 @@ export function VolumeControl({
               onClick={toggleMute}
               aria-label={muted ? 'ミュート解除' : 'ミュート'}
             >
-              {muted ? '🔇' : '🔊'}
+              {muted ? <HiSpeakerXMark /> : <HiSpeakerWave />}
             </button>
           </div>
         </div>

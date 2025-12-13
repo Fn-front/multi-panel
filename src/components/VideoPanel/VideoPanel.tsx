@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback } from 'react';
+import { HiXMark } from 'react-icons/hi2';
 import { VideoPlayer } from '@/components/VideoPlayer';
 import { URLInput } from '@/components/URLInput';
 import { VolumeControl } from '@/components/VolumeControl';
@@ -54,7 +55,7 @@ export function VideoPanel({ panel }: VideoPanelProps) {
           onClick={handleRemove}
           aria-label='パネルを削除'
         >
-          ✕
+          <HiXMark />
         </button>
       </div>
       <div className={styles.videoContainer}>
