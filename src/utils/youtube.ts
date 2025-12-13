@@ -1,4 +1,8 @@
 import type { ParsedYouTubeUrl } from '@/types';
+import {
+  isAllowedYouTubeDomain,
+  isValidYouTubeVideoId,
+} from './validation';
 
 /**
  * YouTube URLを解析して動画ID・チャンネルIDを抽出
@@ -8,21 +12,26 @@ export function parseYouTubeUrl(url: string): ParsedYouTubeUrl {
     const urlObj = new URL(url);
     const hostname = urlObj.hostname.replace('www.', '');
 
+    // ドメインチェック
+    if (!isAllowedYouTubeDomain(hostname)) {
+      return { type: 'unknown' };
+    }
+
     // 動画URL: https://www.youtube.com/watch?v=VIDEO_ID
     if (
       (hostname === 'youtube.com' || hostname === 'm.youtube.com') &&
       urlObj.pathname === '/watch'
     ) {
       const videoId = urlObj.searchParams.get('v');
-      if (videoId) {
+      if (videoId && isValidYouTubeVideoId(videoId)) {
         return { videoId, type: 'video' };
       }
     }
 
     // 短縮URL: https://youtu.be/VIDEO_ID
     if (hostname === 'youtu.be') {
-      const videoId = urlObj.pathname.slice(1);
-      if (videoId) {
+      const videoId = urlObj.pathname.slice(1).split('?')[0]; // クエリパラメータを除去
+      if (videoId && isValidYouTubeVideoId(videoId)) {
         return { videoId, type: 'video' };
       }
     }
@@ -67,56 +76,33 @@ export function parseYouTubeUrl(url: string): ParsedYouTubeUrl {
 }
 
 /**
- * 入力値をサニタイズ（危険な文字を除去）
- */
-export function sanitizeInput(input: string): string {
-  // 前後の空白を削除
-  let sanitized = input.trim();
-
-  // 制御文字を削除
-  sanitized = sanitized.replace(/[\x00-\x1F\x7F]/g, '');
-
-  // HTMLタグを削除
-  sanitized = sanitized.replace(/<[^>]*>/g, '');
-
-  // JavaScriptプロトコルを削除
-  if (sanitized.toLowerCase().startsWith('javascript:')) {
-    return '';
-  }
-
-  // データURIスキームを削除
-  if (sanitized.toLowerCase().startsWith('data:')) {
-    return '';
-  }
-
-  return sanitized;
-}
-
-/**
  * YouTube動画URLとして有効かチェック
  */
 export function isValidYouTubeVideoUrl(url: string): boolean {
-  // 入力をサニタイズ
-  const sanitized = sanitizeInput(url);
-
-  // 長さチェック（YouTubeのURLは通常2000文字以下）
-  if (sanitized.length === 0 || sanitized.length > 2000) {
+  // 空チェック
+  if (!url || typeof url !== 'string') {
     return false;
   }
 
   // URLとして有効かチェック
   try {
-    const urlObj = new URL(sanitized);
+    const urlObj = new URL(url);
 
-    // プロトコルがhttpまたはhttpsであることを確認
+    // プロトコルチェック
     if (urlObj.protocol !== 'http:' && urlObj.protocol !== 'https:') {
+      return false;
+    }
+
+    // ドメインチェック
+    const hostname = urlObj.hostname.replace('www.', '');
+    if (!isAllowedYouTubeDomain(hostname)) {
       return false;
     }
   } catch {
     return false;
   }
 
-  const parsed = parseYouTubeUrl(sanitized);
+  const parsed = parseYouTubeUrl(url);
   return parsed.type === 'video' && !!parsed.videoId;
 }
 

@@ -2,7 +2,8 @@
 
 import { useState, useCallback, type FormEvent, type ChangeEvent } from 'react';
 import { HiArrowPath } from 'react-icons/hi2';
-import { isValidYouTubeVideoUrl, sanitizeInput } from '@/utils/youtube';
+import { isValidYouTubeVideoUrl } from '@/utils/youtube';
+import { sanitizeInput, VALIDATION_CONSTANTS } from '@/utils/validation';
 import styles from './URLInput.module.scss';
 
 type URLInputProps = {
@@ -20,9 +21,9 @@ export function URLInput({ currentUrl, onUrlChange }: URLInputProps) {
   const handleInputChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
 
-    // 入力値の長さ制限（2000文字）
-    if (value.length > 2000) {
-      setError('URLが長すぎます（最大2000文字）');
+    // 入力値の長さ制限
+    if (value.length > VALIDATION_CONSTANTS.MAX_URL_LENGTH) {
+      setError(`URLが長すぎます（最大${VALIDATION_CONSTANTS.MAX_URL_LENGTH}文字）`);
       return;
     }
 
@@ -61,7 +62,7 @@ export function URLInput({ currentUrl, onUrlChange }: URLInputProps) {
         placeholder='YouTube動画URLを入力'
         value={inputValue}
         onChange={handleInputChange}
-        maxLength={2000}
+        maxLength={VALIDATION_CONSTANTS.MAX_URL_LENGTH}
         autoComplete='off'
         spellCheck='false'
       />
