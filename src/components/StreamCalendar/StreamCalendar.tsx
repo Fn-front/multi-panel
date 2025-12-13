@@ -201,18 +201,28 @@ export default function StreamCalendar({
 
   // イベントコンテンツのカスタマイズ
   const renderEventContent = useCallback((eventInfo: any) => {
+    const isMonthView = eventInfo.view.type === 'dayGridMonth';
+
     return (
       <>
         <svg
           width="15"
           height="15"
           viewBox="0 0 12 12"
-          style={{
-            position: 'absolute',
-            top: '-7.5px',
-            left: '-7.5px',
-            zIndex: 10,
-          }}
+          style={
+            isMonthView
+              ? {
+                  display: 'inline-block',
+                  verticalAlign: 'middle',
+                  marginRight: '4px',
+                }
+              : {
+                  position: 'absolute',
+                  top: '-7.5px',
+                  left: '-7.5px',
+                  zIndex: 10,
+                }
+          }
         >
           <circle cx="6" cy="6" r="6" fill="#FF0000" />
           <path d="M5 3.5L5 8.5L8.5 6z" fill="white" />
