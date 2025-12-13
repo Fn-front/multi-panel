@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { HiChevronLeft, HiChevronRight } from 'react-icons/hi2';
 import { PanelContainer } from '@/components/PanelContainer';
 import FavoriteChannels from '@/components/FavoriteChannels';
@@ -13,7 +13,13 @@ import styles from './page.module.scss';
 export default function Home() {
   const [sidebarVisible, setSidebarVisible] = useState(true);
   const [notificationEnabled, setNotificationEnabled] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
   const { state: channelState, addChannel, removeChannel } = useChannels();
+
+  // クライアントサイドでのみマウント状態を有効化
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   // 通知機能
   const { permission, requestPermission, isEnabled, notifiedCount } = useStreamNotification(
@@ -64,26 +70,37 @@ export default function Home() {
 
             <div className={styles.notificationSettings}>
               <h3>配信通知</h3>
-              <div className={styles.notificationToggle}>
-                <label>
-                  {isEnabled
-                    ? `通知有効 (${notifiedCount}件通知済み)`
-                    : permission === 'denied'
-                      ? '通知が拒否されています'
-                      : '通知を有効にする'}
-                </label>
-                <button
-                  onClick={handleNotificationToggle}
-                  className={permission === 'denied' ? styles.disabled : ''}
-                  disabled={permission === 'denied'}
-                  type='button'
-                >
-                  {isEnabled ? 'OFF' : 'ON'}
-                </button>
-              </div>
-              {permission === 'default' && (
-                <div className={styles.notificationStatus}>
-                  ブラウザの通知許可が必要です
+              {isMounted ? (
+                <>
+                  <div className={styles.notificationToggle}>
+                    <label>
+                      {isEnabled
+                        ? `通知有効 (${notifiedCount}件通知済み)`
+                        : permission === 'denied'
+                          ? '通知が拒否されています'
+                          : '通知を有効にする'}
+                    </label>
+                    <button
+                      onClick={handleNotificationToggle}
+                      className={permission === 'denied' ? styles.disabled : ''}
+                      disabled={permission === 'denied'}
+                      type='button'
+                    >
+                      {isEnabled ? 'OFF' : 'ON'}
+                    </button>
+                  </div>
+                  {permission === 'default' && (
+                    <div className={styles.notificationStatus}>
+                      ブラウザの通知許可が必要です
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className={styles.notificationToggle}>
+                  <label>通知を有効にする</label>
+                  <button type='button' disabled>
+                    ON
+                  </button>
                 </div>
               )}
             </div>
