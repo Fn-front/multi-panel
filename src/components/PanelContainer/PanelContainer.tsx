@@ -1,5 +1,6 @@
 'use client';
 
+import { useMemo, useCallback } from 'react';
 import GridLayout, { type Layout } from 'react-grid-layout';
 import { VideoPanel } from '@/components/VideoPanel';
 import { usePanels } from '@/contexts/PanelsContext';
@@ -12,17 +13,21 @@ import styles from './PanelContainer.module.scss';
 export function PanelContainer() {
   const { state, updateLayout, addPanel } = usePanels();
 
-  const layout: Layout[] = state.panels.map((panel) => ({
-    i: panel.id,
-    x: panel.layout.x,
-    y: panel.layout.y,
-    w: panel.layout.w,
-    h: panel.layout.h,
-    minW: 2,
-    minH: 2,
-  }));
+  const layout: Layout[] = useMemo(
+    () =>
+      state.panels.map((panel) => ({
+        i: panel.id,
+        x: panel.layout.x,
+        y: panel.layout.y,
+        w: panel.layout.w,
+        h: panel.layout.h,
+        minW: 2,
+        minH: 2,
+      })),
+    [state.panels],
+  );
 
-  const handleAddPanel = () => {
+  const handleAddPanel = useCallback(() => {
     addPanel({
       id: crypto.randomUUID(),
       url: '',
@@ -36,7 +41,7 @@ export function PanelContainer() {
         h: 3,
       },
     });
-  };
+  }, [addPanel]);
 
   return (
     <div className={styles.container}>

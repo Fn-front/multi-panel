@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, type FormEvent } from 'react';
+import { useState, useCallback, type FormEvent } from 'react';
 import { isValidYouTubeVideoUrl } from '@/utils/youtube';
 import styles from './URLInput.module.scss';
 
@@ -16,22 +16,25 @@ export function URLInput({ currentUrl, onUrlChange }: URLInputProps) {
   const [inputValue, setInputValue] = useState(currentUrl);
   const [error, setError] = useState('');
 
-  const handleSubmit = (e: FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = useCallback(
+    (e: FormEvent) => {
+      e.preventDefault();
 
-    if (!inputValue.trim()) {
-      setError('URLを入力してください');
-      return;
-    }
+      if (!inputValue.trim()) {
+        setError('URLを入力してください');
+        return;
+      }
 
-    if (!isValidYouTubeVideoUrl(inputValue)) {
-      setError('有効なYouTube動画URLを入力してください');
-      return;
-    }
+      if (!isValidYouTubeVideoUrl(inputValue)) {
+        setError('有効なYouTube動画URLを入力してください');
+        return;
+      }
 
-    setError('');
-    onUrlChange(inputValue);
-  };
+      setError('');
+      onUrlChange(inputValue);
+    },
+    [inputValue, onUrlChange],
+  );
 
   return (
     <form className={styles.form} onSubmit={handleSubmit}>

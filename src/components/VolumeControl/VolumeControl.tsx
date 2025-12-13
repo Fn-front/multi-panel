@@ -1,5 +1,6 @@
 'use client';
 
+import { useCallback, useMemo } from 'react';
 import styles from './VolumeControl.module.scss';
 
 type VolumeControlProps = {
@@ -18,19 +19,22 @@ export function VolumeControl({
   onVolumeChange,
   onMutedChange,
 }: VolumeControlProps) {
-  const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newVolume = parseFloat(e.target.value);
-    onVolumeChange(newVolume);
-    if (muted && newVolume > 0) {
-      onMutedChange(false);
-    }
-  };
+  const handleVolumeChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const newVolume = parseFloat(e.target.value);
+      onVolumeChange(newVolume);
+      if (muted && newVolume > 0) {
+        onMutedChange(false);
+      }
+    },
+    [muted, onVolumeChange, onMutedChange],
+  );
 
-  const toggleMute = () => {
+  const toggleMute = useCallback(() => {
     onMutedChange(!muted);
-  };
+  }, [muted, onMutedChange]);
 
-  const volumePercent = Math.round(volume * 100);
+  const volumePercent = useMemo(() => Math.round(volume * 100), [volume]);
 
   return (
     <div className={styles.container}>

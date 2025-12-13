@@ -1,5 +1,6 @@
 'use client';
 
+import { useCallback } from 'react';
 import { VideoPlayer } from '@/components/VideoPlayer';
 import { URLInput } from '@/components/URLInput';
 import { VolumeControl } from '@/components/VolumeControl';
@@ -17,23 +18,40 @@ type VideoPanelProps = {
 export function VideoPanel({ panel }: VideoPanelProps) {
   const { updatePanel, removePanel } = usePanels();
 
+  const handleUrlChange = useCallback(
+    (url: string) => updatePanel(panel.id, { url }),
+    [panel.id, updatePanel],
+  );
+
+  const handleVolumeChange = useCallback(
+    (volume: number) => updatePanel(panel.id, { volume }),
+    [panel.id, updatePanel],
+  );
+
+  const handleMutedChange = useCallback(
+    (isMuted: boolean) => updatePanel(panel.id, { isMuted }),
+    [panel.id, updatePanel],
+  );
+
+  const handleRemove = useCallback(
+    () => removePanel(panel.id),
+    [panel.id, removePanel],
+  );
+
   return (
     <div className={styles.panel}>
       <div className={styles.controlBar}>
-        <URLInput
-          currentUrl={panel.url}
-          onUrlChange={(url) => updatePanel(panel.id, { url })}
-        />
+        <URLInput currentUrl={panel.url} onUrlChange={handleUrlChange} />
         <VolumeControl
           volume={panel.volume}
           muted={panel.isMuted}
-          onVolumeChange={(volume) => updatePanel(panel.id, { volume })}
-          onMutedChange={(isMuted) => updatePanel(panel.id, { isMuted })}
+          onVolumeChange={handleVolumeChange}
+          onMutedChange={handleMutedChange}
         />
         <button
           type='button'
           className={styles.removeButton}
-          onClick={() => removePanel(panel.id)}
+          onClick={handleRemove}
           aria-label='パネルを削除'
         >
           ✕
