@@ -86,8 +86,8 @@
   border-radius: var(--radius-sm, 4px);
   border: none;
   cursor: pointer;
-  font-size: var(--text-xs, 12px);
-  padding: 2px 4px;
+  font-size: 10px;
+  padding: 1px 2px;
 }
 
 .fc .fc-event.event-upcoming {
@@ -111,8 +111,26 @@
 
 .fc .fc-event-time,
 .fc .fc-event-title {
-  font-size: var(--text-xs, 11px);
+  font-size: 10px;
   font-weight: var(--font-medium, 500);
+}
+
+/* 週表示では時刻を非表示 */
+.fc-timegrid .fc-event-time {
+  display: none;
+}
+
+.fc .fc-event-main {
+  position: relative;
+}
+
+.fc .fc-timegrid-event-harness {
+  overflow: visible !important;
+  z-index: 10 !important;
+}
+
+.fc .fc-timegrid-event-harness:hover {
+  z-index: 100 !important;
 }
 
 /* タイムグリッドのスタイル */

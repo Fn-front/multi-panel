@@ -199,6 +199,30 @@ export default function StreamCalendar({
     return [`event-${eventType}`];
   }, []);
 
+  // イベントコンテンツのカスタマイズ
+  const renderEventContent = useCallback((eventInfo: any) => {
+    return (
+      <>
+        <svg
+          width="15"
+          height="15"
+          viewBox="0 0 12 12"
+          style={{
+            position: 'absolute',
+            top: '-7.5px',
+            left: '-7.5px',
+            zIndex: 10,
+          }}
+        >
+          <circle cx="6" cy="6" r="6" fill="#FF0000" />
+          <path d="M5 3.5L5 8.5L8.5 6z" fill="white" />
+        </svg>
+        <div className="fc-event-time">{eventInfo.timeText}</div>
+        <div className="fc-event-title">{eventInfo.event.title}</div>
+      </>
+    );
+  }, []);
+
   if (isLoading) {
     return (
       <div className={styles.calendarContainer}>
@@ -273,6 +297,7 @@ export default function StreamCalendar({
             events={fullCalendarEvents}
             eventClick={handleEventClick}
             eventClassNames={getEventClassNames}
+            eventContent={renderEventContent}
             height='100%'
             slotMinTime='00:00:00'
             slotMaxTime='24:00:00'
@@ -302,6 +327,7 @@ export default function StreamCalendar({
             events={fullCalendarEvents}
             eventClick={handleEventClick}
             eventClassNames={getEventClassNames}
+            eventContent={renderEventContent}
             height='100%'
             dayMaxEventRows={false}
           />
