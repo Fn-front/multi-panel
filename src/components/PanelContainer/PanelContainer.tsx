@@ -2,6 +2,7 @@
 
 import { useMemo, useCallback } from 'react';
 import GridLayout, { type Layout } from 'react-grid-layout';
+import { HiPlus } from 'react-icons/hi2';
 import { VideoPanel } from '@/components/VideoPanel';
 import { usePanels } from '@/contexts/PanelsContext';
 import { GRID_LAYOUT, PANEL_DEFAULTS } from '@/constants';
@@ -48,8 +49,10 @@ export function PanelContainer() {
           type='button'
           className={styles.addButton}
           onClick={handleAddPanel}
+          aria-label='パネルを追加'
         >
-          ＋ パネルを追加
+          <HiPlus />
+          <span>パネルを追加</span>
         </button>
       </div>
       <div className={styles.gridContainer}>
@@ -60,8 +63,10 @@ export function PanelContainer() {
               type='button'
               className={styles.addButtonLarge}
               onClick={handleAddPanel}
+              aria-label='パネルを追加'
             >
-              ＋ パネルを追加
+              <HiPlus />
+              <span>パネルを追加</span>
             </button>
           </div>
         ) : (
