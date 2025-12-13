@@ -105,10 +105,17 @@ export function isValidUrlLength(url: string): boolean {
 }
 
 /**
+ * ホスト名から www. プレフィックスを除去
+ */
+export function normalizeHostname(hostname: string): string {
+  return hostname.replace(/^www\./, '');
+}
+
+/**
  * YouTubeドメインが許可されたものかチェック
  */
 export function isAllowedYouTubeDomain(hostname: string): boolean {
-  const normalizedHostname = hostname.replace('www.', '');
+  const normalizedHostname = normalizeHostname(hostname);
   return (ALLOWED_YOUTUBE_DOMAINS as readonly string[]).includes(normalizedHostname);
 }
 

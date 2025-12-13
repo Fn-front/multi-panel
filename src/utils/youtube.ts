@@ -2,6 +2,7 @@ import type { ParsedYouTubeUrl } from '@/types';
 import {
   isAllowedYouTubeDomain,
   isValidYouTubeVideoId,
+  normalizeHostname,
 } from './validation';
 
 /**
@@ -10,7 +11,7 @@ import {
 export function parseYouTubeUrl(url: string): ParsedYouTubeUrl {
   try {
     const urlObj = new URL(url);
-    const hostname = urlObj.hostname.replace('www.', '');
+    const hostname = normalizeHostname(urlObj.hostname);
 
     // ドメインチェック
     if (!isAllowedYouTubeDomain(hostname)) {
@@ -94,7 +95,7 @@ export function isValidYouTubeVideoUrl(url: string): boolean {
     }
 
     // ドメインチェック
-    const hostname = urlObj.hostname.replace('www.', '');
+    const hostname = normalizeHostname(urlObj.hostname);
     if (!isAllowedYouTubeDomain(hostname)) {
       return false;
     }

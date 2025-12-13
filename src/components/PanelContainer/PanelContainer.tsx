@@ -4,6 +4,7 @@ import { useMemo, useCallback } from 'react';
 import GridLayout, { type Layout } from 'react-grid-layout';
 import { VideoPanel } from '@/components/VideoPanel';
 import { usePanels } from '@/contexts/PanelsContext';
+import { GRID_LAYOUT, PANEL_DEFAULTS } from '@/constants';
 import panelStyles from '@/components/VideoPanel/VideoPanel.module.scss';
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
@@ -23,8 +24,8 @@ export function PanelContainer() {
         y: panel.layout.y,
         w: panel.layout.w,
         h: panel.layout.h,
-        minW: 2,
-        minH: 2,
+        minW: GRID_LAYOUT.MIN_WIDTH,
+        minH: GRID_LAYOUT.MIN_HEIGHT,
       })),
     [state.panels],
   );
@@ -33,15 +34,10 @@ export function PanelContainer() {
     addPanel({
       id: crypto.randomUUID(),
       url: '',
-      volume: 0.5,
-      isMuted: false,
-      showChat: false,
-      layout: {
-        x: 0,
-        y: Infinity,
-        w: 4,
-        h: 3,
-      },
+      volume: PANEL_DEFAULTS.VOLUME,
+      isMuted: PANEL_DEFAULTS.IS_MUTED,
+      showChat: PANEL_DEFAULTS.SHOW_CHAT,
+      layout: PANEL_DEFAULTS.LAYOUT,
     });
   }, [addPanel]);
 
@@ -72,9 +68,9 @@ export function PanelContainer() {
           <GridLayout
             className={styles.grid}
             layout={layout}
-            cols={12}
-            rowHeight={100}
-            width={1200}
+            cols={GRID_LAYOUT.COLS}
+            rowHeight={GRID_LAYOUT.ROW_HEIGHT}
+            width={GRID_LAYOUT.WIDTH}
             onLayoutChange={updateLayout}
             draggableHandle={`.${panelStyles.dragHandle}`}
             resizeHandles={['se', 'e']}
