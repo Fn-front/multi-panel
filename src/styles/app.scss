@@ -24,6 +24,11 @@
   margin-top: 0;
   cursor: ew-resize;
   transform: none;
+  transition: background-color var(--transition-base, 200ms ease-in-out);
+
+  &:hover {
+    background-color: var(--error, #ef4444);
+  }
 }
 
 .react-grid-item.react-grid-item > .react-resizable-handle.react-resizable-handle-se {
@@ -33,4 +38,14 @@
   bottom: -5px;
   cursor: nwse-resize;
   transform: none;
+  transition: background-color var(--transition-base, 200ms ease-in-out);
+
+  &:hover {
+    background-color: var(--error, #ef4444);
+  }
+
+  // デフォルトの::after疑似要素を非表示
+  &::after {
+    display: none;
+  }
 }
