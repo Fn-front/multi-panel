@@ -17,36 +17,23 @@ type VideoPanelProps = {
 export function VideoPanel({ panel }: VideoPanelProps) {
   const { updatePanel, removePanel } = usePanels();
 
-  const handleUrlChange = (url: string) => {
-    updatePanel(panel.id, { url });
-  };
-
-  const handleVolumeChange = (volume: number) => {
-    updatePanel(panel.id, { volume });
-  };
-
-  const handleMutedChange = (isMuted: boolean) => {
-    updatePanel(panel.id, { isMuted });
-  };
-
-  const handleRemove = () => {
-    removePanel(panel.id);
-  };
-
   return (
     <div className={styles.panel}>
       <div className={styles.controlBar}>
-        <URLInput currentUrl={panel.url} onUrlChange={handleUrlChange} />
+        <URLInput
+          currentUrl={panel.url}
+          onUrlChange={(url) => updatePanel(panel.id, { url })}
+        />
         <VolumeControl
           volume={panel.volume}
           muted={panel.isMuted}
-          onVolumeChange={handleVolumeChange}
-          onMutedChange={handleMutedChange}
+          onVolumeChange={(volume) => updatePanel(panel.id, { volume })}
+          onMutedChange={(isMuted) => updatePanel(panel.id, { isMuted })}
         />
         <button
           type='button'
           className={styles.removeButton}
-          onClick={handleRemove}
+          onClick={() => removePanel(panel.id)}
           aria-label='パネルを削除'
         >
           ✕

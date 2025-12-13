@@ -1,6 +1,5 @@
 'use client';
 
-import { useMemo } from 'react';
 import GridLayout, { type Layout } from 'react-grid-layout';
 import { VideoPanel } from '@/components/VideoPanel';
 import { usePanels } from '@/contexts/PanelsContext';
@@ -13,25 +12,18 @@ import styles from './PanelContainer.module.scss';
 export function PanelContainer() {
   const { state, updateLayout, addPanel } = usePanels();
 
-  // react-grid-layout用のlayoutデータを生成
-  const layout: Layout[] = useMemo(() => {
-    return state.panels.map((panel) => ({
-      i: panel.id,
-      x: panel.layout.x,
-      y: panel.layout.y,
-      w: panel.layout.w,
-      h: panel.layout.h,
-      minW: 2,
-      minH: 2,
-    }));
-  }, [state.panels]);
-
-  const handleLayoutChange = (newLayout: Layout[]) => {
-    updateLayout(newLayout);
-  };
+  const layout: Layout[] = state.panels.map((panel) => ({
+    i: panel.id,
+    x: panel.layout.x,
+    y: panel.layout.y,
+    w: panel.layout.w,
+    h: panel.layout.h,
+    minW: 2,
+    minH: 2,
+  }));
 
   const handleAddPanel = () => {
-    const newPanel = {
+    addPanel({
       id: crypto.randomUUID(),
       url: '',
       volume: 0.5,
@@ -39,12 +31,11 @@ export function PanelContainer() {
       showChat: false,
       layout: {
         x: 0,
-        y: Infinity, // 最下部に追加
+        y: Infinity,
         w: 4,
         h: 3,
       },
-    };
-    addPanel(newPanel);
+    });
   };
 
   return (
@@ -77,7 +68,7 @@ export function PanelContainer() {
             cols={12}
             rowHeight={100}
             width={1200}
-            onLayoutChange={handleLayoutChange}
+            onLayoutChange={updateLayout}
             draggableHandle={`.${styles.dragHandle}`}
             compactType='vertical'
             preventCollision={false}

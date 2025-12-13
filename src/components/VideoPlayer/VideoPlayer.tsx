@@ -8,6 +8,13 @@ const ReactPlayer = dynamic(() => import('react-player'), {
   ssr: false,
 }) as unknown as React.FC<ReactPlayerProps>;
 
+const PLAYER_CONFIG = {
+  youtube: {
+    modestbranding: 1 as 0 | 1,
+    rel: 0 as 0 | 1,
+  },
+};
+
 type VideoPlayerProps = {
   url: string;
   volume: number;
@@ -26,13 +33,6 @@ export function VideoPlayer({
   onReady,
   onError,
 }: VideoPlayerProps) {
-  const config = {
-    youtube: {
-      modestbranding: 1 as 0 | 1,
-      rel: 0 as 0 | 1,
-    },
-  };
-
   return (
     <div className={styles.container}>
       <ReactPlayer
@@ -41,8 +41,8 @@ export function VideoPlayer({
         height='100%'
         volume={volume}
         muted={muted}
-        controls={true}
-        config={config}
+        controls
+        config={PLAYER_CONFIG}
         onReady={onReady}
         onError={onError}
         playing={false}
