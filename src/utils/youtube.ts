@@ -67,10 +67,56 @@ export function parseYouTubeUrl(url: string): ParsedYouTubeUrl {
 }
 
 /**
+ * 入力値をサニタイズ（危険な文字を除去）
+ */
+export function sanitizeInput(input: string): string {
+  // 前後の空白を削除
+  let sanitized = input.trim();
+
+  // 制御文字を削除
+  sanitized = sanitized.replace(/[\x00-\x1F\x7F]/g, '');
+
+  // HTMLタグを削除
+  sanitized = sanitized.replace(/<[^>]*>/g, '');
+
+  // JavaScriptプロトコルを削除
+  if (sanitized.toLowerCase().startsWith('javascript:')) {
+    return '';
+  }
+
+  // データURIスキームを削除
+  if (sanitized.toLowerCase().startsWith('data:')) {
+    return '';
+  }
+
+  return sanitized;
+}
+
+/**
  * YouTube動画URLとして有効かチェック
  */
 export function isValidYouTubeVideoUrl(url: string): boolean {
-  const parsed = parseYouTubeUrl(url);
+  // 入力をサニタイズ
+  const sanitized = sanitizeInput(url);
+
+  // 長さチェック（YouTubeのURLは通常2000文字以下）
+  if (sanitized.length === 0 || sanitized.length > 2000) {
+    return false;
+  }
+
+  // URLとして有効かチェック
+  try {
+    const urlObj = new URL(sanitized);
+
+    // プロトコルがhttpまたはhttpsであることを確認
+    if (urlObj.protocol !== 'http:' && urlObj.protocol !== 'https:') {
+      return false;
+    }
+  } catch {
+    return false;
+  }
+
+  const parsed = parseYouTubeUrl(sanitized);
   return parsed.type === 'video' && !!parsed.videoId;
 }
 
