@@ -1,0 +1,105 @@
+.container {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-primary, #1a1a1a);
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  padding: var(--spacing-lg, 16px);
+  background: var(--bg-secondary, #2d2d2d);
+  border-bottom: 1px solid var(--border-color, #404040);
+  flex-shrink: 0;
+}
+
+.addButton {
+  background: var(--accent-primary, #3b82f6);
+  color: var(--text-primary, #ffffff);
+  border: none;
+  padding: var(--spacing-md, 12px) var(--spacing-lg, 16px);
+  border-radius: 4px;
+  font-weight: var(--font-bold, 700);
+  cursor: pointer;
+  transition: background var(--transition-base, 200ms ease-in-out);
+
+  &:hover {
+    background: var(--accent-hover, #2563eb);
+  }
+
+  &:active {
+    background: var(--accent-active, #1d4ed8);
+  }
+}
+
+.gridContainer {
+  flex: 1;
+  overflow: auto;
+  position: relative;
+}
+
+.grid {
+  position: relative;
+  min-height: 100%;
+}
+
+.gridItem {
+  position: relative;
+}
+
+.dragHandle {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 10;
+  background: var(--bg-secondary, #2d2d2d);
+  color: var(--text-muted, #808080);
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: move;
+  font-size: 16px;
+  line-height: 1;
+  user-select: none;
+  opacity: 0;
+  transition: opacity var(--transition-base, 200ms ease-in-out);
+
+  .gridItem:hover & {
+    opacity: 1;
+  }
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: var(--spacing-lg, 16px);
+  color: var(--text-muted, #808080);
+
+  p {
+    font-size: var(--text-lg, 18px);
+  }
+}
+
+.addButtonLarge {
+  background: var(--accent-primary, #3b82f6);
+  color: var(--text-primary, #ffffff);
+  border: none;
+  padding: var(--spacing-lg, 16px) var(--spacing-xl, 24px);
+  border-radius: 8px;
+  font-size: var(--text-lg, 18px);
+  font-weight: var(--font-bold, 700);
+  cursor: pointer;
+  transition: background var(--transition-base, 200ms ease-in-out);
+
+  &:hover {
+    background: var(--accent-hover, #2563eb);
+  }
+
+  &:active {
+    background: var(--accent-active, #1d4ed8);
+  }
+}
