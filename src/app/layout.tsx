@@ -1,7 +1,8 @@
 import type { Metadata } from 'next';
 import { Noto_Sans_JP } from 'next/font/google';
+import { GlobalProvider } from '@/contexts/GlobalProvider';
 
-import '@/styles/app.scss'
+import '@/styles/app.scss';
 
 const noto = Noto_Sans_JP({
   weight: ['400', '700'],
@@ -10,8 +11,8 @@ const noto = Noto_Sans_JP({
 });
 
 export const metadata: Metadata = {
-  title: 'テンプレ',
-  description: 'テンプレ',
+  title: 'Multi Panel - YouTube動画タイリング',
+  description: 'ブラウザでYouTube動画をタイリング表示',
 };
 
 export default function RootLayout({
@@ -22,13 +23,7 @@ export default function RootLayout({
   return (
     <html lang='ja'>
       <body className={noto.className}>
-        <div className='l_global_container'>
-          <main className='l_main'>
-            <div className='l_container'>
-              {children}
-            </div>
-          </main>
-        </div>
+        <GlobalProvider>{children}</GlobalProvider>
       </body>
     </html>
   );
