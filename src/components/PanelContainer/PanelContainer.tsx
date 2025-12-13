@@ -6,6 +6,7 @@ import { VideoPanel } from '@/components/VideoPanel';
 import { usePanels } from '@/contexts/PanelsContext';
 import panelStyles from '@/components/VideoPanel/VideoPanel.module.scss';
 import 'react-grid-layout/css/styles.css';
+import 'react-resizable/css/styles.css';
 import styles from './PanelContainer.module.scss';
 
 /**
@@ -76,7 +77,7 @@ export function PanelContainer() {
             width={1200}
             onLayoutChange={updateLayout}
             draggableHandle={`.${panelStyles.dragHandle}`}
-            resizeHandles={['se', 'e', 's']}
+            resizeHandles={['se', 'e']}
             compactType='vertical'
             preventCollision={false}
           >
