@@ -3,16 +3,19 @@
   gap: var(--spacing-sm, 8px);
   align-items: center;
   position: relative;
+  flex: 1;
+  min-width: 0;
 }
 
 .input {
   flex: 1;
+  min-width: 0;
   background: var(--bg-primary, #1a1a1a);
   color: var(--text-primary, #ffffff);
   border: 1px solid var(--border-color, #404040);
-  padding: var(--spacing-md, 12px);
+  padding: var(--spacing-sm, 8px);
   border-radius: 4px;
-  font-size: var(--text-base, 16px);
+  font-size: var(--text-sm, 14px);
 
   &:focus {
     outline: none;
