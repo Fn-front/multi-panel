@@ -73,6 +73,7 @@ describe('storage utils', () => {
 
     it('should handle console errors on failure', () => {
       const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const badData = {} as any;
       badData.circular = badData; // Create circular reference
 
