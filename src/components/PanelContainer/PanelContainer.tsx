@@ -4,6 +4,7 @@ import { useMemo, useCallback } from 'react';
 import GridLayout, { type Layout } from 'react-grid-layout';
 import { VideoPanel } from '@/components/VideoPanel';
 import { usePanels } from '@/contexts/PanelsContext';
+import panelStyles from '@/components/VideoPanel/VideoPanel.module.scss';
 import 'react-grid-layout/css/styles.css';
 import styles from './PanelContainer.module.scss';
 
@@ -74,13 +75,12 @@ export function PanelContainer() {
             rowHeight={100}
             width={1200}
             onLayoutChange={updateLayout}
-            draggableHandle={`.${styles.dragHandle}`}
+            draggableHandle={`.${panelStyles.dragHandle}`}
             compactType='vertical'
             preventCollision={false}
           >
             {state.panels.map((panel) => (
               <div key={panel.id} className={styles.gridItem}>
-                <div className={styles.dragHandle}>⋮⋮</div>
                 <VideoPanel panel={panel} />
               </div>
             ))}

@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback } from 'react';
-import { HiXMark } from 'react-icons/hi2';
+import { HiXMark, HiEllipsisVertical } from 'react-icons/hi2';
 import { VideoPlayer } from '@/components/VideoPlayer';
 import { URLInput } from '@/components/URLInput';
 import { VolumeControl } from '@/components/VolumeControl';
@@ -42,6 +42,10 @@ export function VideoPanel({ panel }: VideoPanelProps) {
   return (
     <div className={styles.panel}>
       <div className={styles.controlBar}>
+        <div className={styles.dragHandle}>
+          <HiEllipsisVertical />
+          <HiEllipsisVertical />
+        </div>
         <URLInput currentUrl={panel.url} onUrlChange={handleUrlChange} />
         <VolumeControl
           volume={panel.volume}

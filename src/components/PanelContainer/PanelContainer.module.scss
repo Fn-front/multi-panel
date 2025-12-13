@@ -50,24 +50,7 @@
 }
 
 .dragHandle {
-  position: absolute;
-  top: 8px;
-  left: 8px;
-  z-index: 10;
-  background: var(--bg-secondary, #2d2d2d);
-  color: var(--text-muted, #808080);
-  padding: 4px 8px;
-  border-radius: 4px;
-  cursor: move;
-  font-size: 16px;
-  line-height: 1;
-  user-select: none;
-  opacity: 0;
-  transition: opacity var(--transition-base, 200ms ease-in-out);
-
-  .gridItem:hover & {
-    opacity: 1;
-  }
+  display: none;
 }
 
 .empty {

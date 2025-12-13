@@ -23,6 +23,28 @@
   flex-shrink: 0;
 }
 
+.dragHandle {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  color: var(--text-muted, #808080);
+  cursor: move;
+  padding: var(--spacing-xs, 4px);
+  border-radius: 4px;
+  transition: all var(--transition-base, 200ms ease-in-out);
+  font-size: 16px;
+
+  &:hover {
+    background: var(--bg-tertiary, #3a3a3a);
+    color: var(--text-secondary, #b3b3b3);
+  }
+
+  svg {
+    width: 12px;
+    height: 12px;
+  }
+}
+
 .removeButton {
   background: transparent;
   color: var(--text-secondary, #b3b3b3);
