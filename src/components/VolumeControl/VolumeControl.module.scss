@@ -1,0 +1,67 @@
+.container {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm, 8px);
+}
+
+.muteButton {
+  background: transparent;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  padding: var(--spacing-sm, 8px);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background var(--transition-base, 200ms ease-in-out);
+
+  &:hover {
+    background: var(--bg-tertiary, #3a3a3a);
+  }
+}
+
+.slider {
+  width: 100px;
+  height: 4px;
+  background: var(--bg-tertiary, #3a3a3a);
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+
+  &::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    background: var(--accent-primary, #3b82f6);
+    border-radius: 50%;
+    cursor: pointer;
+
+    &:hover {
+      background: var(--accent-hover, #2563eb);
+    }
+  }
+
+  &::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    background: var(--accent-primary, #3b82f6);
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+
+    &:hover {
+      background: var(--accent-hover, #2563eb);
+    }
+  }
+}
+
+.volumeLabel {
+  font-size: var(--text-sm, 14px);
+  color: var(--text-secondary, #b3b3b3);
+  min-width: 40px;
+  text-align: right;
+}
