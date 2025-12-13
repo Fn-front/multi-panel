@@ -22,7 +22,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang='ja'>
-      <body className={noto.className}>
+      <body className={noto.className} style={{ margin: 0, padding: 0 }}>
         <GlobalProvider>{children}</GlobalProvider>
       </body>
     </html>
