@@ -76,6 +76,7 @@ export function PanelContainer() {
             width={1200}
             onLayoutChange={updateLayout}
             draggableHandle={`.${panelStyles.dragHandle}`}
+            resizeHandles={['se', 'e', 's']}
             compactType='vertical'
             preventCollision={false}
           >
