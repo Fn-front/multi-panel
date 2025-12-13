@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback, type FormEvent } from 'react';
+import { HiArrowPath } from 'react-icons/hi2';
 import { isValidYouTubeVideoUrl } from '@/utils/youtube';
 import styles from './URLInput.module.scss';
 
@@ -45,8 +46,12 @@ export function URLInput({ currentUrl, onUrlChange }: URLInputProps) {
         value={inputValue}
         onChange={(e) => setInputValue(e.target.value)}
       />
-      <button type='submit' className={styles.button}>
-        読み込み
+      <button
+        type='submit'
+        className={styles.button}
+        aria-label='動画を読み込み'
+      >
+        <HiArrowPath />
       </button>
       {error && <span className={styles.error}>{error}</span>}
     </form>
