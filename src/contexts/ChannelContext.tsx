@@ -11,8 +11,23 @@ import {
 import type { Channel, ChannelsState, ChannelsAction } from '@/types/channel';
 import { STORAGE_KEYS } from '@/constants';
 import { loadFromStorage, saveArrayToStorage } from '@/utils/storage';
+import { formatDate, getCurrentMonthRange } from '@/utils/date';
+import { callSupabaseFunction } from '@/utils/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
+
+// DB型からChannel型への変換
+const mapDbToChannel = (dbChannel: {
+  id: string;
+  channel_id: string;
+  channel_title: string;
+  channel_thumbnail: string | null;
+}): Channel => ({
+  id: dbChannel.id,
+  channelId: dbChannel.channel_id,
+  name: dbChannel.channel_title,
+  thumbnail: dbChannel.channel_thumbnail || undefined,
+});
 
 // 初期状態
 const initialState: ChannelsState = {
@@ -98,12 +113,7 @@ export function ChannelProvider({ children }: ChannelProviderProps) {
           if (error) throw error;
 
           if (data) {
-            const channels: Channel[] = data.map((item) => ({
-              id: item.id,
-              channelId: item.channel_id,
-              name: item.channel_title,
-              thumbnail: item.channel_thumbnail || undefined,
-            }));
+            const channels = data.map(mapDbToChannel);
             dispatch({ type: 'LOAD_CHANNELS', payload: channels });
           }
         } catch (error) {
@@ -115,7 +125,7 @@ export function ChannelProvider({ children }: ChannelProviderProps) {
           STORAGE_KEYS.CHANNELS,
           [],
         );
-        if (savedChannels && savedChannels.length > 0) {
+        if (savedChannels?.length) {
           dispatch({ type: 'LOAD_CHANNELS', payload: savedChannels });
         }
       }
@@ -148,6 +158,7 @@ export function ChannelProvider({ children }: ChannelProviderProps) {
         const { data, error } = await supabase
           .from('favorite_channels')
           .insert({
+            user_id: user.id,
             channel_id: channel.channelId,
             channel_title: channel.name,
             channel_thumbnail: channel.thumbnail || null,
@@ -158,17 +169,7 @@ export function ChannelProvider({ children }: ChannelProviderProps) {
         if (error) throw error;
 
         if (data) {
-          dispatch({
-            type: 'ADD_CHANNEL',
-            payload: {
-              id: data.id,
-              channelId: data.channel_id,
-              name: data.channel_title,
-              thumbnail: data.channel_thumbnail || undefined,
-            },
-          });
-
-          // お気に入り追加後、現在月の1ヶ月分の配信を取得
+          dispatch({ type: 'ADD_CHANNEL', payload: mapDbToChannel(data) });
           await fetchCurrentMonthStreams(channel.channelId);
         }
       } catch (error) {
@@ -183,55 +184,20 @@ export function ChannelProvider({ children }: ChannelProviderProps) {
   // 現在月の1ヶ月分の配信を取得
   const fetchCurrentMonthStreams = async (channelId: string) => {
     try {
-      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-      const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+      const { startDate, endDate } = getCurrentMonthRange();
 
-      if (!supabaseUrl || !supabaseKey) {
-        console.warn('[ChannelContext] Supabase credentials not configured');
-        return;
-      }
+      const result = await callSupabaseFunction('fetch-past-streams', {
+        channelId,
+        startDate: formatDate(startDate),
+        endDate: formatDate(endDate),
+      });
 
-      const now = new Date();
-      const year = now.getFullYear();
-      const month = now.getMonth(); // 0-indexed
-
-      // 現在月の1日と末日を計算
-      const startDate = new Date(year, month, 1);
-      const endDate = new Date(year, month + 1, 0); // 翌月の0日 = 当月末日
-
-      const formatDate = (date: Date) => {
-        return date.toISOString().split('T')[0];
-      };
-
-      // fetch-past-streams Function を呼び出し
-      const response = await fetch(
-        `${supabaseUrl}/functions/v1/fetch-past-streams`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${supabaseKey}`,
-          },
-          body: JSON.stringify({
-            channelId,
-            startDate: formatDate(startDate),
-            endDate: formatDate(endDate),
-          }),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(`Failed to fetch streams: ${response.statusText}`);
-      }
-
-      const result = await response.json();
       console.log(
         `[ChannelContext] Fetched current month streams for ${channelId}:`,
-        result
+        result,
       );
     } catch (error) {
       console.error('Failed to fetch current month streams:', error);
-      // エラーは無視して続行
     }
   };
 
