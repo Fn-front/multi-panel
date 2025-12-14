@@ -50,10 +50,7 @@ export function PanelContainer({ sidebarWidth = 0 }: PanelContainerProps) {
   if (isLoading) {
     return (
       <div className={styles.container}>
-        <div
-          className={styles.toolbar}
-          style={{ paddingLeft: sidebarWidth > 0 ? '64px' : '16px' }}
-        >
+        <div className={styles.toolbar}>
           <Skeleton width={120} height={36} />
         </div>
         <div className={styles.gridContainer}>
@@ -67,10 +64,7 @@ export function PanelContainer({ sidebarWidth = 0 }: PanelContainerProps) {
 
   return (
     <div className={styles.container}>
-      <div
-        className={styles.toolbar}
-        style={{ paddingLeft: sidebarWidth > 0 ? '64px' : '16px' }}
-      >
+      <div className={styles.toolbar}>
         <button
           type='button'
           className={styles.addButton}
