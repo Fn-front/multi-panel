@@ -124,6 +124,7 @@ export function ChannelProvider({ children }: ChannelProviderProps) {
     };
 
     loadChannels();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
 
   // データ保存（ログイン時: Supabase, 未ログイン時: localStorage）
