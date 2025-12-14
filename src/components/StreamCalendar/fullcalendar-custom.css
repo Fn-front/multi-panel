@@ -115,6 +115,29 @@
   font-weight: var(--font-medium, 500);
 }
 
+.fc .fc-event-title {
+  overflow: hidden;
+  display: block;
+}
+
+.fc .fc-event-title span {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.fc .fc-event:hover .fc-event-title span {
+  animation: marquee 20s linear infinite;
+}
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
 /* 週表示では時刻を非表示 */
 .fc-timegrid .fc-event-time {
   display: none;

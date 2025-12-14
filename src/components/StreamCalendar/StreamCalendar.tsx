@@ -320,7 +320,9 @@ export default function StreamCalendar({
           {timeDisplay && (
             <div className='fc-event-time'>{timeDisplay}</div>
           )}
-          <div className='fc-event-title'>{eventInfo.event.title}</div>
+          <div className='fc-event-title'>
+            <span>{eventInfo.event.title}</span>
+          </div>
         </>
       );
     },
