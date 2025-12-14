@@ -95,6 +95,32 @@ serve(async (req) => {
 
     console.log(`Fetched ${allVideos.length} videos`);
 
+    // 既存のlive/upcoming配信の状態を更新
+    const { data: existingEvents, error: existingError } = await supabase
+      .from('stream_events')
+      .select('video_id')
+      .in('live_broadcast_content', ['live', 'upcoming']);
+
+    if (existingError) {
+      console.error('Failed to fetch existing events:', existingError);
+    } else if (existingEvents && existingEvents.length > 0) {
+      const existingVideoIds = existingEvents.map((e) => e.video_id);
+      console.log(`Checking ${existingVideoIds.length} existing live/upcoming videos`);
+
+      // 既存配信の最新情報を取得（最大50件ずつ）
+      const batchSize = 50;
+      for (let i = 0; i < existingVideoIds.length; i += batchSize) {
+        const batch = existingVideoIds.slice(i, i + batchSize);
+        const updatedVideos = await fetchVideoDetails(batch);
+        allVideos.push(...updatedVideos);
+
+        // レート制限対策
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      }
+
+      console.log(`Updated ${existingVideoIds.length} existing videos`);
+    }
+
     // stream_eventsテーブルに保存（upsert）
     if (allVideos.length > 0) {
       const streamEvents = allVideos.map((video) => ({
@@ -137,6 +163,41 @@ serve(async (req) => {
     });
   }
 });
+
+async function fetchVideoDetails(videoIds: string[]): Promise<YouTubeVideo[]> {
+  if (videoIds.length === 0) {
+    return [];
+  }
+
+  // Videos APIで詳細情報を取得
+  const videosUrl = new URL('https://www.googleapis.com/youtube/v3/videos');
+  videosUrl.searchParams.set('part', 'snippet,liveStreamingDetails');
+  videosUrl.searchParams.set('id', videoIds.join(','));
+  videosUrl.searchParams.set('key', YOUTUBE_API_KEY!);
+
+  const videosResponse = await fetch(videosUrl.toString());
+  if (!videosResponse.ok) {
+    throw new Error(
+      `YouTube Videos API error: ${videosResponse.status} ${videosResponse.statusText}`
+    );
+  }
+
+  const videosData = await videosResponse.json();
+
+  return videosData.items.map((video: any) => ({
+    id: video.id,
+    title: video.snippet.title,
+    thumbnail: video.snippet.thumbnails.high.url,
+    channelId: video.snippet.channelId,
+    channelTitle: video.snippet.channelTitle,
+    channelThumbnail: undefined,
+    publishedAt: video.snippet.publishedAt,
+    liveBroadcastContent: video.snippet.liveBroadcastContent || 'none',
+    scheduledStartTime: video.liveStreamingDetails?.scheduledStartTime,
+    actualStartTime: video.liveStreamingDetails?.actualStartTime,
+    actualEndTime: video.liveStreamingDetails?.actualEndTime,
+  }));
+}
 
 async function fetchChannelStreams(
   channelId: string,
