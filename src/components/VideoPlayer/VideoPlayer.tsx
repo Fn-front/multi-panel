@@ -54,21 +54,23 @@ export function VideoPlayer({
           <Skeleton width='80%' height='80%' />
         </div>
       )}
-      <div
-        style={{ opacity: isPlayerReady ? 1 : 0, transition: 'opacity 0.3s' }}
-      >
-        <ReactPlayer
-          src={url}
-          width='100%'
-          height='100%'
-          volume={volume}
-          muted={muted}
-          controls
-          config={PLAYER_CONFIG}
-          onReady={handleReady}
-          onError={onError}
-          playing={false}
-        />
+      <div className={styles.aspectRatio}>
+        <div
+          style={{ opacity: isPlayerReady ? 1 : 0, transition: 'opacity 0.3s' }}
+        >
+          <ReactPlayer
+            src={url}
+            width='100%'
+            height='100%'
+            volume={volume}
+            muted={muted}
+            controls
+            config={PLAYER_CONFIG}
+            onReady={handleReady}
+            onError={onError}
+            playing={false}
+          />
+        </div>
       </div>
     </div>
   );
