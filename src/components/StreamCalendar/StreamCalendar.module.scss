@@ -26,6 +26,9 @@
       gap: var(--spacing-xs, 4px);
 
       button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
         padding: var(--spacing-xs, 6px) var(--spacing-sm, 12px);
         background: var(--bg-tertiary, #2a2a2a);
         border: 1px solid var(--border-color, #404040);
@@ -44,6 +47,16 @@
           background: var(--accent-primary, #3b82f6);
           color: var(--text-primary, #ffffff);
           border-color: var(--accent-primary, #3b82f6);
+        }
+
+        &:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+
+        svg {
+          width: 16px;
+          height: 16px;
         }
       }
     }

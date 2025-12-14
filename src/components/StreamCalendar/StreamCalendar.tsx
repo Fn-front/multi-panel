@@ -6,6 +6,7 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import jaLocale from '@fullcalendar/core/locales/ja';
+import { HiArrowPath } from 'react-icons/hi2';
 import type { CalendarEvent } from '@/types/youtube';
 import { Modal } from '@/components/Modal';
 import { Skeleton } from '@/components/Skeleton';
@@ -412,6 +413,14 @@ export default function StreamCalendar({
         <div className={styles.header}>
           <h2>配信カレンダー</h2>
           <div className={styles.controls}>
+            <button
+              onClick={fetchSchedule}
+              type='button'
+              disabled={isLoading}
+              aria-label='更新'
+            >
+              <HiArrowPath />
+            </button>
             <button onClick={() => setShowMonthModal(true)} type='button'>
               月表示
             </button>
