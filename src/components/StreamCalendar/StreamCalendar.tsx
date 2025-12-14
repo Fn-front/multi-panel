@@ -11,6 +11,8 @@ import { Modal } from '@/components/Modal';
 import { Skeleton } from '@/components/Skeleton';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
+import { formatDate } from '@/utils/date';
+import { callSupabaseFunction } from '@/utils/supabase';
 import styles from './StreamCalendar.module.scss';
 import './fullcalendar-custom.css';
 
@@ -265,63 +267,34 @@ export default function StreamCalendar({
     async (dateInfo: { start: Date; end: Date; view: { type: string } }) => {
       if (!user || channelIds.length === 0) return;
 
-      // 月表示の場合のみ過去データを取得
+      // 月表示・週表示の場合のみ過去データを取得
       if (
         dateInfo.view.type === 'dayGridMonth' ||
         dateInfo.view.type === 'timeGridWeek'
       ) {
-        const startDate = dateInfo.start;
-        const endDate = dateInfo.end;
-
-        const formatDate = (date: Date) => {
-          return date.toISOString().split('T')[0];
-        };
-
         try {
-          const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-          const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+          const result = await callSupabaseFunction('fetch-past-streams', {
+            channelIds,
+            startDate: formatDate(dateInfo.start),
+            endDate: formatDate(dateInfo.end),
+          });
 
-          if (!supabaseUrl || !supabaseKey) {
-            console.warn('[StreamCalendar] Supabase credentials not configured');
-            return;
-          }
-
-          // fetch-past-streams を呼び出し
-          const response = await fetch(
-            `${supabaseUrl}/functions/v1/fetch-past-streams`,
-            {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${supabaseKey}`,
-              },
-              body: JSON.stringify({
-                channelIds,
-                startDate: formatDate(startDate),
-                endDate: formatDate(endDate),
-              }),
-            }
-          );
-
-          if (!response.ok) {
-            throw new Error(`Failed to fetch streams: ${response.statusText}`);
-          }
-
-          const result = await response.json();
           console.log(
             '[StreamCalendar] Fetched past streams for date range:',
-            result
+            result,
           );
 
           // データを再取得
           fetchSchedule();
         } catch (error) {
-          console.error('Failed to fetch past streams on calendar move:', error);
-          // エラーは無視して続行
+          console.error(
+            'Failed to fetch past streams on calendar move:',
+            error,
+          );
         }
       }
     },
-    [user, channelIds, fetchSchedule]
+    [user, channelIds, fetchSchedule],
   );
 
   if (isLoading) {

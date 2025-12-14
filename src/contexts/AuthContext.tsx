@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import type { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
+import { callSupabaseFunction } from '@/utils/supabase';
 
 interface AuthContextType {
   user: User | null;
@@ -82,35 +83,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // ログイン時: 今日〜月末の配信予定を取得
   const fetchStreamsUntilMonthEnd = async () => {
     try {
-      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-      const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-      if (!supabaseUrl || !supabaseKey) {
-        console.warn('[AuthContext] Supabase credentials not configured');
-        return;
-      }
-
-      const response = await fetch(
-        `${supabaseUrl}/functions/v1/fetch-channel-streams`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${supabaseKey}`,
-          },
-          body: JSON.stringify({}),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(`Failed to fetch streams: ${response.statusText}`);
-      }
-
-      const result = await response.json();
+      const result = await callSupabaseFunction('fetch-channel-streams', {});
       console.log('[AuthContext] Fetched streams until month end:', result);
     } catch (error) {
       console.error('Failed to fetch streams until month end:', error);
-      // エラーは無視して続行
     }
   };
 
