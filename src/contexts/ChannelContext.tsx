@@ -167,6 +167,9 @@ export function ChannelProvider({ children }: ChannelProviderProps) {
               thumbnail: data.channel_thumbnail || undefined,
             },
           });
+
+          // お気に入り追加後、現在月の1ヶ月分の配信を取得
+          await fetchCurrentMonthStreams(channel.channelId);
         }
       } catch (error) {
         console.error('Failed to add channel to Supabase:', error);
@@ -174,6 +177,52 @@ export function ChannelProvider({ children }: ChannelProviderProps) {
     } else {
       // 未ログイン時: ローカルのみ
       dispatch({ type: 'ADD_CHANNEL', payload: channel });
+    }
+  };
+
+  // 現在月の1ヶ月分の配信を取得
+  const fetchCurrentMonthStreams = async (channelId: string) => {
+    try {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = now.getMonth(); // 0-indexed
+
+      // 現在月の1日と末日を計算
+      const startDate = new Date(year, month, 1);
+      const endDate = new Date(year, month + 1, 0); // 翌月の0日 = 当月末日
+
+      const formatDate = (date: Date) => {
+        return date.toISOString().split('T')[0];
+      };
+
+      // fetch-past-streams Function を呼び出し
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/fetch-past-streams`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY}`,
+          },
+          body: JSON.stringify({
+            channelId,
+            startDate: formatDate(startDate),
+            endDate: formatDate(endDate),
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch streams: ${response.statusText}`);
+      }
+
+      const result = await response.json();
+      console.log(
+        `[ChannelContext] Fetched current month streams for ${channelId}:`,
+        result
+      );
+    } catch (error) {
+      console.error('Failed to fetch current month streams:', error);
     }
   };
 

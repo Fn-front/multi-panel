@@ -260,6 +260,61 @@ export default function StreamCalendar({
     [],
   );
 
+  // カレンダー月変更時のハンドラー
+  const handleDatesSet = useCallback(
+    async (dateInfo: { start: Date; end: Date; view: { type: string } }) => {
+      if (!user || channelIds.length === 0) return;
+
+      // 月表示の場合のみ過去データを取得
+      if (
+        dateInfo.view.type === 'dayGridMonth' ||
+        dateInfo.view.type === 'timeGridWeek'
+      ) {
+        const startDate = dateInfo.start;
+        const endDate = dateInfo.end;
+
+        const formatDate = (date: Date) => {
+          return date.toISOString().split('T')[0];
+        };
+
+        try {
+          // fetch-past-streams を呼び出し
+          const response = await fetch(
+            `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/fetch-past-streams`,
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY}`,
+              },
+              body: JSON.stringify({
+                channelIds,
+                startDate: formatDate(startDate),
+                endDate: formatDate(endDate),
+              }),
+            }
+          );
+
+          if (!response.ok) {
+            throw new Error(`Failed to fetch streams: ${response.statusText}`);
+          }
+
+          const result = await response.json();
+          console.log(
+            '[StreamCalendar] Fetched past streams for date range:',
+            result
+          );
+
+          // データを再取得
+          fetchSchedule();
+        } catch (error) {
+          console.error('Failed to fetch past streams on calendar move:', error);
+        }
+      }
+    },
+    [user, channelIds, fetchSchedule]
+  );
+
   if (isLoading) {
     return (
       <div className={styles.calendarContainer}>
@@ -338,6 +393,7 @@ export default function StreamCalendar({
             eventClick={handleEventClick}
             eventClassNames={getEventClassNames}
             eventContent={renderEventContent}
+            datesSet={handleDatesSet}
             height='100%'
             slotMinTime='00:00:00'
             slotMaxTime='24:00:00'
@@ -368,6 +424,7 @@ export default function StreamCalendar({
             eventClick={handleEventClick}
             eventClassNames={getEventClassNames}
             eventContent={renderEventContent}
+            datesSet={handleDatesSet}
             height='100%'
             dayMaxEventRows={false}
           />

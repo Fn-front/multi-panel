@@ -79,6 +79,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  // ログイン時: 今日〜月末の配信予定を取得
+  const fetchStreamsUntilMonthEnd = async () => {
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/fetch-channel-streams`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY}`,
+          },
+          body: JSON.stringify({}),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch streams: ${response.statusText}`);
+      }
+
+      const result = await response.json();
+      console.log('[AuthContext] Fetched streams until month end:', result);
+    } catch (error) {
+      console.error('Failed to fetch streams until month end:', error);
+    }
+  };
+
   // セッション初期化
   useEffect(() => {
     // 現在のセッションを取得
@@ -94,6 +120,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // （実際の期限チェックはonAuthStateChangeで行う）
         if (allowed) {
           await updateLastLogin(session.user.id);
+          // ログイン時: 今日〜月末の配信予定を取得
+          await fetchStreamsUntilMonthEnd();
         }
       }
 
