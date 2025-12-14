@@ -41,13 +41,18 @@ serve(async (req) => {
 
     // リクエストボディからチャンネルIDと期間を取得（オプション）
     const body = await req.json().catch(() => ({}));
-    const { channelId, daysAgo = 7 } = body;
+    const { channelId, channelIds, startDate, endDate, daysAgo = 7 } = body;
 
     let channelsToFetch = [];
+    let fetchStartDate: string | null = null;
+    let fetchEndDate: string | null = null;
 
     if (channelId) {
       // 特定のチャンネルのみ取得
       channelsToFetch = [{ channel_id: channelId, channel_title: '' }];
+    } else if (channelIds && Array.isArray(channelIds)) {
+      // 複数チャンネル指定
+      channelsToFetch = channelIds.map((id: string) => ({ channel_id: id, channel_title: '' }));
     } else {
       // favorite_channelsから全チャンネルIDを取得
       const { data: channels, error: channelsError } = await supabase
@@ -69,6 +74,12 @@ serve(async (req) => {
       ).map(([channel_id, channel_title]) => ({ channel_id, channel_title }));
     }
 
+    // 日付指定がある場合
+    if (startDate && endDate) {
+      fetchStartDate = startDate;
+      fetchEndDate = endDate;
+    }
+
     console.log(`Fetching past streams for ${channelsToFetch.length} channels (${daysAgo} days)`);
 
     const allVideos: YouTubeVideo[] = [];
@@ -76,8 +87,38 @@ serve(async (req) => {
     // 各チャンネルの過去配信を取得
     for (const channel of channelsToFetch) {
       try {
-        const videos = await fetchPastStreams(channel.channel_id, daysAgo);
+        // fetched_date_rangesから取得済み期間をチェック
+        if (fetchStartDate && fetchEndDate) {
+          const { data: existingRanges } = await supabase
+            .from('fetched_date_ranges')
+            .select('*')
+            .eq('channel_id', channel.channel_id)
+            .gte('end_date', fetchStartDate)
+            .lte('start_date', fetchEndDate);
+
+          // すでに取得済みの場合はスキップ
+          if (existingRanges && existingRanges.length > 0) {
+            console.log(`Skipping ${channel.channel_id}: already fetched for ${fetchStartDate} - ${fetchEndDate}`);
+            continue;
+          }
+        }
+
+        const videos = fetchStartDate && fetchEndDate
+          ? await fetchPastStreamsByDateRange(channel.channel_id, fetchStartDate, fetchEndDate)
+          : await fetchPastStreams(channel.channel_id, daysAgo);
+
         allVideos.push(...videos);
+
+        // fetched_date_rangesに記録
+        if (fetchStartDate && fetchEndDate) {
+          await supabase
+            .from('fetched_date_ranges')
+            .upsert({
+              channel_id: channel.channel_id,
+              start_date: fetchStartDate,
+              end_date: fetchEndDate,
+            }, { onConflict: 'channel_id,start_date,end_date' });
+        }
 
         // レート制限対策（100ms待機）
         await new Promise((resolve) => setTimeout(resolve, 100));
@@ -132,6 +173,74 @@ serve(async (req) => {
     });
   }
 });
+
+async function fetchPastStreamsByDateRange(
+  channelId: string,
+  startDate: string,
+  endDate: string
+): Promise<YouTubeVideo[]> {
+  // Search APIで過去の配信を検索
+  const searchUrl = new URL('https://www.googleapis.com/youtube/v3/search');
+  searchUrl.searchParams.set('part', 'snippet');
+  searchUrl.searchParams.set('channelId', channelId);
+  searchUrl.searchParams.set('eventType', 'completed');
+  searchUrl.searchParams.set('type', 'video');
+  searchUrl.searchParams.set('maxResults', '50');
+  searchUrl.searchParams.set('order', 'date');
+  searchUrl.searchParams.set('publishedAfter', new Date(startDate).toISOString());
+  searchUrl.searchParams.set('publishedBefore', new Date(endDate + 'T23:59:59Z').toISOString());
+  searchUrl.searchParams.set('key', YOUTUBE_API_KEY!);
+
+  const searchResponse = await fetch(searchUrl.toString());
+  if (!searchResponse.ok) {
+    throw new Error(
+      `YouTube Search API error: ${searchResponse.status} ${searchResponse.statusText}`
+    );
+  }
+
+  const searchData = await searchResponse.json();
+
+  if (!searchData.items || searchData.items.length === 0) {
+    return [];
+  }
+
+  // 動画IDを収集
+  const videoIds = searchData.items
+    .map((item: any) => item.id.videoId)
+    .filter(Boolean);
+
+  if (videoIds.length === 0) {
+    return [];
+  }
+
+  // Videos APIで詳細情報を取得
+  const videosUrl = new URL('https://www.googleapis.com/youtube/v3/videos');
+  videosUrl.searchParams.set('part', 'snippet,liveStreamingDetails');
+  videosUrl.searchParams.set('id', videoIds.join(','));
+  videosUrl.searchParams.set('key', YOUTUBE_API_KEY!);
+
+  const videosResponse = await fetch(videosUrl.toString());
+  if (!videosResponse.ok) {
+    throw new Error(
+      `YouTube Videos API error: ${videosResponse.status} ${videosResponse.statusText}`
+    );
+  }
+
+  const videosData = await videosResponse.json();
+
+  return videosData.items.map((video: any) => ({
+    id: video.id,
+    title: video.snippet.title,
+    thumbnail: video.snippet.thumbnails.high.url,
+    channelId: video.snippet.channelId,
+    channelTitle: video.snippet.channelTitle,
+    publishedAt: video.snippet.publishedAt,
+    liveBroadcastContent: 'none',
+    scheduledStartTime: video.liveStreamingDetails?.scheduledStartTime,
+    actualStartTime: video.liveStreamingDetails?.actualStartTime,
+    actualEndTime: video.liveStreamingDetails?.actualEndTime,
+  }));
+}
 
 async function fetchPastStreams(
   channelId: string,
