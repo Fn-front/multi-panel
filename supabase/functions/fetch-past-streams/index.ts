@@ -14,6 +14,7 @@ interface YouTubeVideo {
   thumbnail: string;
   channelId: string;
   channelTitle: string;
+  channelThumbnail?: string;
   scheduledStartTime?: string;
   actualStartTime?: string;
   actualEndTime?: string;
@@ -49,15 +50,34 @@ serve(async (req) => {
 
     if (channelId) {
       // 特定のチャンネルのみ取得
-      channelsToFetch = [{ channel_id: channelId, channel_title: '' }];
+      // favorite_channelsからchannel_thumbnailを取得
+      const { data: channelData } = await supabase
+        .from('favorite_channels')
+        .select('channel_id, channel_title, channel_thumbnail')
+        .eq('channel_id', channelId)
+        .limit(1)
+        .single();
+
+      channelsToFetch = channelData
+        ? [channelData]
+        : [{ channel_id: channelId, channel_title: '', channel_thumbnail: null }];
     } else if (channelIds && Array.isArray(channelIds)) {
       // 複数チャンネル指定
-      channelsToFetch = channelIds.map((id: string) => ({ channel_id: id, channel_title: '' }));
+      const { data: channelsData } = await supabase
+        .from('favorite_channels')
+        .select('channel_id, channel_title, channel_thumbnail')
+        .in('channel_id', channelIds);
+
+      channelsToFetch = channelsData || channelIds.map((id: string) => ({
+        channel_id: id,
+        channel_title: '',
+        channel_thumbnail: null
+      }));
     } else {
       // favorite_channelsから全チャンネルIDを取得
       const { data: channels, error: channelsError } = await supabase
         .from('favorite_channels')
-        .select('channel_id, channel_title');
+        .select('channel_id, channel_title, channel_thumbnail');
 
       if (channelsError) throw channelsError;
 
@@ -70,8 +90,8 @@ serve(async (req) => {
 
       // チャンネルIDの重複を排除
       channelsToFetch = Array.from(
-        new Map(channels.map((ch) => [ch.channel_id, ch.channel_title])).entries()
-      ).map(([channel_id, channel_title]) => ({ channel_id, channel_title }));
+        new Map(channels.map((ch) => [ch.channel_id, { channel_title: ch.channel_title, channel_thumbnail: ch.channel_thumbnail }])).entries()
+      ).map(([channel_id, { channel_title, channel_thumbnail }]) => ({ channel_id, channel_title, channel_thumbnail }));
     }
 
     // 日付指定がある場合
@@ -104,8 +124,8 @@ serve(async (req) => {
         }
 
         const videos = fetchStartDate && fetchEndDate
-          ? await fetchPastStreamsByDateRange(channel.channel_id, fetchStartDate, fetchEndDate)
-          : await fetchPastStreams(channel.channel_id, daysAgo);
+          ? await fetchPastStreamsByDateRange(channel.channel_id, fetchStartDate, fetchEndDate, channel.channel_thumbnail)
+          : await fetchPastStreams(channel.channel_id, daysAgo, channel.channel_thumbnail);
 
         allVideos.push(...videos);
 
@@ -140,6 +160,7 @@ serve(async (req) => {
         title: video.title,
         thumbnail: video.thumbnail,
         channel_title: video.channelTitle,
+        channel_thumbnail: video.channelThumbnail,
         scheduled_start_time: video.scheduledStartTime,
         actual_start_time: video.actualStartTime,
         actual_end_time: video.actualEndTime,
@@ -177,7 +198,8 @@ serve(async (req) => {
 async function fetchPastStreamsByDateRange(
   channelId: string,
   startDate: string,
-  endDate: string
+  endDate: string,
+  channelThumbnail?: string | null
 ): Promise<YouTubeVideo[]> {
   // Search APIで過去の配信を検索
   const searchUrl = new URL('https://www.googleapis.com/youtube/v3/search');
@@ -234,6 +256,7 @@ async function fetchPastStreamsByDateRange(
     thumbnail: video.snippet.thumbnails.high.url,
     channelId: video.snippet.channelId,
     channelTitle: video.snippet.channelTitle,
+    channelThumbnail: channelThumbnail || undefined,
     publishedAt: video.snippet.publishedAt,
     liveBroadcastContent: 'none',
     scheduledStartTime: video.liveStreamingDetails?.scheduledStartTime,
@@ -244,7 +267,8 @@ async function fetchPastStreamsByDateRange(
 
 async function fetchPastStreams(
   channelId: string,
-  daysAgo: number
+  daysAgo: number,
+  channelThumbnail?: string | null
 ): Promise<YouTubeVideo[]> {
   // 過去N日前の日時を計算
   const publishedAfter = new Date();
@@ -304,6 +328,7 @@ async function fetchPastStreams(
     thumbnail: video.snippet.thumbnails.high.url,
     channelId: video.snippet.channelId,
     channelTitle: video.snippet.channelTitle,
+    channelThumbnail: channelThumbnail || undefined,
     publishedAt: video.snippet.publishedAt,
     liveBroadcastContent: 'none',
     scheduledStartTime: video.liveStreamingDetails?.scheduledStartTime,

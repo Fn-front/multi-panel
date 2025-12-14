@@ -15,6 +15,7 @@ interface YouTubeVideo {
   thumbnail: string;
   channelId: string;
   channelTitle: string;
+  channelThumbnail?: string;
   scheduledStartTime?: string;
   actualStartTime?: string;
   actualEndTime?: string;
@@ -43,7 +44,7 @@ serve(async (req) => {
     // favorite_channelsから全チャンネルIDを取得（重複排除）
     const { data: channels, error: channelsError } = await supabase
       .from('favorite_channels')
-      .select('channel_id, channel_title');
+      .select('channel_id, channel_title, channel_thumbnail');
 
     if (channelsError) throw channelsError;
 
@@ -56,8 +57,8 @@ serve(async (req) => {
 
     // チャンネルIDの重複を排除
     const uniqueChannels = Array.from(
-      new Map(channels.map((ch) => [ch.channel_id, ch.channel_title])).entries()
-    ).map(([channel_id, channel_title]) => ({ channel_id, channel_title }));
+      new Map(channels.map((ch) => [ch.channel_id, { channel_title: ch.channel_title, channel_thumbnail: ch.channel_thumbnail }])).entries()
+    ).map(([channel_id, { channel_title, channel_thumbnail }]) => ({ channel_id, channel_title, channel_thumbnail }));
 
     console.log(`Fetching streams for ${uniqueChannels.length} channels`);
 
@@ -69,14 +70,16 @@ serve(async (req) => {
         // ライブ配信中の動画を取得
         const liveVideos = await fetchChannelStreams(
           channel.channel_id,
-          'live'
+          'live',
+          channel.channel_thumbnail
         );
         allVideos.push(...liveVideos);
 
         // 配信予定の動画を取得
         const upcomingVideos = await fetchChannelStreams(
           channel.channel_id,
-          'upcoming'
+          'upcoming',
+          channel.channel_thumbnail
         );
         allVideos.push(...upcomingVideos);
 
@@ -100,6 +103,7 @@ serve(async (req) => {
         title: video.title,
         thumbnail: video.thumbnail,
         channel_title: video.channelTitle,
+        channel_thumbnail: video.channelThumbnail,
         scheduled_start_time: video.scheduledStartTime,
         actual_start_time: video.actualStartTime,
         actual_end_time: video.actualEndTime,
@@ -136,7 +140,8 @@ serve(async (req) => {
 
 async function fetchChannelStreams(
   channelId: string,
-  eventType: 'live' | 'upcoming'
+  eventType: 'live' | 'upcoming',
+  channelThumbnail?: string | null
 ): Promise<YouTubeVideo[]> {
   // Search APIで配信を検索
   const searchUrl = new URL('https://www.googleapis.com/youtube/v3/search');
@@ -191,6 +196,7 @@ async function fetchChannelStreams(
     thumbnail: video.snippet.thumbnails.high.url,
     channelId: video.snippet.channelId,
     channelTitle: video.snippet.channelTitle,
+    channelThumbnail: channelThumbnail || undefined,
     publishedAt: video.snippet.publishedAt,
     liveBroadcastContent: eventType,
     scheduledStartTime: video.liveStreamingDetails?.scheduledStartTime,
