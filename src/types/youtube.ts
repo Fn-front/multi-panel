@@ -140,4 +140,6 @@ export type CalendarEvent = {
   url: string;
   /** チャンネル名 */
   channelName: string;
+  /** チャンネルサムネイルURL */
+  channelThumbnail?: string;
 };
