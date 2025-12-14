@@ -40,8 +40,10 @@ export function URLInput({ currentUrl, onUrlChange }: URLInputProps) {
       // サニタイズ
       const sanitized = sanitizeInput(inputValue);
 
+      // 空文字列の場合はクリア
       if (!sanitized) {
-        setError('URLを入力してください');
+        setError('');
+        onUrlChange('');
         return;
       }
 
