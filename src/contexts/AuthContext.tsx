@@ -104,7 +104,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('認証イベント:', event);
       setSession(session);
       setUser(session?.user ?? null);
 
@@ -144,26 +143,39 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // GitHub OAuth ログイン
   const signInWithGitHub = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'github',
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-      },
-    });
+    setIsLoading(true);
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'github',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
 
-    if (error) {
-      console.error('ログインエラー:', error);
-      throw error;
+      if (error) {
+        console.error('ログインエラー:', error);
+        setIsLoading(false);
+        throw error;
+      }
+      // リダイレクトが発生するため、setIsLoading(false)は不要
+    } catch (err) {
+      setIsLoading(false);
+      throw err;
     }
   };
 
   // ログアウト
   const signOut = async () => {
-    const { error } = await supabase.auth.signOut();
+    setIsLoading(true);
+    try {
+      const { error } = await supabase.auth.signOut();
 
-    if (error) {
-      console.error('ログアウトエラー:', error);
-      throw error;
+      if (error) {
+        console.error('ログアウトエラー:', error);
+        throw error;
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 

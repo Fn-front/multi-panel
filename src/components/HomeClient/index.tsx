@@ -89,17 +89,33 @@ export function HomeClient({ initialSidebarVisible }: HomeClientProps) {
         >
           <div className={styles.authSection}>
             {authLoading ? (
-              <Skeleton width={80} height={28} />
+              <Skeleton width={40} height={40} borderRadius='50%' />
             ) : user ? (
               <div className={styles.userInfo}>
-                <span className={styles.userEmail}>{user.email}</span>
-                <button
-                  onClick={handleLogout}
-                  className={styles.logoutButton}
-                  type='button'
-                >
-                  ログアウト
-                </button>
+                {sidebarVisible ? (
+                  <>
+                    <img
+                      src={user.user_metadata?.avatar_url || `https://api.dicebear.com/7.x/initials/svg?seed=${user.email}`}
+                      alt='User avatar'
+                      className={styles.userAvatar}
+                      title={user.email || ''}
+                    />
+                    <button
+                      onClick={handleLogout}
+                      className={styles.logoutButton}
+                      type='button'
+                    >
+                      ログアウト
+                    </button>
+                  </>
+                ) : (
+                  <img
+                    src={user.user_metadata?.avatar_url || `https://api.dicebear.com/7.x/initials/svg?seed=${user.email}`}
+                    alt='User avatar'
+                    className={styles.userAvatarCompact}
+                    title={user.email || ''}
+                  />
+                )}
               </div>
             ) : (
               <button

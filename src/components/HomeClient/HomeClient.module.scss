@@ -75,8 +75,34 @@
       gap: var(--spacing-sm, 8px);
       font-size: 14px;
 
+      .userAvatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid var(--border-color, #404040);
+      }
+
+      .userAvatarCompact {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid var(--border-color, #404040);
+        cursor: pointer;
+        transition: border-color 0.2s;
+
+        &:hover {
+          border-color: var(--accent-primary, #3b82f6);
+        }
+      }
+
       .userEmail {
         color: var(--text-secondary, #b0b0b0);
+        flex: 1;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
 
       .logoutButton {

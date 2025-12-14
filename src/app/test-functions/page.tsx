@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { supabase } from '@/lib/supabase';
 
 export default function TestFunctionsPage() {
   const [result, setResult] = useState<string>('');
