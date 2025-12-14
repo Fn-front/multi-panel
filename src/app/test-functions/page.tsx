@@ -21,10 +21,10 @@ export default function TestFunctionsPage() {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY}`,
+            Authorization: `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY}`,
           },
           body: JSON.stringify(body || {}),
-        }
+        },
       );
 
       console.log('Response status:', response.status);
@@ -33,7 +33,9 @@ export default function TestFunctionsPage() {
       console.log('Result:', data);
 
       if (!response.ok) {
-        setResult(`エラー (${response.status}): ${JSON.stringify(data, null, 2)}`);
+        setResult(
+          `エラー (${response.status}): ${JSON.stringify(data, null, 2)}`,
+        );
       } else {
         setResult(JSON.stringify(data, null, 2));
       }
@@ -66,9 +68,7 @@ export default function TestFunctionsPage() {
         </button>
 
         <button
-          onClick={() =>
-            testFunction('fetch-past-streams', { daysAgo: 7 })
-          }
+          onClick={() => testFunction('fetch-past-streams', { daysAgo: 7 })}
           disabled={loading}
           style={{
             padding: '0.5rem 1rem',

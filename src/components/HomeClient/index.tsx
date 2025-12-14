@@ -95,7 +95,10 @@ export function HomeClient({ initialSidebarVisible }: HomeClientProps) {
                 {sidebarVisible ? (
                   <>
                     <img
-                      src={user.user_metadata?.avatar_url || `https://api.dicebear.com/7.x/initials/svg?seed=${user.email}`}
+                      src={
+                        user.user_metadata?.avatar_url ||
+                        `https://api.dicebear.com/7.x/initials/svg?seed=${user.email}`
+                      }
                       alt='User avatar'
                       className={styles.userAvatar}
                       title={user.email || ''}
@@ -110,7 +113,10 @@ export function HomeClient({ initialSidebarVisible }: HomeClientProps) {
                   </>
                 ) : (
                   <img
-                    src={user.user_metadata?.avatar_url || `https://api.dicebear.com/7.x/initials/svg?seed=${user.email}`}
+                    src={
+                      user.user_metadata?.avatar_url ||
+                      `https://api.dicebear.com/7.x/initials/svg?seed=${user.email}`
+                    }
                     alt='User avatar'
                     className={styles.userAvatarCompact}
                     title={user.email || ''}
