@@ -111,11 +111,7 @@ export default function StreamCalendar({
       // Supabaseからstream_eventsを取得
       // カレンダー表示のため、現在月の1日から未来のデータまで取得
       const now = new Date();
-      const currentMonthStart = new Date(
-        now.getFullYear(),
-        now.getMonth(),
-        1,
-      );
+      const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
 
       const { data, error: supabaseError } = await supabase
         .from('stream_events')
