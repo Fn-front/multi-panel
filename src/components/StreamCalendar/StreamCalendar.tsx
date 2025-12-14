@@ -422,7 +422,7 @@ export default function StreamCalendar({
               <HiArrowPath />
             </button>
             <button onClick={() => setShowMonthModal(true)} type='button'>
-              月表示
+              月
             </button>
           </div>
         </div>
