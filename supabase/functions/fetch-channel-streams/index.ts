@@ -95,14 +95,17 @@ serve(async (req) => {
 
     console.log(`Fetched ${allVideos.length} videos`);
 
-    // 既存のlive/upcoming配信の状態を更新（現在時刻以降の未来の配信）
+    // 既存のlive/upcoming配信の状態を更新（現在〜1ヶ月先まで）
     const now = new Date();
+    const oneMonthLater = new Date(now);
+    oneMonthLater.setMonth(oneMonthLater.getMonth() + 1);
 
     const { data: existingEvents, error: existingError } = await supabase
       .from('stream_events')
       .select('video_id')
       .in('live_broadcast_content', ['live', 'upcoming'])
-      .gte('scheduled_start_time', now.toISOString());
+      .gte('scheduled_start_time', now.toISOString())
+      .lte('scheduled_start_time', oneMonthLater.toISOString());
 
     if (existingError) {
       console.error('Failed to fetch existing events:', existingError);
