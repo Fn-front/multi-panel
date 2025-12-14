@@ -9,6 +9,7 @@ import { LoginModal } from '@/components/LoginModal';
 import { Skeleton } from '@/components/Skeleton';
 import { useChannels } from '@/contexts/ChannelContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { usePanels } from '@/contexts/PanelsContext';
 import { useStreamNotification } from '@/hooks/useStreamNotification';
 import type { CalendarEvent } from '@/types/youtube';
 import styles from './HomeClient.module.scss';
@@ -24,6 +25,7 @@ export function HomeClient({ initialSidebarVisible }: HomeClientProps) {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const { state: channelState, addChannel, removeChannel } = useChannels();
   const { user, isLoading: authLoading, signOut } = useAuth();
+  const { addPanel } = usePanels();
 
   // クライアントサイドでのみマウント状態を有効化
   useEffect(() => {
@@ -57,9 +59,25 @@ export function HomeClient({ initialSidebarVisible }: HomeClientProps) {
     setNotificationEnabled((prev) => !prev);
   }, [permission, requestPermission]);
 
-  const handleCalendarEventClick = useCallback((event: CalendarEvent) => {
-    window.open(event.url, '_blank', 'noopener,noreferrer');
-  }, []);
+  const handleCalendarEventClick = useCallback(
+    (event: CalendarEvent) => {
+      // 新しいパネルを追加
+      const newPanel = {
+        id: `panel-${Date.now()}`,
+        url: event.url,
+        title: event.title,
+        layout: {
+          i: `panel-${Date.now()}`,
+          x: 0,
+          y: 0,
+          w: 6,
+          h: 4,
+        },
+      };
+      addPanel(newPanel);
+    },
+    [addPanel],
+  );
 
   const handleLogout = useCallback(async () => {
     try {
