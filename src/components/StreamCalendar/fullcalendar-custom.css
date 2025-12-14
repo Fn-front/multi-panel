@@ -133,6 +133,10 @@
   min-height: 15px !important;
 }
 
+.fc .fc-daygrid-event .fc-event-main {
+  display: flex;
+}
+
 .fc .fc-timegrid-event-harness {
   overflow: visible !important;
   z-index: 10 !important;
@@ -167,4 +171,8 @@
 /* 現在時刻のライン */
 .fc .fc-timegrid-now-indicator-line {
   border-color: var(--error, #ef4444);
+}
+
+.fc-h-event .fc-event-time {
+  overflow: visible;
 }

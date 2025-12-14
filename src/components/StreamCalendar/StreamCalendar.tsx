@@ -232,6 +232,9 @@ export default function StreamCalendar({
     (eventInfo: {
       event: {
         title: string;
+        start: Date | null;
+        end: Date | null;
+        allDay?: boolean;
         extendedProps?: { channelThumbnail?: string };
       };
       timeText: string;
@@ -239,6 +242,27 @@ export default function StreamCalendar({
     }) => {
       const isMonthView = eventInfo.view.type === 'dayGridMonth';
       const channelThumbnail = eventInfo.event.extendedProps?.channelThumbnail;
+      const isMultiDay =
+        eventInfo.event.allDay ||
+        (eventInfo.event.start &&
+          eventInfo.event.end &&
+          new Date(eventInfo.event.start).toDateString() !==
+            new Date(eventInfo.event.end).toDateString());
+
+      // 時刻のフォーマット
+      const formatTime = (date: Date | null) => {
+        if (!date) return '';
+        const hours = date.getHours();
+        const minutes = date.getMinutes();
+        return `${hours}:${minutes.toString().padStart(2, '0')}`;
+      };
+
+      // 月表示で日をまたぐイベントの場合は「開始時 〜 終了時」表示
+      // それ以外は開始時のみ表示
+      const timeDisplay =
+        isMonthView && isMultiDay
+          ? `${formatTime(eventInfo.event.start)} 〜 ${formatTime(eventInfo.event.end)}`
+          : formatTime(eventInfo.event.start);
 
       return (
         <>
@@ -293,7 +317,9 @@ export default function StreamCalendar({
               <path d='M5 3.5L5 8.5L8.5 6z' fill='white' />
             </svg>
           )}
-          <div className='fc-event-time'>{eventInfo.timeText}</div>
+          {timeDisplay && (
+            <div className='fc-event-time'>{timeDisplay}</div>
+          )}
           <div className='fc-event-title'>{eventInfo.event.title}</div>
         </>
       );
