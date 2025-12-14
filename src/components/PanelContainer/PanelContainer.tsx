@@ -48,7 +48,10 @@ export function PanelContainer({ sidebarWidth = 0 }: PanelContainerProps) {
 
   return (
     <div className={styles.container}>
-      <div className={styles.toolbar} style={{ paddingLeft: sidebarWidth > 0 ? '64px' : '16px' }}>
+      <div
+        className={styles.toolbar}
+        style={{ paddingLeft: sidebarWidth > 0 ? '64px' : '16px' }}
+      >
         <button
           type='button'
           className={styles.addButton}

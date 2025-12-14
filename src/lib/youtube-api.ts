@@ -48,7 +48,9 @@ async function handleApiResponse<T>(response: Response): Promise<T> {
 /**
  * チャンネルIDから詳細情報を取得
  */
-export async function getChannelInfo(channelId: string): Promise<YouTubeChannelInfo | null> {
+export async function getChannelInfo(
+  channelId: string,
+): Promise<YouTubeChannelInfo | null> {
   const apiKey = validateApiKey();
 
   const url = new URL(`${API_BASE_URL}/channels`);
@@ -81,7 +83,9 @@ export async function getChannelInfo(channelId: string): Promise<YouTubeChannelI
 /**
  * チャンネルの配信予定・ライブ配信を取得
  */
-export async function getChannelUpcomingStreams(channelId: string): Promise<YouTubeVideo[]> {
+export async function getChannelUpcomingStreams(
+  channelId: string,
+): Promise<YouTubeVideo[]> {
   const apiKey = validateApiKey();
 
   // Search APIで配信予定・ライブ中の動画を検索
@@ -103,7 +107,9 @@ export async function getChannelUpcomingStreams(channelId: string): Promise<YouT
     }
 
     // 動画IDを収集
-    const videoIds = data.items.map((item) => item.id.videoId).filter(Boolean) as string[];
+    const videoIds = data.items
+      .map((item) => item.id.videoId)
+      .filter(Boolean) as string[];
 
     if (videoIds.length === 0) {
       return [];
@@ -116,7 +122,8 @@ export async function getChannelUpcomingStreams(channelId: string): Promise<YouT
     videosUrl.searchParams.set('key', apiKey);
 
     const videosResponse = await fetch(videosUrl.toString());
-    const videosData = await handleApiResponse<YouTubeVideosResponse>(videosResponse);
+    const videosData =
+      await handleApiResponse<YouTubeVideosResponse>(videosResponse);
 
     return videosData.items.map((video) => ({
       id: video.id,
@@ -137,7 +144,9 @@ export async function getChannelUpcomingStreams(channelId: string): Promise<YouT
 /**
  * チャンネルの現在配信中の動画を取得
  */
-export async function getChannelLiveStreams(channelId: string): Promise<YouTubeVideo[]> {
+export async function getChannelLiveStreams(
+  channelId: string,
+): Promise<YouTubeVideo[]> {
   const apiKey = validateApiKey();
 
   const searchUrl = new URL(`${API_BASE_URL}/search`);
@@ -156,7 +165,9 @@ export async function getChannelLiveStreams(channelId: string): Promise<YouTubeV
       return [];
     }
 
-    const videoIds = data.items.map((item) => item.id.videoId).filter(Boolean) as string[];
+    const videoIds = data.items
+      .map((item) => item.id.videoId)
+      .filter(Boolean) as string[];
 
     if (videoIds.length === 0) {
       return [];
@@ -168,7 +179,8 @@ export async function getChannelLiveStreams(channelId: string): Promise<YouTubeV
     videosUrl.searchParams.set('key', apiKey);
 
     const videosResponse = await fetch(videosUrl.toString());
-    const videosData = await handleApiResponse<YouTubeVideosResponse>(videosResponse);
+    const videosData =
+      await handleApiResponse<YouTubeVideosResponse>(videosResponse);
 
     return videosData.items.map((video) => ({
       id: video.id,
@@ -187,6 +199,65 @@ export async function getChannelLiveStreams(channelId: string): Promise<YouTubeV
 }
 
 /**
+ * チャンネルの過去のライブ配信アーカイブを取得
+ */
+export async function getChannelPastStreams(
+  channelId: string,
+): Promise<YouTubeVideo[]> {
+  const apiKey = validateApiKey();
+
+  // Search APIで過去の動画を検索
+  const searchUrl = new URL(`${API_BASE_URL}/search`);
+  searchUrl.searchParams.set('part', 'snippet');
+  searchUrl.searchParams.set('channelId', channelId);
+  searchUrl.searchParams.set('eventType', 'completed');
+  searchUrl.searchParams.set('type', 'video');
+  searchUrl.searchParams.set('maxResults', '50');
+  searchUrl.searchParams.set('order', 'date');
+  searchUrl.searchParams.set('key', apiKey);
+
+  try {
+    const response = await fetch(searchUrl.toString());
+    const data = await handleApiResponse<YouTubeSearchResponse>(response);
+
+    if (!data.items || data.items.length === 0) {
+      return [];
+    }
+
+    const videoIds = data.items
+      .map((item) => item.id.videoId)
+      .filter(Boolean) as string[];
+
+    if (videoIds.length === 0) {
+      return [];
+    }
+
+    const videosUrl = new URL(`${API_BASE_URL}/videos`);
+    videosUrl.searchParams.set('part', 'snippet,liveStreamingDetails');
+    videosUrl.searchParams.set('id', videoIds.join(','));
+    videosUrl.searchParams.set('key', apiKey);
+
+    const videosResponse = await fetch(videosUrl.toString());
+    const videosData =
+      await handleApiResponse<YouTubeVideosResponse>(videosResponse);
+
+    return videosData.items.map((video) => ({
+      id: video.id,
+      title: video.snippet.title,
+      thumbnail: video.snippet.thumbnails.high.url,
+      channelId: video.snippet.channelId,
+      channelName: video.snippet.channelTitle,
+      publishedAt: video.snippet.publishedAt,
+      liveBroadcastContent: 'none',
+      scheduledStartTime: video.liveStreamingDetails?.actualStartTime,
+    }));
+  } catch (error) {
+    console.error('Failed to fetch past streams:', error);
+    throw error;
+  }
+}
+
+/**
  * 複数チャンネルの配信スケジュールを一括取得
  */
 export async function getMultipleChannelsSchedule(
@@ -197,11 +268,12 @@ export async function getMultipleChannelsSchedule(
   // 並列リクエストで効率化
   const results = await Promise.allSettled(
     channelIds.map(async (channelId) => {
-      const [upcoming, live] = await Promise.all([
+      const [upcoming, live, past] = await Promise.all([
         getChannelUpcomingStreams(channelId),
         getChannelLiveStreams(channelId),
+        getChannelPastStreams(channelId),
       ]);
-      return { channelId, videos: [...live, ...upcoming] };
+      return { channelId, videos: [...live, ...upcoming, ...past] };
     }),
   );
 

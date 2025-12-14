@@ -15,7 +15,8 @@
 
 // react-grid-layoutのリサイズハンドルをカスタマイズ
 // 詳細度を上げるためにセレクタを二重に指定
-.react-grid-item.react-grid-item > .react-resizable-handle.react-resizable-handle-e {
+.react-grid-item.react-grid-item
+  > .react-resizable-handle.react-resizable-handle-e {
   right: -5px;
   top: 0;
   bottom: 10px;
@@ -31,7 +32,8 @@
   }
 }
 
-.react-grid-item.react-grid-item > .react-resizable-handle.react-resizable-handle-se {
+.react-grid-item.react-grid-item
+  > .react-resizable-handle.react-resizable-handle-se {
   width: 20px;
   height: 20px;
   right: -5px;

@@ -8,7 +8,10 @@
  * @param fallback パースに失敗した場合のフォールバック値
  * @returns パースされたデータ、または null
  */
-export function loadFromStorage<T>(key: string, fallback: T | null = null): T | null {
+export function loadFromStorage<T>(
+  key: string,
+  fallback: T | null = null,
+): T | null {
   if (typeof window === 'undefined') {
     return fallback;
   }
@@ -21,7 +24,10 @@ export function loadFromStorage<T>(key: string, fallback: T | null = null): T | 
 
     return JSON.parse(item) as T;
   } catch (error) {
-    console.error(`Failed to load data from localStorage (key: ${key}):`, error);
+    console.error(
+      `Failed to load data from localStorage (key: ${key}):`,
+      error,
+    );
     return fallback;
   }
 }
@@ -55,7 +61,10 @@ export function removeFromStorage(key: string): void {
   try {
     localStorage.removeItem(key);
   } catch (error) {
-    console.error(`Failed to remove data from localStorage (key: ${key}):`, error);
+    console.error(
+      `Failed to remove data from localStorage (key: ${key}):`,
+      error,
+    );
   }
 }
 

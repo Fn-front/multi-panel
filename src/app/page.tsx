@@ -5,7 +5,9 @@ import { HiChevronLeft, HiChevronRight } from 'react-icons/hi2';
 import { PanelContainer } from '@/components/PanelContainer';
 import FavoriteChannels from '@/components/FavoriteChannels';
 import StreamCalendar from '@/components/StreamCalendar';
+import { LoginModal } from '@/components/LoginModal';
 import { useChannels } from '@/contexts/ChannelContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { useStreamNotification } from '@/hooks/useStreamNotification';
 import type { CalendarEvent } from '@/types/youtube';
 import styles from './page.module.scss';
@@ -14,7 +16,9 @@ export default function Home() {
   const [sidebarVisible, setSidebarVisible] = useState(true);
   const [notificationEnabled, setNotificationEnabled] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const { state: channelState, addChannel, removeChannel } = useChannels();
+  const { user, signOut } = useAuth();
 
   const SIDEBAR_WIDTH = 450;
 
@@ -24,14 +28,15 @@ export default function Home() {
   }, []);
 
   // 通知機能
-  const { permission, requestPermission, isEnabled, notifiedCount } = useStreamNotification(
-    channelState.channels.map((ch) => ch.channelId),
-    {
-      enabled: notificationEnabled,
-      checkInterval: 3 * 60 * 1000, // 3分
-      notifyBeforeMinutes: 5, // 5分前
-    },
-  );
+  const { permission, requestPermission, isEnabled, notifiedCount } =
+    useStreamNotification(
+      channelState.channels.map((ch) => ch.channelId),
+      {
+        enabled: notificationEnabled,
+        checkInterval: 3 * 60 * 1000, // 3分
+        notifyBeforeMinutes: 5, // 5分前
+      },
+    );
 
   const toggleSidebar = useCallback(() => {
     setSidebarVisible((prev) => !prev);
@@ -48,6 +53,15 @@ export default function Home() {
     window.open(event.url, '_blank', 'noopener,noreferrer');
   }, []);
 
+  const handleLogout = useCallback(async () => {
+    try {
+      await signOut();
+    } catch (error) {
+      console.error('ログアウトに失敗しました:', error);
+      alert('ログアウトに失敗しました。');
+    }
+  }, [signOut]);
+
   return (
     <div className={styles.container}>
       <button
@@ -62,6 +76,29 @@ export default function Home() {
       {sidebarVisible && (
         <aside className={styles.sidebar}>
           <div className={styles.sidebarContent}>
+            <div className={styles.authSection}>
+              {user ? (
+                <div className={styles.userInfo}>
+                  <span className={styles.userEmail}>{user.email}</span>
+                  <button
+                    onClick={handleLogout}
+                    className={styles.logoutButton}
+                    type='button'
+                  >
+                    ログアウト
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => setIsLoginModalOpen(true)}
+                  className={styles.loginButton}
+                  type='button'
+                >
+                  ログイン
+                </button>
+              )}
+            </div>
+
             <div className={`${styles.section} ${styles.channelsSection}`}>
               <FavoriteChannels
                 channels={channelState.channels}
@@ -121,6 +158,11 @@ export default function Home() {
       <main className={styles.mainContent}>
         <PanelContainer sidebarWidth={sidebarVisible ? SIDEBAR_WIDTH : 0} />
       </main>
+
+      <LoginModal
+        isOpen={isLoginModalOpen}
+        onClose={() => setIsLoginModalOpen(false)}
+      />
     </div>
   );
 }

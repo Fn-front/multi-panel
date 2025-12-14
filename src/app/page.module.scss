@@ -44,6 +44,55 @@
     }
   }
 
+  .authSection {
+    display: flex;
+    justify-content: flex-end;
+    padding: var(--spacing-sm, 8px) 0;
+    margin-bottom: var(--spacing-sm, 8px);
+
+    .userInfo {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm, 8px);
+      font-size: 14px;
+
+      .userEmail {
+        color: var(--text-secondary, #b0b0b0);
+      }
+
+      .logoutButton {
+        padding: 6px 12px;
+        background: var(--bg-tertiary, #2a2a2a);
+        color: var(--text-primary, #ffffff);
+        border: 1px solid var(--border-color, #404040);
+        border-radius: var(--radius-sm, 4px);
+        font-size: 12px;
+        cursor: pointer;
+        transition: background 0.2s;
+
+        &:hover {
+          background: var(--bg-hover, #3a3a3a);
+        }
+      }
+    }
+
+    .loginButton {
+      padding: 6px 16px;
+      background: #24292e;
+      color: white;
+      border: none;
+      border-radius: var(--radius-sm, 4px);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+
+      &:hover {
+        background: #1b1f23;
+      }
+    }
+  }
+
   .section {
     background: var(--bg-tertiary, #2a2a2a);
     border-radius: var(--radius-md, 8px);

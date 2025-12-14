@@ -28,9 +28,9 @@ export default function FavoriteChannels({
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [channelInfoCache, setChannelInfoCache] = useState<Map<string, YouTubeChannelInfo>>(
-    new Map(),
-  );
+  const [channelInfoCache, setChannelInfoCache] = useState<
+    Map<string, YouTubeChannelInfo>
+  >(new Map());
 
   // チャンネルIDの抽出
   const extractChannelId = useCallback((input: string): string | null => {
@@ -56,7 +56,9 @@ export default function FavoriteChannels({
       // Videos APIを使う必要がある（ここでは未対応）
       const videoId = extractVideoId(trimmed);
       if (videoId) {
-        setError('動画URLからチャンネルを追加することはできません。チャンネルURLを入力してください。');
+        setError(
+          '動画URLからチャンネルを追加することはできません。チャンネルURLを入力してください。',
+        );
         return null;
       }
     } catch {
@@ -103,7 +105,9 @@ export default function FavoriteChannels({
         }
 
         // キャッシュに保存
-        setChannelInfoCache((prev) => new Map(prev).set(channelId, channelInfo));
+        setChannelInfoCache((prev) =>
+          new Map(prev).set(channelId, channelInfo),
+        );
 
         // チャンネルを追加
         const newChannel: Channel = {
@@ -117,7 +121,9 @@ export default function FavoriteChannels({
         setInputValue('');
       } catch (err) {
         console.error('Failed to add channel:', err);
-        setError(err instanceof Error ? err.message : 'チャンネルの追加に失敗しました');
+        setError(
+          err instanceof Error ? err.message : 'チャンネルの追加に失敗しました',
+        );
       } finally {
         setIsLoading(false);
       }
@@ -144,7 +150,11 @@ export default function FavoriteChannels({
         onChannelClick(channelId);
       } else {
         // デフォルト動作: 新しいタブでチャンネルページを開く
-        window.open(`https://www.youtube.com/channel/${channelId}`, '_blank', 'noopener,noreferrer');
+        window.open(
+          `https://www.youtube.com/channel/${channelId}`,
+          '_blank',
+          'noopener,noreferrer',
+        );
       }
     },
     [onChannelClick],
@@ -196,7 +206,9 @@ export default function FavoriteChannels({
                 )}
                 <div className={styles.info}>
                   <h3 className={styles.title}>{channel.channelName}</h3>
-                  {info?.description && <p className={styles.description}>{info.description}</p>}
+                  {info?.description && (
+                    <p className={styles.description}>{info.description}</p>
+                  )}
                 </div>
                 <button
                   className={styles.removeButton}

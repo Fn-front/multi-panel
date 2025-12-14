@@ -49,7 +49,10 @@ export function sanitizeInput(input: string): string {
   let sanitized = input.trim();
 
   // 長さチェック（早期リターン）
-  if (sanitized.length === 0 || sanitized.length > VALIDATION_CONSTANTS.MAX_URL_LENGTH) {
+  if (
+    sanitized.length === 0 ||
+    sanitized.length > VALIDATION_CONSTANTS.MAX_URL_LENGTH
+  ) {
     return '';
   }
 
@@ -116,7 +119,9 @@ export function normalizeHostname(hostname: string): string {
  */
 export function isAllowedYouTubeDomain(hostname: string): boolean {
   const normalizedHostname = normalizeHostname(hostname);
-  return (ALLOWED_YOUTUBE_DOMAINS as readonly string[]).includes(normalizedHostname);
+  return (ALLOWED_YOUTUBE_DOMAINS as readonly string[]).includes(
+    normalizedHostname,
+  );
 }
 
 /**

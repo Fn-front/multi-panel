@@ -134,7 +134,9 @@ export default function StreamCalendar({
       setEvents(calendarEvents);
     } catch (err) {
       console.error('Failed to fetch schedule:', err);
-      setError(err instanceof Error ? err.message : 'スケジュールの取得に失敗しました');
+      setError(
+        err instanceof Error ? err.message : 'スケジュールの取得に失敗しました',
+      );
     } finally {
       setIsLoading(false);
     }
@@ -154,7 +156,9 @@ export default function StreamCalendar({
   useEffect(() => {
     if (!isLoading && events.length > 0) {
       const timer = setTimeout(() => {
-        const scrollableElement = document.querySelector('.fc-scroller-liquid-absolute');
+        const scrollableElement = document.querySelector(
+          '.fc-scroller-liquid-absolute',
+        );
         if (scrollableElement) {
           const now = new Date();
           const currentHour = now.getHours();
@@ -162,7 +166,8 @@ export default function StreamCalendar({
 
           // 1時間あたりのピクセル数（FullCalendarのデフォルトは約50px）
           const pixelsPerHour = 50;
-          const currentTimePosition = (currentHour + currentMinute / 60) * pixelsPerHour;
+          const currentTimePosition =
+            (currentHour + currentMinute / 60) * pixelsPerHour;
 
           // ビューポートの高さの半分を引いて、現在時刻が中央に来るようにする
           const viewportHeight = scrollableElement.clientHeight;
@@ -178,7 +183,7 @@ export default function StreamCalendar({
 
   // イベントクリック時の処理
   const handleEventClick = useCallback(
-    (info: any) => {
+    (info: { event: { id: string } }) => {
       const event = events.find((e) => e.id === info.event.id);
       if (!event) return;
 
@@ -193,45 +198,51 @@ export default function StreamCalendar({
   );
 
   // イベントの色設定
-  const getEventClassNames = useCallback((info: any) => {
-    const event = info.event;
-    const eventType = event.extendedProps?.eventType || 'upcoming';
-    return [`event-${eventType}`];
-  }, []);
+  const getEventClassNames = useCallback(
+    (info: { event: { extendedProps?: { eventType?: string } } }) => {
+      const event = info.event;
+      const eventType = event.extendedProps?.eventType || 'upcoming';
+      return [`event-${eventType}`];
+    },
+    [],
+  );
 
   // イベントコンテンツのカスタマイズ
-  const renderEventContent = useCallback((eventInfo: any) => {
-    const isMonthView = eventInfo.view.type === 'dayGridMonth';
+  const renderEventContent = useCallback(
+    (eventInfo: { event: { title: string }; view: { type: string } }) => {
+      const isMonthView = eventInfo.view.type === 'dayGridMonth';
 
-    return (
-      <>
-        <svg
-          width="15"
-          height="15"
-          viewBox="0 0 12 12"
-          style={
-            isMonthView
-              ? {
-                  display: 'inline-block',
-                  verticalAlign: 'middle',
-                  marginRight: '4px',
-                }
-              : {
-                  position: 'absolute',
-                  top: '-7.5px',
-                  left: '-7.5px',
-                  zIndex: 10,
-                }
-          }
-        >
-          <circle cx="6" cy="6" r="6" fill="#FF0000" />
-          <path d="M5 3.5L5 8.5L8.5 6z" fill="white" />
-        </svg>
-        <div className="fc-event-time">{eventInfo.timeText}</div>
-        <div className="fc-event-title">{eventInfo.event.title}</div>
-      </>
-    );
-  }, []);
+      return (
+        <>
+          <svg
+            width='15'
+            height='15'
+            viewBox='0 0 12 12'
+            style={
+              isMonthView
+                ? {
+                    display: 'inline-block',
+                    verticalAlign: 'middle',
+                    marginRight: '4px',
+                  }
+                : {
+                    position: 'absolute',
+                    top: '-7.5px',
+                    left: '-7.5px',
+                    zIndex: 10,
+                  }
+            }
+          >
+            <circle cx='6' cy='6' r='6' fill='#FF0000' />
+            <path d='M5 3.5L5 8.5L8.5 6z' fill='white' />
+          </svg>
+          <div className='fc-event-time'>{eventInfo.timeText}</div>
+          <div className='fc-event-title'>{eventInfo.event.title}</div>
+        </>
+      );
+    },
+    [],
+  );
 
   if (isLoading) {
     return (

@@ -67,7 +67,11 @@ function showNotification(video: YouTubeVideo, minutesUntilStart: number) {
   });
 
   notification.onclick = () => {
-    window.open(`https://www.youtube.com/watch?v=${video.id}`, '_blank', 'noopener,noreferrer');
+    window.open(
+      `https://www.youtube.com/watch?v=${video.id}`,
+      '_blank',
+      'noopener,noreferrer',
+    );
     notification.close();
   };
 
@@ -87,7 +91,11 @@ export function useStreamNotification(
   requestPermission: () => Promise<void>;
   notifiedCount: number;
 } {
-  const { enabled, checkInterval = 3 * 60 * 1000, notifyBeforeMinutes = 5 } = options;
+  const {
+    enabled,
+    checkInterval = 3 * 60 * 1000,
+    notifyBeforeMinutes = 5,
+  } = options;
 
   const [permission, setPermission] = useState<NotificationPermission>(
     typeof window !== 'undefined' && 'Notification' in window
@@ -129,12 +137,16 @@ export function useStreamNotification(
           const shouldNotify =
             video.liveBroadcastContent === 'live' || // 現在配信中
             (video.scheduledStartTime &&
-              new Date(video.scheduledStartTime).getTime() - now <= notifyThresholdMs && // 開始予定時刻が近い
+              new Date(video.scheduledStartTime).getTime() - now <=
+                notifyThresholdMs && // 開始予定時刻が近い
               new Date(video.scheduledStartTime).getTime() > now); // まだ開始していない
 
           if (shouldNotify) {
             const minutesUntilStart = video.scheduledStartTime
-              ? Math.ceil((new Date(video.scheduledStartTime).getTime() - now) / (60 * 1000))
+              ? Math.ceil(
+                  (new Date(video.scheduledStartTime).getTime() - now) /
+                    (60 * 1000),
+                )
               : 0;
 
             showNotification(video, minutesUntilStart);

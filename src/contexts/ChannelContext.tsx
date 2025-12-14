@@ -1,6 +1,12 @@
 'use client';
 
-import { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
+import {
+  createContext,
+  useContext,
+  useReducer,
+  useEffect,
+  ReactNode,
+} from 'react';
 import type { Channel, ChannelsState, ChannelsAction } from '@/types/channel';
 import { STORAGE_KEYS } from '@/constants';
 import { loadFromStorage, saveArrayToStorage } from '@/utils/storage';
@@ -11,7 +17,10 @@ const initialState: ChannelsState = {
 };
 
 // Reducer
-function channelsReducer(state: ChannelsState, action: ChannelsAction): ChannelsState {
+function channelsReducer(
+  state: ChannelsState,
+  action: ChannelsAction,
+): ChannelsState {
   switch (action.type) {
     case 'ADD_CHANNEL':
       return {
@@ -22,7 +31,9 @@ function channelsReducer(state: ChannelsState, action: ChannelsAction): Channels
     case 'REMOVE_CHANNEL':
       return {
         ...state,
-        channels: state.channels.filter((channel) => channel.id !== action.payload),
+        channels: state.channels.filter(
+          (channel) => channel.id !== action.payload,
+        ),
       };
 
     case 'UPDATE_CHANNEL':
@@ -99,7 +110,9 @@ export function ChannelProvider({ children }: ChannelProviderProps) {
     updateChannel,
   };
 
-  return <ChannelContext.Provider value={value}>{children}</ChannelContext.Provider>;
+  return (
+    <ChannelContext.Provider value={value}>{children}</ChannelContext.Provider>
+  );
 }
 
 // Hook

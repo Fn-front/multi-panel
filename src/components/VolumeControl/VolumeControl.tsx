@@ -1,10 +1,7 @@
 'use client';
 
 import { useCallback, useMemo, useState, useRef, useEffect } from 'react';
-import {
-  HiSpeakerWave,
-  HiSpeakerXMark,
-} from 'react-icons/hi2';
+import { HiSpeakerWave, HiSpeakerXMark } from 'react-icons/hi2';
 import styles from './VolumeControl.module.scss';
 
 type VolumeControlProps = {

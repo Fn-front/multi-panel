@@ -66,7 +66,9 @@ describe('youtube-api', () => {
       });
 
       expect(global.fetch).toHaveBeenCalledWith(
-        expect.stringContaining(`channels?part=snippet&id=${mockChannelId}&key=${mockApiKey}`),
+        expect.stringContaining(
+          `channels?part=snippet&id=${mockChannelId}&key=${mockApiKey}`,
+        ),
       );
     });
 
@@ -105,7 +107,9 @@ describe('youtube-api', () => {
         }),
       });
 
-      await expect(getChannelInfo(mockChannelId)).rejects.toThrow('YouTube API Error');
+      await expect(getChannelInfo(mockChannelId)).rejects.toThrow(
+        'YouTube API Error',
+      );
     });
   });
 
@@ -301,7 +305,9 @@ describe('youtube-api', () => {
           return Promise.resolve({
             ok: false,
             status: 500,
-            json: async () => ({ error: { code: 500, message: 'Internal Server Error' } }),
+            json: async () => ({
+              error: { code: 500, message: 'Internal Server Error' },
+            }),
           });
         }
         // 2番目のチャンネルのリクエストは成功

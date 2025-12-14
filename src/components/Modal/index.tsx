@@ -8,9 +8,16 @@ type ModalProps = {
   onClose: () => void;
   title?: string;
   children: React.ReactNode;
+  maxWidth?: string;
 };
 
-export function Modal({ isOpen, onClose, title, children }: ModalProps) {
+export function Modal({
+  isOpen,
+  onClose,
+  title,
+  children,
+  maxWidth,
+}: ModalProps) {
   // ESCキーで閉じる
   useEffect(() => {
     if (!isOpen) return;
@@ -29,11 +36,19 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
 
   return (
     <div className={styles.modal} onClick={onClose}>
-      <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+      <div
+        className={styles.modalContent}
+        onClick={(e) => e.stopPropagation()}
+        style={maxWidth ? { maxWidth } : undefined}
+      >
         {title && (
           <div className={styles.modalHeader}>
             <h2>{title}</h2>
-            <button className={styles.closeButton} onClick={onClose} type='button'>
+            <button
+              className={styles.closeButton}
+              onClick={onClose}
+              type='button'
+            >
               ✕
             </button>
           </div>

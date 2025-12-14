@@ -1,0 +1,40 @@
+.loginContent {
+  padding: 24px 0;
+  text-align: center;
+}
+
+.description {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 24px;
+  line-height: 1.6;
+}
+
+.loginButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 12px 24px;
+  background: #24292e;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+
+  &:hover {
+    background: #1b1f23;
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+.githubIcon {
+  width: 20px;
+  height: 20px;
+}
