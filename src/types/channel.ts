@@ -7,9 +7,9 @@ export type Channel = {
   /** YouTube Channel ID */
   channelId: string;
   /** チャンネル名 */
-  channelName: string;
-  /** 登録日時 (Unix timestamp) */
-  addedAt: number;
+  name: string;
+  /** サムネイルURL */
+  thumbnail?: string;
 };
 
 /**

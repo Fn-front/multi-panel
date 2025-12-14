@@ -113,8 +113,8 @@ export default function FavoriteChannels({
         const newChannel: Channel = {
           id: crypto.randomUUID(),
           channelId: channelInfo.id,
-          channelName: channelInfo.title,
-          addedAt: Date.now(),
+          name: channelInfo.title,
+          thumbnail: channelInfo.thumbnail,
         };
 
         onAddChannel(newChannel);
@@ -192,22 +192,25 @@ export default function FavoriteChannels({
         ) : (
           channels.map((channel) => {
             const info = channelInfoCache.get(channel.channelId);
+            const thumbnail = channel.thumbnail || info?.thumbnail;
+            const description = info?.description;
+
             return (
               <div
                 key={channel.id}
                 className={styles.channelItem}
                 onClick={() => handleChannelClick(channel.channelId)}
               >
-                {info?.thumbnail && (
+                {thumbnail && (
                   <div className={styles.thumbnail}>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={info.thumbnail} alt={channel.channelName} />
+                    <img src={thumbnail} alt={channel.name} />
                   </div>
                 )}
                 <div className={styles.info}>
-                  <h3 className={styles.title}>{channel.channelName}</h3>
-                  {info?.description && (
-                    <p className={styles.description}>{info.description}</p>
+                  <h3 className={styles.title}>{channel.name}</h3>
+                  {description && (
+                    <p className={styles.description}>{description}</p>
                   )}
                 </div>
                 <button
