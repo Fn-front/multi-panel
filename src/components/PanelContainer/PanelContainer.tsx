@@ -19,7 +19,7 @@ type PanelContainerProps = {
  * グリッドレイアウトを管理するコンテナコンポーネント
  */
 export function PanelContainer({ sidebarWidth = 0 }: PanelContainerProps) {
-  const { state, updateLayout, addPanel } = usePanels();
+  const { state, isLoading, updateLayout, addPanel } = usePanels();
 
   const layout: Layout[] = useMemo(
     () =>
@@ -45,6 +45,24 @@ export function PanelContainer({ sidebarWidth = 0 }: PanelContainerProps) {
       layout: PANEL_DEFAULTS.LAYOUT,
     });
   }, [addPanel]);
+
+  if (isLoading) {
+    return (
+      <div className={styles.container}>
+        <div
+          className={styles.toolbar}
+          style={{ paddingLeft: sidebarWidth > 0 ? '64px' : '16px' }}
+        >
+          <div className={styles.toolbarSkeleton} />
+        </div>
+        <div className={styles.gridContainer}>
+          <div className={styles.loadingSkeleton}>
+            <div className={styles.skeletonContent} />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.container}>

@@ -5,6 +5,7 @@ import {
   useContext,
   useReducer,
   useEffect,
+  useState,
   type ReactNode,
 } from 'react';
 import type { Layout } from 'react-grid-layout';
@@ -78,6 +79,7 @@ function panelsReducer(state: PanelsState, action: PanelsAction): PanelsState {
 type PanelsContextType = {
   state: PanelsState;
   dispatch: React.Dispatch<PanelsAction>;
+  isLoading: boolean;
   addPanel: (panel: Panel) => void;
   removePanel: (id: string) => void;
   updatePanel: (id: string, updates: Partial<Panel>) => void;
@@ -95,6 +97,7 @@ type PanelsProviderProps = {
 // Provider コンポーネント
 export function PanelsProvider({ children }: PanelsProviderProps) {
   const [state, dispatch] = useReducer(panelsReducer, initialState);
+  const [isLoading, setIsLoading] = useState(true);
 
   // 初期ロード: localStorage からパネル情報を復元
   useEffect(() => {
@@ -107,6 +110,7 @@ export function PanelsProvider({ children }: PanelsProviderProps) {
         console.error('Failed to load panels from localStorage:', error);
       }
     }
+    setIsLoading(false);
   }, []);
 
   // パネル状態が変更されたら localStorage に保存
@@ -138,6 +142,7 @@ export function PanelsProvider({ children }: PanelsProviderProps) {
   const value: PanelsContextType = {
     state,
     dispatch,
+    isLoading,
     addPanel,
     removePanel,
     updatePanel,

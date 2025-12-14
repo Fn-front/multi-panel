@@ -250,7 +250,10 @@ export default function StreamCalendar({
         <div className={styles.header}>
           <h2>配信カレンダー</h2>
         </div>
-        <div className={styles.loading}>スケジュールを読み込み中...</div>
+        <div className={styles.loading}>
+          <div className={`${styles.skeleton} ${styles.header}`} />
+          <div className={`${styles.skeleton} ${styles.calendar}`} />
+        </div>
       </div>
     );
   }

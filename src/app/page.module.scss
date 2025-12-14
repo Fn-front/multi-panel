@@ -50,6 +50,34 @@
     padding: var(--spacing-sm, 8px) 0;
     margin-bottom: var(--spacing-sm, 8px);
 
+    .authLoading {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm, 8px);
+
+      .skeleton {
+        background: linear-gradient(
+          90deg,
+          var(--bg-tertiary, #2a2a2a) 25%,
+          var(--bg-hover, #353535) 50%,
+          var(--bg-tertiary, #2a2a2a) 75%
+        );
+        background-size: 200% 100%;
+        animation: skeleton-loading 1.5s infinite;
+        border-radius: var(--radius-sm, 4px);
+
+        &.email {
+          width: 150px;
+          height: 20px;
+        }
+
+        &.button {
+          width: 80px;
+          height: 28px;
+        }
+      }
+    }
+
     .userInfo {
       display: flex;
       align-items: center;
@@ -93,6 +121,15 @@
     }
   }
 
+  @keyframes skeleton-loading {
+    0% {
+      background-position: 200% 0;
+    }
+    100% {
+      background-position: -200% 0;
+    }
+  }
+
   .section {
     background: var(--bg-tertiary, #2a2a2a);
     border-radius: var(--radius-md, 8px);
@@ -102,11 +139,12 @@
     &.channelsSection {
       flex: 0 0 auto;
       max-height: 250px;
+      min-height: 250px;
     }
 
     &.calendarSection {
       flex: 1;
-      min-height: 0;
+      min-height: 400px;
       display: flex;
       flex-direction: column;
     }

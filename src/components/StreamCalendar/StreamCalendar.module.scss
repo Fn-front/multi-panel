@@ -56,12 +56,42 @@
   }
 
   .loading {
+    flex: 1;
     display: flex;
-    align-items: center;
-    justify-content: center;
+    flex-direction: column;
+    gap: var(--spacing-md, 16px);
     min-height: 400px;
-    color: var(--text-secondary, #a0a0a0);
-    font-size: var(--text-base, 16px);
+
+    .skeleton {
+      background: linear-gradient(
+        90deg,
+        var(--bg-tertiary, #2a2a2a) 25%,
+        var(--bg-hover, #353535) 50%,
+        var(--bg-tertiary, #2a2a2a) 75%
+      );
+      background-size: 200% 100%;
+      animation: skeleton-loading 1.5s infinite;
+      border-radius: var(--radius-sm, 4px);
+
+      &.header {
+        height: 36px;
+        width: 100%;
+      }
+
+      &.calendar {
+        flex: 1;
+        min-height: 350px;
+      }
+    }
+  }
+
+  @keyframes skeleton-loading {
+    0% {
+      background-position: 200% 0;
+    }
+    100% {
+      background-position: -200% 0;
+    }
   }
 
   .error {

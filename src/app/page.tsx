@@ -18,7 +18,7 @@ export default function Home() {
   const [isMounted, setIsMounted] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const { state: channelState, addChannel, removeChannel } = useChannels();
-  const { user, signOut } = useAuth();
+  const { user, isLoading: authLoading, signOut } = useAuth();
 
   const SIDEBAR_WIDTH = 450;
 
@@ -77,7 +77,12 @@ export default function Home() {
         <aside className={styles.sidebar}>
           <div className={styles.sidebarContent}>
             <div className={styles.authSection}>
-              {user ? (
+              {authLoading ? (
+                <div className={styles.authLoading}>
+                  <div className={`${styles.skeleton} ${styles.email}`} />
+                  <div className={`${styles.skeleton} ${styles.button}`} />
+                </div>
+              ) : user ? (
                 <div className={styles.userInfo}>
                   <span className={styles.userEmail}>{user.email}</span>
                   <button
