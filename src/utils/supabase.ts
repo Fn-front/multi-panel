@@ -42,7 +42,11 @@ export const callSupabaseFunction = async <T = unknown>(
   );
 
   if (!response.ok) {
-    throw new Error(`Failed to call ${functionName}: ${response.statusText}`);
+    const errorText = await response.text();
+    console.error(`[Supabase Function Error] ${functionName}:`, errorText);
+    throw new Error(
+      `Failed to call ${functionName}: ${response.statusText} - ${errorText}`,
+    );
   }
 
   return response.json();

@@ -105,8 +105,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // （実際の期限チェックはonAuthStateChangeで行う）
         if (allowed) {
           await updateLastLogin(session.user.id);
-          // ログイン時: 今日〜月末の配信予定を取得
-          await fetchStreamsUntilMonthEnd();
+          // 配信情報の取得はSIGNED_INイベント時のみ実行（ページリロード毎には実行しない）
         }
       }
 
