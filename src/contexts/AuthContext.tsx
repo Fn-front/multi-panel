@@ -132,6 +132,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             event === 'INITIAL_SESSION')
         ) {
           await updateLastLogin(session.user.id);
+          // ログイン時: 今日〜月末の配信予定を取得
+          if (event === 'SIGNED_IN') {
+            await fetchStreamsUntilMonthEnd();
+          }
         }
         // その他のイベントではセッション期限チェック
         else if (allowed) {
