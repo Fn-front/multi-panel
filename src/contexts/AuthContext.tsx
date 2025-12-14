@@ -21,11 +21,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [isAllowed, setIsAllowed] = useState(false);
 
+  // セッション有効期限（24時間）
+  const SESSION_EXPIRY_HOURS = 24;
+
   // ホワイトリストチェック
   const checkAllowedUser = async (userId: string) => {
     const { data, error } = await supabase
       .from('allowed_users')
-      .select('user_id')
+      .select('user_id, last_login_at')
       .eq('user_id', userId)
       .single();
 
@@ -37,15 +40,61 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return !!data;
   };
 
+  // 最終ログイン日時をチェックして期限切れか判定
+  const checkSessionExpiry = async (userId: string): Promise<boolean> => {
+    const { data, error } = await supabase
+      .from('allowed_users')
+      .select('last_login_at')
+      .eq('user_id', userId)
+      .single();
+
+    if (error || !data) {
+      console.error('最終ログイン日時の取得エラー:', error);
+      return true; // エラー時は期限切れ扱い
+    }
+
+    // last_login_atがnullの場合は初回ログインなので有効
+    if (!data.last_login_at) {
+      return false;
+    }
+
+    // 最終ログインから24時間経過しているかチェック
+    const lastLogin = new Date(data.last_login_at);
+    const now = new Date();
+    const hoursSinceLogin =
+      (now.getTime() - lastLogin.getTime()) / (1000 * 60 * 60);
+
+    return hoursSinceLogin >= SESSION_EXPIRY_HOURS;
+  };
+
+  // 最終ログイン日時を更新
+  const updateLastLogin = async (userId: string) => {
+    const { error } = await supabase
+      .from('allowed_users')
+      .update({ last_login_at: new Date().toISOString() })
+      .eq('user_id', userId);
+
+    if (error) {
+      console.error('最終ログイン日時の更新エラー:', error);
+    }
+  };
+
   // セッション初期化
   useEffect(() => {
     // 現在のセッションを取得
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
 
       if (session?.user) {
-        checkAllowedUser(session.user.id).then(setIsAllowed);
+        const allowed = await checkAllowedUser(session.user.id);
+        setIsAllowed(allowed);
+
+        // getSession時は期限チェックせず、常に最終ログイン日時を更新
+        // （実際の期限チェックはonAuthStateChangeで行う）
+        if (allowed) {
+          await updateLastLogin(session.user.id);
+        }
       }
 
       setIsLoading(false);
@@ -54,13 +103,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // 認証状態の変更を監視
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('認証イベント:', event);
       setSession(session);
       setUser(session?.user ?? null);
 
       if (session?.user) {
         const allowed = await checkAllowedUser(session.user.id);
         setIsAllowed(allowed);
+
+        // ログイン関連イベント時は必ず最終ログイン日時を更新（期限チェックなし）
+        if (
+          allowed &&
+          (event === 'SIGNED_IN' ||
+            event === 'TOKEN_REFRESHED' ||
+            event === 'INITIAL_SESSION')
+        ) {
+          await updateLastLogin(session.user.id);
+        }
+        // その他のイベントではセッション期限チェック
+        else if (allowed) {
+          const isExpired = await checkSessionExpiry(session.user.id);
+          if (isExpired) {
+            console.log('セッション期限切れ - 自動ログアウト');
+            await supabase.auth.signOut();
+            setSession(null);
+            setUser(null);
+            setIsAllowed(false);
+          }
+        }
       } else {
         setIsAllowed(false);
       }
