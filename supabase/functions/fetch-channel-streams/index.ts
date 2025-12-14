@@ -50,7 +50,7 @@ serve(async (req) => {
     if (!channels || channels.length === 0) {
       return new Response(
         JSON.stringify({ message: 'No favorite channels found' }),
-        { headers: { 'Content-Type': 'application/json' }, status: 200 }
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
       );
     }
 
