@@ -104,6 +104,9 @@ export function ChannelProvider({ children }: ChannelProviderProps) {
 
       if (user) {
         // ログイン時: Supabaseから読み込み
+        // localStorageをクリアして、Supabaseが唯一の真実の情報源になるようにする
+        localStorage.removeItem(STORAGE_KEYS.CHANNELS);
+
         try {
           const { data, error } = await supabase
             .from('favorite_channels')
@@ -115,9 +118,14 @@ export function ChannelProvider({ children }: ChannelProviderProps) {
           if (data) {
             const channels = data.map(mapDbToChannel);
             dispatch({ type: 'LOAD_CHANNELS', payload: channels });
+          } else {
+            // データがない場合は空配列をセット
+            dispatch({ type: 'LOAD_CHANNELS', payload: [] });
           }
         } catch (error) {
           console.error('Failed to load channels from Supabase:', error);
+          // エラー時も空配列をセット
+          dispatch({ type: 'LOAD_CHANNELS', payload: [] });
         }
       } else {
         // 未ログイン時: localStorageから読み込み

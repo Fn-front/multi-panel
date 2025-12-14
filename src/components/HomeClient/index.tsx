@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import { HiChevronLeft, HiChevronRight } from 'react-icons/hi2';
 import { PanelContainer } from '@/components/PanelContainer';
 import FavoriteChannels from '@/components/FavoriteChannels';
@@ -32,16 +32,25 @@ export function HomeClient({ initialSidebarVisible }: HomeClientProps) {
     setIsMounted(true);
   }, []);
 
+  // チャンネルIDの配列をメモ化
+  const channelIds = useMemo(
+    () => channelState.channels.map((ch) => ch.channelId),
+    [channelState.channels],
+  );
+
+  // 通知設定をメモ化
+  const notificationOptions = useMemo(
+    () => ({
+      enabled: notificationEnabled,
+      checkInterval: 3 * 60 * 1000, // 3分
+      notifyBeforeMinutes: 5, // 5分前
+    }),
+    [notificationEnabled],
+  );
+
   // 通知機能
   const { permission, requestPermission, isEnabled, notifiedCount } =
-    useStreamNotification(
-      channelState.channels.map((ch) => ch.channelId),
-      {
-        enabled: notificationEnabled,
-        checkInterval: 3 * 60 * 1000, // 3分
-        notifyBeforeMinutes: 5, // 5分前
-      },
-    );
+    useStreamNotification(channelIds, notificationOptions);
 
   const toggleSidebar = useCallback(() => {
     setSidebarVisible((prev) => {
@@ -87,6 +96,10 @@ export function HomeClient({ initialSidebarVisible }: HomeClientProps) {
       alert('ログアウトに失敗しました。');
     }
   }, [signOut]);
+
+  const handleLoginModalClose = useCallback(() => {
+    setIsLoginModalOpen(false);
+  }, []);
 
   return (
     <div className={styles.container}>
@@ -213,7 +226,7 @@ export function HomeClient({ initialSidebarVisible }: HomeClientProps) {
 
               <div className={`${styles.section} ${styles.calendarSection}`}>
                 <StreamCalendar
-                  channelIds={channelState.channels.map((ch) => ch.channelId)}
+                  channelIds={channelIds}
                   onEventClick={handleCalendarEventClick}
                   refreshInterval={5 * 60 * 1000}
                 />
@@ -229,7 +242,7 @@ export function HomeClient({ initialSidebarVisible }: HomeClientProps) {
 
       <LoginModal
         isOpen={isLoginModalOpen}
-        onClose={() => setIsLoginModalOpen(false)}
+        onClose={handleLoginModalClose}
       />
     </div>
   );
