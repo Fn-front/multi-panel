@@ -95,7 +95,6 @@ export function VideoPlayer({
             config={PLAYER_CONFIG}
             onReady={handleReady}
             onError={onError}
-            playing={false}
           />
         </div>
       </div>
