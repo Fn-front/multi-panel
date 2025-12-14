@@ -105,9 +105,11 @@ export function PanelsProvider({ children }: PanelsProviderProps) {
 
   // 初期データ読み込み（ログイン時: Supabase, 未ログイン時: localStorage）
   useEffect(() => {
-    const loadPanels = async () => {
-      setIsLoading(true);
+    let isCancelled = false;
+    setIsLoading(true);
 
+    const loadPanels = async () => {
+      if (isCancelled) return;
       if (user) {
         // ログイン時: Supabaseから読み込み
         try {
@@ -127,7 +129,9 @@ export function PanelsProvider({ children }: PanelsProviderProps) {
             }
           } else if (data && data.panels) {
             const panels = data.panels as Panel[];
-            dispatch({ type: 'LOAD_LAYOUT', payload: panels });
+            if (!isCancelled) {
+              dispatch({ type: 'LOAD_LAYOUT', payload: panels });
+            }
           }
         } catch (error) {
           console.error('Failed to load panels from Supabase:', error);
@@ -138,17 +142,25 @@ export function PanelsProvider({ children }: PanelsProviderProps) {
         if (savedPanels) {
           try {
             const panels = JSON.parse(savedPanels) as Panel[];
-            dispatch({ type: 'LOAD_LAYOUT', payload: panels });
+            if (!isCancelled) {
+              dispatch({ type: 'LOAD_LAYOUT', payload: panels });
+            }
           } catch (error) {
             console.error('Failed to load panels from localStorage:', error);
           }
         }
       }
 
-      setIsLoading(false);
+      if (!isCancelled) {
+        setIsLoading(false);
+      }
     };
 
     loadPanels();
+
+    return () => {
+      isCancelled = true;
+    };
   }, [user?.id]);
 
   // データ保存（ログイン時: Supabase, 未ログイン時: localStorage）
@@ -176,15 +188,7 @@ export function PanelsProvider({ children }: PanelsProviderProps) {
               })
               .eq('id', existingLayout.id);
 
-            if (error) {
-              console.error('Update error:', {
-                message: error.message,
-                details: error.details,
-                hint: error.hint,
-                code: error.code,
-              });
-              throw error;
-            }
+            if (error) throw error;
           } else {
             // 新規作成
             const { error } = await supabase.from('panel_layouts').insert({
@@ -194,21 +198,10 @@ export function PanelsProvider({ children }: PanelsProviderProps) {
               is_active: true,
             });
 
-            if (error) {
-              console.error('Insert error:', {
-                message: error.message,
-                details: error.details,
-                hint: error.hint,
-                code: error.code,
-              });
-              throw error;
-            }
+            if (error) throw error;
           }
         } catch (error) {
           console.error('Failed to save panels to Supabase:', error);
-          if (error instanceof Error) {
-            console.error('Error details:', error.message, error.stack);
-          }
         }
       } else {
         // 未ログイン時: localStorageへ保存
