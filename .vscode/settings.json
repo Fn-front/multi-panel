@@ -10,5 +10,10 @@
   "scss.validate": false,
   "stylelint.validate": ["scss"],
   "stylelint.configFile": "./.stylelintrc.json",
-  "cSpell.ignoreWords": ["NEXTAUTH", "hookform"]
+  "cSpell.ignoreWords": ["NEXTAUTH", "hookform"],
+  "deno.enable": true,
+  "deno.enablePaths": ["supabase/functions"],
+  "[typescript]": {
+    "editor.defaultFormatter": "denoland.vscode-deno"
+  }
 }
