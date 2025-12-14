@@ -183,6 +183,14 @@ export function ChannelProvider({ children }: ChannelProviderProps) {
   // 現在月の1ヶ月分の配信を取得
   const fetchCurrentMonthStreams = async (channelId: string) => {
     try {
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+      const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+      if (!supabaseUrl || !supabaseKey) {
+        console.warn('[ChannelContext] Supabase credentials not configured');
+        return;
+      }
+
       const now = new Date();
       const year = now.getFullYear();
       const month = now.getMonth(); // 0-indexed
@@ -197,12 +205,12 @@ export function ChannelProvider({ children }: ChannelProviderProps) {
 
       // fetch-past-streams Function を呼び出し
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/fetch-past-streams`,
+        `${supabaseUrl}/functions/v1/fetch-past-streams`,
         {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY}`,
+            Authorization: `Bearer ${supabaseKey}`,
           },
           body: JSON.stringify({
             channelId,
@@ -223,6 +231,7 @@ export function ChannelProvider({ children }: ChannelProviderProps) {
       );
     } catch (error) {
       console.error('Failed to fetch current month streams:', error);
+      // エラーは無視して続行
     }
   };
 

@@ -278,14 +278,22 @@ export default function StreamCalendar({
         };
 
         try {
+          const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+          const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+          if (!supabaseUrl || !supabaseKey) {
+            console.warn('[StreamCalendar] Supabase credentials not configured');
+            return;
+          }
+
           // fetch-past-streams を呼び出し
           const response = await fetch(
-            `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/fetch-past-streams`,
+            `${supabaseUrl}/functions/v1/fetch-past-streams`,
             {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
-                Authorization: `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY}`,
+                Authorization: `Bearer ${supabaseKey}`,
               },
               body: JSON.stringify({
                 channelIds,
@@ -309,6 +317,7 @@ export default function StreamCalendar({
           fetchSchedule();
         } catch (error) {
           console.error('Failed to fetch past streams on calendar move:', error);
+          // エラーは無視して続行
         }
       }
     },
