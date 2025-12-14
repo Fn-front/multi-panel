@@ -205,12 +205,46 @@ export function ChannelProvider({ children }: ChannelProviderProps) {
     if (user) {
       // ログイン時: Supabaseから削除
       try {
+        // 削除するチャンネルのchannel_idを取得
+        const channelToRemove = state.channels.find((ch) => ch.id === id);
+        if (!channelToRemove) {
+          console.warn('Channel not found:', id);
+          return;
+        }
+
+        // favorite_channelsから削除
         const { error } = await supabase
           .from('favorite_channels')
           .delete()
           .eq('id', id);
 
         if (error) throw error;
+
+        // 紐づくstream_eventsを削除
+        const { error: streamEventsError } = await supabase
+          .from('stream_events')
+          .delete()
+          .eq('channel_id', channelToRemove.channelId);
+
+        if (streamEventsError) {
+          console.error(
+            'Failed to delete stream_events:',
+            streamEventsError,
+          );
+        }
+
+        // 紐づくfetched_date_rangesを削除
+        const { error: fetchedRangesError } = await supabase
+          .from('fetched_date_ranges')
+          .delete()
+          .eq('channel_id', channelToRemove.channelId);
+
+        if (fetchedRangesError) {
+          console.error(
+            'Failed to delete fetched_date_ranges:',
+            fetchedRangesError,
+          );
+        }
 
         dispatch({ type: 'REMOVE_CHANNEL', payload: id });
       } catch (error) {
