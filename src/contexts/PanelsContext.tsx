@@ -10,9 +10,12 @@ import {
 } from 'react';
 import type { Layout } from 'react-grid-layout';
 import type { Panel, PanelsState, PanelsAction } from '@/types';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/lib/supabase';
 
 // LocalStorage キー
 const STORAGE_KEY = 'multi-panel:panels';
+const DEFAULT_LAYOUT_NAME = 'default';
 
 // 初期状態
 const initialState: PanelsState = {
@@ -98,29 +101,127 @@ type PanelsProviderProps = {
 export function PanelsProvider({ children }: PanelsProviderProps) {
   const [state, dispatch] = useReducer(panelsReducer, initialState);
   const [isLoading, setIsLoading] = useState(true);
+  const { user } = useAuth();
 
-  // 初期ロード: localStorage からパネル情報を復元
+  // 初期データ読み込み（ログイン時: Supabase, 未ログイン時: localStorage）
   useEffect(() => {
-    const savedPanels = localStorage.getItem(STORAGE_KEY);
-    if (savedPanels) {
-      try {
-        const panels = JSON.parse(savedPanels) as Panel[];
-        dispatch({ type: 'LOAD_LAYOUT', payload: panels });
-      } catch (error) {
-        console.error('Failed to load panels from localStorage:', error);
+    const loadPanels = async () => {
+      setIsLoading(true);
+
+      if (user) {
+        // ログイン時: Supabaseから読み込み
+        try {
+          const { data, error } = await supabase
+            .from('panel_layouts')
+            .select('*')
+            .eq('is_active', true)
+            .eq('layout_name', DEFAULT_LAYOUT_NAME)
+            .single();
+
+          if (error) {
+            // レイアウトが存在しない場合はエラーではなく空配列とする
+            if (error.code === 'PGRST116') {
+              dispatch({ type: 'LOAD_LAYOUT', payload: [] });
+            } else {
+              throw error;
+            }
+          } else if (data && data.panels) {
+            const panels = data.panels as Panel[];
+            dispatch({ type: 'LOAD_LAYOUT', payload: panels });
+          }
+        } catch (error) {
+          console.error('Failed to load panels from Supabase:', error);
+        }
+      } else {
+        // 未ログイン時: localStorageから読み込み
+        const savedPanels = localStorage.getItem(STORAGE_KEY);
+        if (savedPanels) {
+          try {
+            const panels = JSON.parse(savedPanels) as Panel[];
+            dispatch({ type: 'LOAD_LAYOUT', payload: panels });
+          } catch (error) {
+            console.error('Failed to load panels from localStorage:', error);
+          }
+        }
       }
-    }
-    setIsLoading(false);
-  }, []);
 
-  // パネル状態が変更されたら localStorage に保存
+      setIsLoading(false);
+    };
+
+    loadPanels();
+  }, [user?.id]);
+
+  // データ保存（ログイン時: Supabase, 未ログイン時: localStorage）
   useEffect(() => {
-    if (state.panels.length > 0) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state.panels));
-    } else {
-      localStorage.removeItem(STORAGE_KEY);
-    }
-  }, [state.panels]);
+    if (isLoading) return; // 初期ロード中は保存しない
+
+    const savePanels = async () => {
+      if (user) {
+        // ログイン時: Supabaseへ保存
+        try {
+          // 既存のレイアウトを確認
+          const { data: existingLayout } = await supabase
+            .from('panel_layouts')
+            .select('id')
+            .eq('layout_name', DEFAULT_LAYOUT_NAME)
+            .single();
+
+          if (existingLayout) {
+            // 更新
+            const { error } = await supabase
+              .from('panel_layouts')
+              .update({
+                panels: state.panels,
+                updated_at: new Date().toISOString(),
+              })
+              .eq('id', existingLayout.id);
+
+            if (error) {
+              console.error('Update error:', {
+                message: error.message,
+                details: error.details,
+                hint: error.hint,
+                code: error.code,
+              });
+              throw error;
+            }
+          } else {
+            // 新規作成
+            const { error } = await supabase.from('panel_layouts').insert({
+              user_id: user.id,
+              layout_name: DEFAULT_LAYOUT_NAME,
+              panels: state.panels,
+              is_active: true,
+            });
+
+            if (error) {
+              console.error('Insert error:', {
+                message: error.message,
+                details: error.details,
+                hint: error.hint,
+                code: error.code,
+              });
+              throw error;
+            }
+          }
+        } catch (error) {
+          console.error('Failed to save panels to Supabase:', error);
+          if (error instanceof Error) {
+            console.error('Error details:', error.message, error.stack);
+          }
+        }
+      } else {
+        // 未ログイン時: localStorageへ保存
+        if (state.panels.length > 0) {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(state.panels));
+        } else {
+          localStorage.removeItem(STORAGE_KEY);
+        }
+      }
+    };
+
+    savePanels();
+  }, [state.panels, user, isLoading]);
 
   // ヘルパー関数
   const addPanel = (panel: Panel) => {

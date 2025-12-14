@@ -7,9 +7,10 @@ import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import jaLocale from '@fullcalendar/core/locales/ja';
 import type { CalendarEvent } from '@/types/youtube';
-import { getMultipleChannelsSchedule } from '@/lib/youtube-api';
 import { Modal } from '@/components/Modal';
 import { Skeleton } from '@/components/Skeleton';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/lib/supabase';
 import styles from './StreamCalendar.module.scss';
 import './fullcalendar-custom.css';
 
@@ -85,16 +86,17 @@ export default function StreamCalendar({
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showMonthModal, setShowMonthModal] = useState(false);
+  const { user } = useAuth();
 
   // スケジュール取得
   const fetchSchedule = useCallback(async () => {
-    // 開発用: 常にモックデータを表示
-    setEvents(generateMockEvents());
-    setIsLoading(false);
-    return;
+    if (!user) {
+      // 未ログイン時: モックデータを表示
+      setEvents(generateMockEvents());
+      setIsLoading(false);
+      return;
+    }
 
-    // 以下は実際のAPI使用時のコード
-    // eslint-disable-next-line no-unreachable
     if (channelIds.length === 0) {
       setEvents([]);
       setIsLoading(false);
@@ -103,46 +105,59 @@ export default function StreamCalendar({
 
     try {
       setError(null);
-      const scheduleMap = await getMultipleChannelsSchedule(channelIds);
+
+      // Supabaseからstream_eventsを取得
+      const { data, error: supabaseError } = await supabase
+        .from('stream_events')
+        .select('*')
+        .in('channel_id', channelIds)
+        .gte(
+          'scheduled_start_time',
+          new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+        ) // 過去7日間
+        .order('scheduled_start_time', { ascending: true });
+
+      if (supabaseError) throw supabaseError;
 
       const calendarEvents: CalendarEvent[] = [];
 
-      scheduleMap.forEach((videos) => {
-        videos.forEach((video) => {
-          if (!video.scheduledStartTime) return;
+      if (data) {
+        data.forEach((event) => {
+          if (!event.scheduled_start_time) return;
 
-          const startDate = new Date(video.scheduledStartTime);
-          // 終了時刻は開始時刻+2時間と仮定（実際の終了時刻がない場合）
-          const endDate = new Date(startDate.getTime() + 2 * 60 * 60 * 1000);
+          const startDate = new Date(event.scheduled_start_time);
+          // 終了時刻: actual_end_time があればそれを使用、なければ開始時刻+2時間
+          const endDate = event.actual_end_time
+            ? new Date(event.actual_end_time)
+            : new Date(startDate.getTime() + 2 * 60 * 60 * 1000);
 
           calendarEvents.push({
-            id: video.id,
-            title: video.title,
+            id: event.video_id,
+            title: event.title,
             start: startDate,
             end: endDate,
             eventType:
-              video.liveBroadcastContent === 'live'
+              event.live_broadcast_content === 'live'
                 ? 'live'
-                : video.liveBroadcastContent === 'upcoming'
+                : event.live_broadcast_content === 'upcoming'
                   ? 'upcoming'
                   : 'video',
-            url: `https://www.youtube.com/watch?v=${video.id}`,
-            channelName: video.channelName,
+            url: `https://www.youtube.com/watch?v=${event.video_id}`,
+            channelName: event.channel_title,
           });
         });
-      });
+      }
 
       setEvents(calendarEvents);
     } catch (err) {
-      console.error('Failed to fetch schedule:', err);
+      console.error('Failed to fetch schedule from Supabase:', err);
       setError(
         err instanceof Error ? err.message : 'スケジュールの取得に失敗しました',
       );
     } finally {
       setIsLoading(false);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [channelIds, user]);
 
   // 初回読み込みと定期更新
   useEffect(() => {
