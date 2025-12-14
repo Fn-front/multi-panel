@@ -120,24 +120,6 @@
   display: block;
 }
 
-.fc .fc-event-title span {
-  display: inline-block;
-  white-space: nowrap;
-}
-
-.fc .fc-event:hover .fc-event-title span {
-  animation: marquee 20s linear infinite;
-}
-
-@keyframes marquee {
-  0% {
-    transform: translateX(0);
-  }
-  100% {
-    transform: translateX(-100%);
-  }
-}
-
 /* 週表示では時刻を非表示 */
 .fc-timegrid .fc-event-time {
   display: none;
@@ -158,6 +140,26 @@
 
 .fc .fc-daygrid-event .fc-event-main {
   display: flex;
+}
+
+.fc .fc-daygrid-event .fc-event-main .fc-event-title span,
+.fc .fc-daygrid-event-harness .fc-event-title span {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.fc .fc-daygrid-event:hover .fc-event-title span,
+.fc .fc-daygrid-event-harness:hover .fc-event-title span {
+  animation: marquee 20s linear infinite;
+}
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
 }
 
 .fc .fc-timegrid-event-harness {
