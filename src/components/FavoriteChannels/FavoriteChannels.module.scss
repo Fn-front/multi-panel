@@ -104,8 +104,8 @@
   .channelItem {
     display: flex;
     align-items: center;
-    gap: var(--spacing-sm, 12px);
-    padding: var(--spacing-sm, 12px);
+    gap: var(--spacing-sm, 6px);
+    padding: var(--spacing-xs, 8px);
     background: var(--bg-tertiary, #2a2a2a);
     border: 1px solid var(--border-color, #404040);
     border-radius: var(--radius-sm, 4px);
@@ -118,8 +118,8 @@
     }
 
     .thumbnail {
-      width: 48px;
-      height: 48px;
+      width: 30px;
+      height: 30px;
       border-radius: 50%;
       overflow: hidden;
       flex-shrink: 0;
@@ -136,17 +136,17 @@
       min-width: 0;
 
       .title {
-        font-size: var(--text-base, 16px);
+        font-size: var(--text-sm, 14px);
         font-weight: var(--font-semibold, 600);
         color: var(--text-primary, #ffffff);
-        margin: 0 0 var(--spacing-xs, 4px) 0;
+        margin: 0 0 2px 0;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
       }
 
       .description {
-        font-size: var(--text-xs, 12px);
+        font-size: 11px;
         color: var(--text-secondary, #a0a0a0);
         overflow: hidden;
         text-overflow: ellipsis;
@@ -155,7 +155,7 @@
     }
 
     .removeButton {
-      padding: var(--spacing-xs, 6px);
+      padding: 4px;
       background: transparent;
       border: none;
       color: var(--text-tertiary, #707070);
@@ -167,8 +167,8 @@
       justify-content: center;
 
       svg {
-        width: 20px;
-        height: 20px;
+        width: 16px;
+        height: 16px;
       }
 
       &:hover {
