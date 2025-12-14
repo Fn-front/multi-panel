@@ -3,13 +3,14 @@
 import { useState, useCallback } from 'react';
 import dynamic from 'next/dynamic';
 import type { ReactPlayerProps } from 'react-player/types';
+import { Skeleton } from '@/components/Skeleton';
 import styles from './VideoPlayer.module.scss';
 
 const ReactPlayer = dynamic(() => import('react-player'), {
   ssr: false,
   loading: () => (
     <div className={styles.skeleton}>
-      <div className={styles.skeletonContent} />
+      <Skeleton width='80%' height='80%' />
     </div>
   ),
 }) as unknown as React.FC<ReactPlayerProps>;
@@ -50,7 +51,7 @@ export function VideoPlayer({
     <div className={styles.container}>
       {!isPlayerReady && (
         <div className={styles.skeleton}>
-          <div className={styles.skeletonContent} />
+          <Skeleton width='80%' height='80%' />
         </div>
       )}
       <div

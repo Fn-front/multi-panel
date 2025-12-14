@@ -9,6 +9,7 @@ import jaLocale from '@fullcalendar/core/locales/ja';
 import type { CalendarEvent } from '@/types/youtube';
 import { getMultipleChannelsSchedule } from '@/lib/youtube-api';
 import { Modal } from '@/components/Modal';
+import { Skeleton } from '@/components/Skeleton';
 import styles from './StreamCalendar.module.scss';
 import './fullcalendar-custom.css';
 
@@ -251,8 +252,8 @@ export default function StreamCalendar({
           <h2>配信カレンダー</h2>
         </div>
         <div className={styles.loading}>
-          <div className={`${styles.skeleton} ${styles.header}`} />
-          <div className={`${styles.skeleton} ${styles.calendar}`} />
+          <Skeleton height={36} />
+          <Skeleton height={350} />
         </div>
       </div>
     );

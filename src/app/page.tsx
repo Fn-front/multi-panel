@@ -6,6 +6,7 @@ import { PanelContainer } from '@/components/PanelContainer';
 import FavoriteChannels from '@/components/FavoriteChannels';
 import StreamCalendar from '@/components/StreamCalendar';
 import { LoginModal } from '@/components/LoginModal';
+import { Skeleton } from '@/components/Skeleton';
 import { useChannels } from '@/contexts/ChannelContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useStreamNotification } from '@/hooks/useStreamNotification';
@@ -79,8 +80,8 @@ export default function Home() {
             <div className={styles.authSection}>
               {authLoading ? (
                 <div className={styles.authLoading}>
-                  <div className={`${styles.skeleton} ${styles.email}`} />
-                  <div className={`${styles.skeleton} ${styles.button}`} />
+                  <Skeleton width={150} height={20} />
+                  <Skeleton width={80} height={28} />
                 </div>
               ) : user ? (
                 <div className={styles.userInfo}>

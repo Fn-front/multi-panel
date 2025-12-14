@@ -1,0 +1,27 @@
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--bg-tertiary, #2a2a2a) 25%,
+    var(--bg-hover, #353535) 50%,
+    var(--bg-tertiary, #2a2a2a) 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+}
+
+.box {
+  border-radius: var(--radius-sm, 4px);
+}
+
+.circle {
+  border-radius: 50%;
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}

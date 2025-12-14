@@ -4,6 +4,7 @@ import { useMemo, useCallback } from 'react';
 import GridLayout, { type Layout } from 'react-grid-layout';
 import { HiPlus } from 'react-icons/hi2';
 import { VideoPanel } from '@/components/VideoPanel';
+import { Skeleton } from '@/components/Skeleton';
 import { usePanels } from '@/contexts/PanelsContext';
 import { GRID_LAYOUT, PANEL_DEFAULTS } from '@/constants';
 import panelStyles from '@/components/VideoPanel/VideoPanel.module.scss';
@@ -53,11 +54,11 @@ export function PanelContainer({ sidebarWidth = 0 }: PanelContainerProps) {
           className={styles.toolbar}
           style={{ paddingLeft: sidebarWidth > 0 ? '64px' : '16px' }}
         >
-          <div className={styles.toolbarSkeleton} />
+          <Skeleton width={120} height={36} />
         </div>
         <div className={styles.gridContainer}>
           <div className={styles.loadingSkeleton}>
-            <div className={styles.skeletonContent} />
+            <Skeleton width='100%' height='100%' />
           </div>
         </div>
       </div>
