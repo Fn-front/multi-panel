@@ -12,14 +12,10 @@ import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
 import styles from './PanelContainer.module.scss';
 
-type PanelContainerProps = {
-  sidebarWidth?: number;
-};
-
 /**
  * グリッドレイアウトを管理するコンテナコンポーネント
  */
-export function PanelContainer({ sidebarWidth = 0 }: PanelContainerProps) {
+export function PanelContainer() {
   const { state, isLoading, updateLayout, addPanel } = usePanels();
 
   const layout: Layout[] = useMemo(

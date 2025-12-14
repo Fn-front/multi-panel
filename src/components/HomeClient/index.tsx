@@ -25,8 +25,6 @@ export function HomeClient({ initialSidebarVisible }: HomeClientProps) {
   const { state: channelState, addChannel, removeChannel } = useChannels();
   const { user, isLoading: authLoading, signOut } = useAuth();
 
-  const SIDEBAR_WIDTH = 450;
-
   // クライアントサイドでのみマウント状態を有効化
   useEffect(() => {
     setIsMounted(true);
@@ -76,103 +74,117 @@ export function HomeClient({ initialSidebarVisible }: HomeClientProps) {
     <div className={styles.container}>
       <aside
         className={`${styles.sidebar} ${!sidebarVisible ? styles.collapsed : ''}`}
-        style={!sidebarVisible ? { width: 'fit-content', minWidth: 'fit-content', maxWidth: 'fit-content' } : undefined}
+        style={
+          !sidebarVisible
+            ? {
+                width: 'fit-content',
+                minWidth: 'fit-content',
+                maxWidth: 'fit-content',
+              }
+            : undefined
+        }
       >
-        <div className={`${styles.sidebarContent} ${!sidebarVisible ? styles.collapsed : ''}`}>
+        <div
+          className={`${styles.sidebarContent} ${!sidebarVisible ? styles.collapsed : ''}`}
+        >
           <div className={styles.authSection}>
-              {authLoading ? (
-                <Skeleton width={80} height={28} />
-              ) : user ? (
-                <div className={styles.userInfo}>
-                  <span className={styles.userEmail}>{user.email}</span>
-                  <button
-                    onClick={handleLogout}
-                    className={styles.logoutButton}
-                    type='button'
-                  >
-                    ログアウト
-                  </button>
-                </div>
-              ) : (
+            {authLoading ? (
+              <Skeleton width={80} height={28} />
+            ) : user ? (
+              <div className={styles.userInfo}>
+                <span className={styles.userEmail}>{user.email}</span>
                 <button
-                  onClick={() => setIsLoginModalOpen(true)}
-                  className={styles.loginButton}
+                  onClick={handleLogout}
+                  className={styles.logoutButton}
                   type='button'
                 >
-                  ログイン
+                  ログアウト
                 </button>
-              )}
+              </div>
+            ) : (
               <button
-                className={styles.toggleButton}
-                onClick={toggleSidebar}
-                aria-label={sidebarVisible ? 'サイドバーを閉じる' : 'サイドバーを開く'}
+                onClick={() => setIsLoginModalOpen(true)}
+                className={styles.loginButton}
                 type='button'
               >
-                {sidebarVisible ? <HiChevronLeft /> : <HiChevronRight />}
+                ログイン
               </button>
-            </div>
+            )}
+            <button
+              className={styles.toggleButton}
+              onClick={toggleSidebar}
+              aria-label={
+                sidebarVisible ? 'サイドバーを閉じる' : 'サイドバーを開く'
+              }
+              type='button'
+            >
+              {sidebarVisible ? <HiChevronLeft /> : <HiChevronRight />}
+            </button>
+          </div>
 
-            {sidebarVisible && user && (
-              <>
-                <div className={`${styles.section} ${styles.channelsSection}`}>
-                  <FavoriteChannels
-                    channels={channelState.channels}
-                    onAddChannel={addChannel}
-                    onRemoveChannel={removeChannel}
-                  />
-                </div>
+          {sidebarVisible && user && (
+            <>
+              <div className={`${styles.section} ${styles.channelsSection}`}>
+                <FavoriteChannels
+                  channels={channelState.channels}
+                  onAddChannel={addChannel}
+                  onRemoveChannel={removeChannel}
+                />
+              </div>
 
-                <div className={styles.notificationSettings}>
-                  <h3>配信通知</h3>
-                  {isMounted ? (
-                    <>
-                      <div className={styles.notificationToggle}>
-                        <label>
-                          {isEnabled
-                            ? `通知有効 (${notifiedCount}件通知済み)`
-                            : permission === 'denied'
-                              ? '通知が拒否されています'
-                              : '通知を有効にする'}
-                        </label>
-                        <button
-                          onClick={handleNotificationToggle}
-                          className={permission === 'denied' ? styles.disabled : ''}
-                          disabled={permission === 'denied'}
-                          type='button'
-                        >
-                          {isEnabled ? 'OFF' : 'ON'}
-                        </button>
-                      </div>
-                      {permission === 'default' && (
-                        <div className={styles.notificationStatus}>
-                          ブラウザの通知許可が必要です
-                        </div>
-                      )}
-                    </>
-                  ) : (
+              <div className={styles.notificationSettings}>
+                <h3>配信通知</h3>
+                {isMounted ? (
+                  <>
                     <div className={styles.notificationToggle}>
-                      <label>通知を有効にする</label>
-                      <button type='button' disabled>
-                        ON
+                      <label>
+                        {isEnabled
+                          ? `通知有効 (${notifiedCount}件通知済み)`
+                          : permission === 'denied'
+                            ? '通知が拒否されています'
+                            : '通知を有効にする'}
+                      </label>
+                      <button
+                        onClick={handleNotificationToggle}
+                        className={
+                          permission === 'denied' ? styles.disabled : ''
+                        }
+                        disabled={permission === 'denied'}
+                        type='button'
+                      >
+                        {isEnabled ? 'OFF' : 'ON'}
                       </button>
                     </div>
-                  )}
-                </div>
+                    {permission === 'default' && (
+                      <div className={styles.notificationStatus}>
+                        ブラウザの通知許可が必要です
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <div className={styles.notificationToggle}>
+                    <label>通知を有効にする</label>
+                    <button type='button' disabled>
+                      ON
+                    </button>
+                  </div>
+                )}
+              </div>
 
-                <div className={`${styles.section} ${styles.calendarSection}`}>
-                  <StreamCalendar
-                    channelIds={channelState.channels.map((ch) => ch.channelId)}
-                    onEventClick={handleCalendarEventClick}
-                    refreshInterval={5 * 60 * 1000}
-                  />
-                </div>
-              </>
-            )}
-          </div>
-        </aside>
+              <div className={`${styles.section} ${styles.calendarSection}`}>
+                <StreamCalendar
+                  channelIds={channelState.channels.map((ch) => ch.channelId)}
+                  onEventClick={handleCalendarEventClick}
+                  refreshInterval={5 * 60 * 1000}
+                />
+              </div>
+            </>
+          )}
+        </div>
+      </aside>
 
       <main className={styles.mainContent}>
-        <PanelContainer sidebarWidth={sidebarVisible ? SIDEBAR_WIDTH : 0} />
+        <PanelContainer />
       </main>
 
       <LoginModal
