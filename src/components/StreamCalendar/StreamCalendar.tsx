@@ -109,14 +109,19 @@ export default function StreamCalendar({
       setError(null);
 
       // Supabaseからstream_eventsを取得
+      // カレンダー表示のため、現在月の1日から未来のデータまで取得
+      const now = new Date();
+      const currentMonthStart = new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        1,
+      );
+
       const { data, error: supabaseError } = await supabase
         .from('stream_events')
         .select('*')
         .in('channel_id', channelIds)
-        .gte(
-          'scheduled_start_time',
-          new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-        ) // 過去7日間
+        .gte('scheduled_start_time', currentMonthStart.toISOString())
         .order('scheduled_start_time', { ascending: true });
 
       if (supabaseError) throw supabaseError;
