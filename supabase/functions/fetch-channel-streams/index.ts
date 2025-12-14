@@ -183,6 +183,14 @@ async function fetchVideoDetails(videoIds: string[]): Promise<YouTubeVideo[]> {
 
   const videosResponse = await fetch(videosUrl.toString());
   if (!videosResponse.ok) {
+    if (videosResponse.status === 403) {
+      const errorData = await videosResponse.json();
+      // クォータ超過の場合は警告ログを出して空配列を返す（エラーにしない）
+      if (errorData.error?.errors?.[0]?.reason === 'quotaExceeded') {
+        console.warn('YouTube API quota exceeded - skipping video details fetch');
+        return [];
+      }
+    }
     throw new Error(
       `YouTube Videos API error: ${videosResponse.status} ${videosResponse.statusText}`
     );
@@ -222,6 +230,14 @@ async function fetchChannelStreams(
 
   const searchResponse = await fetch(searchUrl.toString());
   if (!searchResponse.ok) {
+    if (searchResponse.status === 403) {
+      const errorData = await searchResponse.json();
+      // クォータ超過の場合は警告ログを出して空配列を返す（エラーにしない）
+      if (errorData.error?.errors?.[0]?.reason === 'quotaExceeded') {
+        console.warn(`YouTube API quota exceeded - skipping ${eventType} streams fetch for channel ${channelId}`);
+        return [];
+      }
+    }
     throw new Error(
       `YouTube Search API error: ${searchResponse.status} ${searchResponse.statusText}`
     );
@@ -250,6 +266,14 @@ async function fetchChannelStreams(
 
   const videosResponse = await fetch(videosUrl.toString());
   if (!videosResponse.ok) {
+    if (videosResponse.status === 403) {
+      const errorData = await videosResponse.json();
+      // クォータ超過の場合は警告ログを出して空配列を返す（エラーにしない）
+      if (errorData.error?.errors?.[0]?.reason === 'quotaExceeded') {
+        console.warn('YouTube API quota exceeded - skipping video details fetch');
+        return [];
+      }
+    }
     throw new Error(
       `YouTube Videos API error: ${videosResponse.status} ${videosResponse.statusText}`
     );
