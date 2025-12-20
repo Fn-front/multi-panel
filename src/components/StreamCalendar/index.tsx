@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState, useRef } from 'react';
+import { useCallback, useState } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
@@ -10,6 +10,8 @@ import { HiArrowPath } from 'react-icons/hi2';
 import type { CalendarEvent } from '@/types/youtube';
 import { Modal } from '@/components/Modal';
 import { Skeleton } from '@/components/Skeleton';
+import { useCalendarAutoScroll } from './hooks/useCalendarAutoScroll';
+import { useInitialMountSkip } from './hooks/useInitialMountSkip';
 import styles from './StreamCalendar.module.scss';
 import './fullcalendar-custom.css';
 
@@ -41,36 +43,12 @@ export default function StreamCalendar({
   onDatesSet,
 }: StreamCalendarProps) {
   const [showMonthModal, setShowMonthModal] = useState(false);
-  const isInitialMountRef = useRef(true);
 
   // カレンダーマウント後に現在時刻までスクロール
-  useEffect(() => {
-    if (!isLoading && events.length > 0) {
-      const timer = setTimeout(() => {
-        const scrollableElement = document.querySelector(
-          '.fc-scroller-liquid-absolute',
-        );
-        if (scrollableElement) {
-          const now = new Date();
-          const currentHour = now.getHours();
-          const currentMinute = now.getMinutes();
-
-          // 1時間あたりのピクセル数（FullCalendarのデフォルトは約50px）
-          const pixelsPerHour = 50;
-          const currentTimePosition =
-            (currentHour + currentMinute / 60) * pixelsPerHour;
-
-          // ビューポートの高さの半分を引いて、現在時刻が中央に来るようにする
-          const viewportHeight = scrollableElement.clientHeight;
-          const scrollPosition = currentTimePosition - viewportHeight / 2;
-
-          scrollableElement.scrollTop = Math.max(0, scrollPosition);
-        }
-      }, 100);
-
-      return () => clearTimeout(timer);
-    }
-  }, [isLoading, events]);
+  useCalendarAutoScroll({
+    isLoading,
+    eventsCount: events.length,
+  });
 
   // イベントクリック時の処理
   const handleEventClick = useCallback(
@@ -98,19 +76,7 @@ export default function StreamCalendar({
   };
 
   // datesSetイベントのラッパー（初回マウント時はスキップ）
-  const handleDatesSet = useCallback(
-    (dateInfo: { start: Date; end: Date; view: { type: string } }) => {
-      if (isInitialMountRef.current) {
-        isInitialMountRef.current = false;
-        return;
-      }
-
-      if (onDatesSet) {
-        onDatesSet(dateInfo);
-      }
-    },
-    [onDatesSet],
-  );
+  const handleDatesSet = useInitialMountSkip(onDatesSet);
 
   // イベントコンテンツのカスタマイズ
   const renderEventContent = useCallback(
