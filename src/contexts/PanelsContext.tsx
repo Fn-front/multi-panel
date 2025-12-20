@@ -101,7 +101,7 @@ type PanelsProviderProps = {
 export function PanelsProvider({ children }: PanelsProviderProps) {
   const [state, dispatch] = useReducer(panelsReducer, initialState);
   const [isLoading, setIsLoading] = useState(true);
-  const { user } = useAuth();
+  const { user, isAllowed } = useAuth();
 
   // 初期データ読み込み（ログイン時: Supabase, 未ログイン時: localStorage）
   useEffect(() => {
@@ -118,19 +118,21 @@ export function PanelsProvider({ children }: PanelsProviderProps) {
             .select('*')
             .eq('is_active', true)
             .eq('layout_name', DEFAULT_LAYOUT_NAME)
-            .single();
+            .maybeSingle();
 
           if (error) {
-            // レイアウトが存在しない場合はエラーではなく空配列とする
-            if (error.code === 'PGRST116') {
-              dispatch({ type: 'LOAD_LAYOUT', payload: [] });
-            } else {
-              throw error;
-            }
-          } else if (data && data.panels) {
+            throw error;
+          }
+
+          if (data && data.panels) {
             const panels = data.panels as Panel[];
             if (!isCancelled) {
               dispatch({ type: 'LOAD_LAYOUT', payload: panels });
+            }
+          } else {
+            // データが存在しない場合は空配列
+            if (!isCancelled) {
+              dispatch({ type: 'LOAD_LAYOUT', payload: [] });
             }
           }
         } catch (error) {
@@ -169,15 +171,17 @@ export function PanelsProvider({ children }: PanelsProviderProps) {
     if (isLoading) return; // 初期ロード中は保存しない
 
     const savePanels = async () => {
-      if (user) {
-        // ログイン時: Supabaseへ保存
+      if (user && isAllowed) {
+        // ログイン時かつ許可されたユーザー: Supabaseへ保存
         try {
           // 既存のレイアウトを確認
-          const { data: existingLayout } = await supabase
+          const { data: existingLayout, error: selectError } = await supabase
             .from('panel_layouts')
             .select('id')
             .eq('layout_name', DEFAULT_LAYOUT_NAME)
-            .single();
+            .maybeSingle();
+
+          if (selectError) throw selectError;
 
           if (existingLayout) {
             // 更新
@@ -215,7 +219,7 @@ export function PanelsProvider({ children }: PanelsProviderProps) {
     };
 
     savePanels();
-  }, [state.panels, user, isLoading]);
+  }, [state.panels, user, isAllowed, isLoading]);
 
   // ヘルパー関数
   const addPanel = (panel: Panel) => {
