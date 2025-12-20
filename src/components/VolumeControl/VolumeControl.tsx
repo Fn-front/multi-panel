@@ -86,7 +86,7 @@ export function VolumeControl({
             min='0'
             max='1'
             step='0.01'
-            value={volume}
+            value={volume ?? 0}
             onChange={handleVolumeChange}
             aria-label='音量'
           />
