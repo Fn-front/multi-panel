@@ -1,9 +1,8 @@
 'use client';
 
-import { useState, useCallback, type FormEvent, type ChangeEvent } from 'react';
 import { HiArrowPath } from 'react-icons/hi2';
-import { isValidYouTubeVideoUrl } from '@/utils/youtube';
-import { sanitizeInput, VALIDATION_CONSTANTS } from '@/utils/validation';
+import { VALIDATION_CONSTANTS } from '@/utils/validation';
+import { useURLInput } from './hooks/useURLInput';
 import styles from './URLInput.module.scss';
 
 type URLInputProps = {
@@ -15,48 +14,10 @@ type URLInputProps = {
  * YouTube URL入力コンポーネント
  */
 export function URLInput({ currentUrl, onUrlChange }: URLInputProps) {
-  const [inputValue, setInputValue] = useState(currentUrl);
-  const [error, setError] = useState('');
-
-  const handleInputChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-
-    // 入力値の長さ制限
-    if (value.length > VALIDATION_CONSTANTS.MAX_URL_LENGTH) {
-      setError(
-        `URLが長すぎます（最大${VALIDATION_CONSTANTS.MAX_URL_LENGTH}文字）`,
-      );
-      return;
-    }
-
-    setInputValue(value);
-    setError('');
-  }, []);
-
-  const handleSubmit = useCallback(
-    (e: FormEvent) => {
-      e.preventDefault();
-
-      // サニタイズ
-      const sanitized = sanitizeInput(inputValue);
-
-      // 空文字列の場合はクリア
-      if (!sanitized) {
-        setError('');
-        onUrlChange('');
-        return;
-      }
-
-      if (!isValidYouTubeVideoUrl(sanitized)) {
-        setError('有効なYouTube動画URLを入力してください');
-        return;
-      }
-
-      setError('');
-      onUrlChange(sanitized);
-    },
-    [inputValue, onUrlChange],
-  );
+  const { inputValue, error, handleInputChange, handleSubmit } = useURLInput({
+    currentUrl,
+    onUrlChange,
+  });
 
   return (
     <form className={styles.form} onSubmit={handleSubmit}>

@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useCallback, useEffect, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import type { ReactPlayerProps } from 'react-player/types';
 import { Skeleton } from '@/components/Skeleton';
+import { useYouTubePlayerReady } from './hooks/useYouTubePlayerReady';
 import styles from './VideoPlayer.module.scss';
 
 const ReactPlayer = dynamic(() => import('react-player'), {
@@ -40,39 +40,10 @@ export function VideoPlayer({
   onReady,
   onError,
 }: VideoPlayerProps) {
-  const [isPlayerReady, setIsPlayerReady] = useState(false);
-  const playerRef = useRef<HTMLDivElement>(null);
-
-  const handleReady = useCallback(() => {
-    setIsPlayerReady(true);
-    onReady?.();
-  }, [onReady]);
-
-  // youtube-video-elementが既に準備完了している場合の対応
-  useEffect(() => {
-    const checkReadyState = () => {
-      const youtubeVideo = playerRef.current?.querySelector('youtube-video');
-      if (youtubeVideo && (youtubeVideo as HTMLMediaElement).readyState >= 1) {
-        // readyState >= 1 (HAVE_METADATA) なら既に準備完了
-        handleReady();
-        return true;
-      }
-      return false;
-    };
-
-    // ReactPlayerがマウントされるまで繰り返しチェック
-    let attempts = 0;
-    const maxAttempts = 50; // 最大5秒 (100ms * 50)
-
-    const intervalId = setInterval(() => {
-      attempts++;
-      if (checkReadyState() || attempts >= maxAttempts) {
-        clearInterval(intervalId);
-      }
-    }, 100);
-
-    return () => clearInterval(intervalId);
-  }, [url, handleReady]);
+  const { isPlayerReady, playerRef, handleReady } = useYouTubePlayerReady({
+    url,
+    onReady,
+  });
 
   return (
     <div className={styles.container}>

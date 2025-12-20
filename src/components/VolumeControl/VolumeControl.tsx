@@ -1,7 +1,8 @@
 'use client';
 
-import { useCallback, useMemo, useState, useRef, useEffect } from 'react';
+import { useCallback, useMemo } from 'react';
 import { HiSpeakerWave, HiSpeakerXMark } from 'react-icons/hi2';
+import { usePopoverControl } from './hooks/usePopoverControl';
 import styles from './VolumeControl.module.scss';
 
 type VolumeControlProps = {
@@ -20,8 +21,7 @@ export function VolumeControl({
   onVolumeChange,
   onMutedChange,
 }: VolumeControlProps) {
-  const [isOpen, setIsOpen] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const { isOpen, containerRef, togglePopover } = usePopoverControl();
 
   const handleVolumeChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -38,30 +38,7 @@ export function VolumeControl({
     onMutedChange(!muted);
   }, [muted, onMutedChange]);
 
-  const togglePopover = useCallback(() => {
-    setIsOpen((prev) => !prev);
-  }, []);
-
   const volumePercent = useMemo(() => Math.round(volume * 100), [volume]);
-
-  // 外側クリックでポップオーバーを閉じる
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        containerRef.current &&
-        !containerRef.current.contains(event.target as Node)
-      ) {
-        setIsOpen(false);
-      }
-    };
-
-    if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-      return () => {
-        document.removeEventListener('mousedown', handleClickOutside);
-      };
-    }
-  }, [isOpen]);
 
   const VolumeIcon = useMemo(() => {
     if (muted || volumePercent === 0) return HiSpeakerXMark;
