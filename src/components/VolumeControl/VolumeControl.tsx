@@ -73,7 +73,7 @@ export function VolumeControl({
             onClick={toggleMute}
             aria-label={muted ? 'ミュート解除' : 'ミュート'}
           >
-            {muted ? <HiSpeakerXMark /> : <HiSpeakerWave />}
+            <VolumeIcon />
           </button>
         </div>
       )}

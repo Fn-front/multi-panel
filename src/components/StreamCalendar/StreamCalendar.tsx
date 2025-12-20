@@ -89,14 +89,13 @@ export default function StreamCalendar({
   );
 
   // イベントの色設定
-  const getEventClassNames = useCallback(
-    (info: { event: { extendedProps?: { eventType?: string } } }) => {
-      const event = info.event;
-      const eventType = event.extendedProps?.eventType || 'upcoming';
-      return [`event-${eventType}`];
-    },
-    [],
-  );
+  const getEventClassNames = (info: {
+    event: { extendedProps?: { eventType?: string } };
+  }) => {
+    const event = info.event;
+    const eventType = event.extendedProps?.eventType || 'upcoming';
+    return [`event-${eventType}`];
+  };
 
   // datesSetイベントのラッパー（初回マウント時はスキップ）
   const handleDatesSet = useCallback(

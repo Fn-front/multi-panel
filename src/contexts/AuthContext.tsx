@@ -26,6 +26,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const SESSION_EXPIRY_HOURS = 24;
 
   /**
+   * セッション期限切れ時の処理
+   */
+  const handleSessionExpired = async () => {
+    console.log('セッション期限切れ - 自動ログアウト');
+    await supabase.auth.signOut();
+    setSession(null);
+    setUser(null);
+  };
+
+  /**
    * ホワイトリストチェック + セッション期限チェック + 最終ログイン更新を1回のクエリで実行
    * 最適化: 3回のクエリ → 1回のクエリに統合してコールドスタート時間を短縮
    */
@@ -106,10 +116,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         } else {
           setIsAllowed(false);
           if (isExpired) {
-            console.log('セッション期限切れ - 自動ログアウト');
-            await supabase.auth.signOut();
-            setSession(null);
-            setUser(null);
+            await handleSessionExpired();
           }
         }
       }
@@ -147,10 +154,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         } else {
           setIsAllowed(false);
           if (isExpired) {
-            console.log('セッション期限切れ - 自動ログアウト');
-            await supabase.auth.signOut();
-            setSession(null);
-            setUser(null);
+            await handleSessionExpired();
           }
         }
       } else {
