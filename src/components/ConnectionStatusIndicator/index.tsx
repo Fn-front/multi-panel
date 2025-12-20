@@ -18,7 +18,7 @@ export function ConnectionStatusIndicator() {
   if (!isColdStart) return null;
 
   return (
-    <div className={styles.indicator} role="status" aria-live="polite">
+    <div className={styles.indicator} role='status' aria-live='polite'>
       <div className={styles.icon}>⏳</div>
       <div className={styles.message}>
         <strong>接続プールがスリープ中</strong>
