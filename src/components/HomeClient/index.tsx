@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect, useMemo } from 'react';
+import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { HiChevronLeft, HiChevronRight } from 'react-icons/hi2';
 import { PanelContainer } from '@/components/PanelContainer';
 import FavoriteChannels from '@/components/FavoriteChannels';
@@ -11,7 +11,10 @@ import { useChannels } from '@/contexts/ChannelContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePanels } from '@/contexts/PanelsContext';
 import { useStreamNotification } from '@/hooks/useStreamNotification';
+import { useCalendarEvents } from '@/hooks/useCalendarEvents';
 import type { CalendarEvent } from '@/types/youtube';
+import { formatDate } from '@/utils/date';
+import { callSupabaseFunction } from '@/utils/supabase';
 import styles from './HomeClient.module.scss';
 
 type HomeClientProps = {
@@ -23,6 +26,7 @@ export function HomeClient({ initialSidebarVisible }: HomeClientProps) {
   const [notificationEnabled, setNotificationEnabled] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const fetchedRangesRef = useRef<Set<string>>(new Set());
   const { state: channelState, addChannel, removeChannel } = useChannels();
   const { user, isLoading: authLoading, signOut } = useAuth();
   const { addPanel } = usePanels();
@@ -37,6 +41,17 @@ export function HomeClient({ initialSidebarVisible }: HomeClientProps) {
     () => channelState.channels.map((ch) => ch.channelId),
     [channelState.channels],
   );
+
+  // カレンダーイベント管理
+  const {
+    events: calendarEvents,
+    isLoading: isCalendarLoading,
+    error: calendarError,
+    fetchSchedule,
+  } = useCalendarEvents({
+    channelIds,
+    refreshInterval: 5 * 60 * 1000,
+  });
 
   // 通知設定をメモ化
   const notificationOptions = useMemo(
@@ -75,6 +90,9 @@ export function HomeClient({ initialSidebarVisible }: HomeClientProps) {
         id: `panel-${Date.now()}`,
         url: event.url,
         title: event.title,
+        volume: 0.5,
+        isMuted: false,
+        showChat: true,
         layout: {
           i: `panel-${Date.now()}`,
           x: 0,
@@ -101,6 +119,47 @@ export function HomeClient({ initialSidebarVisible }: HomeClientProps) {
     setIsLoginModalOpen(false);
   }, []);
 
+  // カレンダー月変更時のハンドラー
+  const handleCalendarDatesSet = useCallback(
+    async (dateInfo: { start: Date; end: Date; view: { type: string } }) => {
+      if (!user || channelIds.length === 0) return;
+
+      // 月表示・週表示の場合のみ過去データを取得
+      if (
+        dateInfo.view.type === 'dayGridMonth' ||
+        dateInfo.view.type === 'timeGridWeek'
+      ) {
+        // 日付範囲のキーを生成
+        const rangeKey = `${formatDate(dateInfo.start)}_${formatDate(dateInfo.end)}`;
+
+        // 既にフェッチ済みの範囲ならスキップ
+        if (fetchedRangesRef.current.has(rangeKey)) {
+          return;
+        }
+
+        try {
+          await callSupabaseFunction('fetch-past-streams', {
+            channelIds,
+            startDate: formatDate(dateInfo.start),
+            endDate: formatDate(dateInfo.end),
+          });
+
+          // フェッチ済みとしてマーク
+          fetchedRangesRef.current.add(rangeKey);
+
+          // データ再取得
+          fetchSchedule();
+        } catch (error) {
+          console.error(
+            'Failed to fetch past streams on calendar move:',
+            error,
+          );
+        }
+      }
+    },
+    [user, channelIds, fetchSchedule],
+  );
+
   return (
     <div className={styles.container}>
       <aside
@@ -120,7 +179,7 @@ export function HomeClient({ initialSidebarVisible }: HomeClientProps) {
         >
           <div className={styles.authSection}>
             {authLoading ? (
-              <Skeleton width={40} height={40} borderRadius='50%' />
+              <Skeleton width={40} height={40} variant='circle' />
             ) : user ? (
               <div className={styles.userInfo}>
                 {sidebarVisible ? (
@@ -226,9 +285,12 @@ export function HomeClient({ initialSidebarVisible }: HomeClientProps) {
 
               <div className={`${styles.section} ${styles.calendarSection}`}>
                 <StreamCalendar
-                  channelIds={channelIds}
                   onEventClick={handleCalendarEventClick}
-                  refreshInterval={5 * 60 * 1000}
+                  events={calendarEvents}
+                  isLoading={isCalendarLoading}
+                  error={calendarError}
+                  onRefresh={fetchSchedule}
+                  onDatesSet={handleCalendarDatesSet}
                 />
               </div>
             </>
