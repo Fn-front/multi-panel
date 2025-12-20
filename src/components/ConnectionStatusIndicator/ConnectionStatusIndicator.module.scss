@@ -1,0 +1,56 @@
+.indicator {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: rgba(255, 152, 0, 0.95);
+  color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  font-size: 14px;
+  z-index: 9999;
+  animation: slideIn 0.3s ease-out;
+}
+
+.icon {
+  font-size: 20px;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.message {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  strong {
+    font-weight: 600;
+  }
+}
+
+.detail {
+  font-size: 12px;
+  opacity: 0.9;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(100px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}

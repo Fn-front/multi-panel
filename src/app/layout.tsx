@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Noto_Sans_JP } from 'next/font/google';
 import { GlobalProvider } from '@/contexts/GlobalProvider';
+import { ConnectionStatusIndicator } from '@/components/ConnectionStatusIndicator';
 
 import '@/styles/app.scss';
 
@@ -23,7 +24,10 @@ export default function RootLayout({
   return (
     <html lang='ja'>
       <body className={noto.className}>
-        <GlobalProvider>{children}</GlobalProvider>
+        <GlobalProvider>
+          {children}
+          <ConnectionStatusIndicator />
+        </GlobalProvider>
       </body>
     </html>
   );
