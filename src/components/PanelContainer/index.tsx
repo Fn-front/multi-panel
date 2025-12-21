@@ -52,6 +52,25 @@ export function PanelContainer() {
   // グリッドの列数（モバイルは1列、PCは12列）
   const cols = isMobile ? 1 : GRID_LAYOUT.COLS;
 
+  // レイアウト変更時に16:9のアスペクト比を維持
+  const handleLayoutChange = useCallback(
+    (newLayout: Layout[]) => {
+      const adjustedLayout = newLayout.map((item) => {
+        const gridItemWidth = (containerWidth / cols) * item.w;
+        const targetHeight = (gridItemWidth * 9) / 16;
+        const gridHeight = Math.round(targetHeight / GRID_LAYOUT.ROW_HEIGHT);
+
+        return {
+          ...item,
+          h: Math.max(gridHeight, GRID_LAYOUT.MIN_HEIGHT),
+        };
+      });
+
+      updateLayout(adjustedLayout);
+    },
+    [containerWidth, cols, updateLayout],
+  );
+
   const handleAddPanel = useCallback(() => {
     addPanel({
       id: crypto.randomUUID(),
@@ -112,7 +131,7 @@ export function PanelContainer() {
             cols={cols}
             rowHeight={GRID_LAYOUT.ROW_HEIGHT}
             width={containerWidth}
-            onLayoutChange={updateLayout}
+            onLayoutChange={handleLayoutChange}
             draggableHandle={isMobile ? undefined : `.${panelStyles.dragHandle}`}
             isDraggable={!isMobile}
             isResizable={true}
