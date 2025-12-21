@@ -9,7 +9,10 @@ type UseEventHandlerOptions = {
 /**
  * カレンダーイベントクリック処理を管理するフック
  */
-export function useEventHandler({ events, onEventClick }: UseEventHandlerOptions) {
+export function useEventHandler({
+  events,
+  onEventClick,
+}: UseEventHandlerOptions) {
   const handleEventClick = useCallback(
     (info: { event: { id: string }; jsEvent: Event }) => {
       info.jsEvent.preventDefault();

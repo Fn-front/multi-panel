@@ -4,6 +4,8 @@
   left: 0;
   right: 0;
   bottom: 0;
+  width: 100vw;
+  height: 100vh;
   background: rgba(0, 0, 0, 0.8);
   display: flex;
   align-items: center;
@@ -21,6 +23,10 @@
     flex-direction: column;
     overflow: hidden;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+
+    @media (max-width: 768px) {
+      max-width: calc(100vw - 40px);
+    }
   }
 
   .modalHeader {

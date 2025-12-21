@@ -21,7 +21,9 @@ export function useURLInput({ currentUrl, onUrlChange }: UseURLInputProps) {
 
       // 入力値の長さ制限
       if (value.length > VALIDATION_CONSTANTS.MAX_URL_LENGTH) {
-        setError(UI_TEXT.PANEL.URL_TOO_LONG(VALIDATION_CONSTANTS.MAX_URL_LENGTH));
+        setError(
+          UI_TEXT.PANEL.URL_TOO_LONG(VALIDATION_CONSTANTS.MAX_URL_LENGTH),
+        );
         return;
       }
 

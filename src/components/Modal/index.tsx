@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import styles from './Modal.module.scss';
 
 type ModalProps = {
@@ -34,7 +35,7 @@ export function Modal({
 
   if (!isOpen) return null;
 
-  return (
+  const modalContent = (
     <div className={styles.modal} onClick={onClose}>
       <div
         className={styles.modalContent}
@@ -57,4 +58,6 @@ export function Modal({
       </div>
     </div>
   );
+
+  return createPortal(modalContent, document.body);
 }

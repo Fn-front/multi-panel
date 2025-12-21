@@ -177,7 +177,10 @@ export function ChannelProvider({ children }: ChannelProviderProps) {
         if (error) throw error;
 
         if (data) {
-          dispatch({ type: ACTION_TYPES.CHANNEL.ADD, payload: mapDbToChannel(data) });
+          dispatch({
+            type: ACTION_TYPES.CHANNEL.ADD,
+            payload: mapDbToChannel(data),
+          });
           await fetchCurrentMonthStreams(channel.channelId);
         }
       } catch (error) {
@@ -278,7 +281,10 @@ export function ChannelProvider({ children }: ChannelProviderProps) {
 
         if (error) throw error;
 
-        dispatch({ type: ACTION_TYPES.CHANNEL.UPDATE, payload: { id, updates } });
+        dispatch({
+          type: ACTION_TYPES.CHANNEL.UPDATE,
+          payload: { id, updates },
+        });
       } catch (error) {
         console.error('Failed to update channel in Supabase:', error);
       }

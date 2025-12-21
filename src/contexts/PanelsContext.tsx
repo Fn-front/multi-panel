@@ -128,7 +128,10 @@ export function PanelsProvider({ children }: PanelsProviderProps) {
           if (data && data.panels) {
             const panels = data.panels as Panel[];
             if (!isCancelled) {
-              dispatch({ type: ACTION_TYPES.PANEL.LOAD_LAYOUT, payload: panels });
+              dispatch({
+                type: ACTION_TYPES.PANEL.LOAD_LAYOUT,
+                payload: panels,
+              });
             }
           } else {
             // データが存在しない場合は空配列
@@ -146,7 +149,10 @@ export function PanelsProvider({ children }: PanelsProviderProps) {
           try {
             const panels = JSON.parse(savedPanels) as Panel[];
             if (!isCancelled) {
-              dispatch({ type: ACTION_TYPES.PANEL.LOAD_LAYOUT, payload: panels });
+              dispatch({
+                type: ACTION_TYPES.PANEL.LOAD_LAYOUT,
+                payload: panels,
+              });
             }
           } catch (error) {
             console.error('Failed to load panels from localStorage:', error);

@@ -42,7 +42,10 @@ export type PanelsState = {
 export type PanelsAction =
   | { type: typeof ACTION_TYPES.PANEL.ADD; payload: Panel }
   | { type: typeof ACTION_TYPES.PANEL.REMOVE; payload: string }
-  | { type: typeof ACTION_TYPES.PANEL.UPDATE; payload: { id: string; updates: Partial<Panel> } }
+  | {
+      type: typeof ACTION_TYPES.PANEL.UPDATE;
+      payload: { id: string; updates: Partial<Panel> };
+    }
   | { type: typeof ACTION_TYPES.PANEL.UPDATE_LAYOUT; payload: Layout[] }
   | { type: typeof ACTION_TYPES.PANEL.LOAD_LAYOUT; payload: Panel[] };
 

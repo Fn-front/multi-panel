@@ -41,12 +41,8 @@ export function HomeClient({ initialSidebarVisible }: HomeClientProps) {
   const { sidebarVisible, toggleSidebar } = useSidebar(initialSidebarVisible);
 
   // 認証ハンドラ
-  const {
-    isLoginModalOpen,
-    openLoginModal,
-    closeLoginModal,
-    handleLogout,
-  } = useAuthHandlers();
+  const { isLoginModalOpen, openLoginModal, closeLoginModal, handleLogout } =
+    useAuthHandlers();
 
   // 通知管理
   const {
@@ -86,34 +82,25 @@ export function HomeClient({ initialSidebarVisible }: HomeClientProps) {
     <div className={styles.container}>
       {/* ハンバーガーメニューボタン（モバイルのみ） */}
       <button
-        className={styles.hamburgerButton}
+        className={`${styles.hamburgerButton} ${sidebarVisible ? styles.hidden : ''}`}
         onClick={toggleSidebar}
-        aria-label={sidebarVisible ? UI_TEXT.SIDEBAR.CLOSE : UI_TEXT.SIDEBAR.OPEN}
+        aria-label={
+          sidebarVisible ? UI_TEXT.SIDEBAR.CLOSE : UI_TEXT.SIDEBAR.OPEN
+        }
         type='button'
       >
         <HiBars3 />
       </button>
 
       {/* オーバーレイ（モバイルのみ） */}
-      {sidebarVisible && (
-        <div
-          className={`${styles.overlay} ${sidebarVisible ? styles.visible : ''}`}
-          onClick={toggleSidebar}
-          aria-hidden='true'
-        />
-      )}
+      <div
+        className={`${styles.overlay} ${sidebarVisible ? styles.visible : ''}`}
+        onClick={toggleSidebar}
+        aria-hidden='true'
+      />
 
       <aside
         className={`${styles.sidebar} ${sidebarVisible ? styles.visible : styles.collapsed}`}
-        style={
-          !sidebarVisible
-            ? {
-                width: 'fit-content',
-                minWidth: 'fit-content',
-                maxWidth: 'fit-content',
-              }
-            : undefined
-        }
       >
         <div
           className={`${styles.sidebarContent} ${!sidebarVisible ? styles.collapsed : ''}`}

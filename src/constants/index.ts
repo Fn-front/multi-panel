@@ -120,7 +120,8 @@ export const UI_TEXT = {
     URL_PLACEHOLDER: 'YouTube動画URLを入力',
     URL_INPUT_MESSAGE: 'YouTube動画URLを入力してください',
     INVALID_URL: '有効なYouTube動画URLを入力してください',
-    URL_TOO_LONG: (maxLength: number) => `URLが長すぎます（最大${maxLength}文字）`,
+    URL_TOO_LONG: (maxLength: number) =>
+      `URLが長すぎます（最大${maxLength}文字）`,
     REMOVE: 'パネルを削除',
   },
   // チャンネル関連
@@ -134,7 +135,8 @@ export const UI_TEXT = {
     ALREADY_REGISTERED: 'このチャンネルは既に登録されています',
     NOT_FOUND: 'チャンネルが見つかりませんでした',
     ADD_FAILED: 'チャンネルの追加に失敗しました',
-    INVALID_VIDEO_URL: '動画URLからチャンネルを追加することはできません。チャンネルURLを入力してください。',
+    INVALID_VIDEO_URL:
+      '動画URLからチャンネルを追加することはできません。チャンネルURLを入力してください。',
     INPUT_REQUIRED: 'チャンネルIDまたはURLを入力してください',
     INVALID_INPUT: '有効なチャンネルIDまたはURLを入力してください',
   },
@@ -145,7 +147,8 @@ export const UI_TEXT = {
     LOGIN_WITH_GITHUB: 'GitHubでログイン',
     LOGIN_FAILED: 'ログアウトに失敗しました。',
     LOGIN_ERROR: 'ログインに失敗しました。もう一度お試しください。',
-    LOGIN_MESSAGE: 'Multi Panelを使用するには、GitHubアカウントでログインしてください。',
+    LOGIN_MESSAGE:
+      'Multi Panelを使用するには、GitHubアカウントでログインしてください。',
     NOT_WHITELISTED: 'ホワイトリストに登録されていません',
   },
   // 通知関連
@@ -168,7 +171,8 @@ export const UI_TEXT = {
   // 接続状態関連
   CONNECTION: {
     RETRYING: '接続を再試行中',
-    RETRY_COUNT: (attempt: number, max: number) => `${attempt}/${max} 回目の試行...`,
+    RETRY_COUNT: (attempt: number, max: number) =>
+      `${attempt}/${max} 回目の試行...`,
     COLD_START: '接続プールがスリープ中',
     COLD_START_MESSAGE: (time: number | null) =>
       `次のリクエストに ${time ? `${(time / 1000).toFixed(1)}秒` : '1-2秒'} かかる可能性があります`,

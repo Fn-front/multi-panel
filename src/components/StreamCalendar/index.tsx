@@ -93,7 +93,9 @@ export default function StreamCalendar({
         </div>
         <div className={styles.error}>
           <div className={styles.errorMessage}>{error}</div>
-          {onRefresh && <button onClick={onRefresh}>{UI_TEXT.CALENDAR.RELOAD}</button>}
+          {onRefresh && (
+            <button onClick={onRefresh}>{UI_TEXT.CALENDAR.RELOAD}</button>
+          )}
         </div>
       </div>
     );
