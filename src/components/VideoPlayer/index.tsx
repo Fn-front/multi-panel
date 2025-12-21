@@ -53,17 +53,24 @@ export function VideoPlayer({
         </div>
       )}
       <div className={styles.aspectRatio} ref={playerRef}>
-        <ReactPlayer
-          src={url}
-          width='100%'
-          height='100%'
-          volume={volume}
-          muted={muted}
-          controls
-          config={PLAYER_CONFIG}
-          onReady={handleReady}
-          onError={onError}
-        />
+        <div
+          style={{
+            opacity: isPlayerReady ? 1 : 0,
+            transition: 'opacity 0.3s',
+          }}
+        >
+          <ReactPlayer
+            src={url}
+            width='100%'
+            height='100%'
+            volume={volume}
+            muted={muted}
+            controls
+            config={PLAYER_CONFIG}
+            onReady={handleReady}
+            onError={onError}
+          />
+        </div>
       </div>
     </div>
   );
