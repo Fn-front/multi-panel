@@ -1,3 +1,5 @@
+import { ACTION_TYPES } from '@/constants';
+
 /**
  * YouTubeチャンネル情報を表す型
  */
@@ -24,13 +26,13 @@ export type ChannelsState = {
  * チャンネル操作のアクション型
  */
 export type ChannelsAction =
-  | { type: 'ADD_CHANNEL'; payload: Channel }
-  | { type: 'REMOVE_CHANNEL'; payload: string }
+  | { type: typeof ACTION_TYPES.CHANNEL.ADD; payload: Channel }
+  | { type: typeof ACTION_TYPES.CHANNEL.REMOVE; payload: string }
   | {
-      type: 'UPDATE_CHANNEL';
+      type: typeof ACTION_TYPES.CHANNEL.UPDATE;
       payload: { id: string; updates: Partial<Channel> };
     }
-  | { type: 'LOAD_CHANNELS'; payload: Channel[] };
+  | { type: typeof ACTION_TYPES.CHANNEL.LOAD; payload: Channel[] };
 
 /**
  * チャンネル追加時の入力データ

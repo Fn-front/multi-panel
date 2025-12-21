@@ -1,4 +1,5 @@
 import { Layout } from 'react-grid-layout';
+import { ACTION_TYPES } from '@/constants';
 
 /**
  * パネルの状態を表す型
@@ -39,11 +40,11 @@ export type PanelsState = {
  * パネル操作のアクション型
  */
 export type PanelsAction =
-  | { type: 'ADD_PANEL'; payload: Panel }
-  | { type: 'REMOVE_PANEL'; payload: string }
-  | { type: 'UPDATE_PANEL'; payload: { id: string; updates: Partial<Panel> } }
-  | { type: 'UPDATE_LAYOUT'; payload: Layout[] }
-  | { type: 'LOAD_LAYOUT'; payload: Panel[] };
+  | { type: typeof ACTION_TYPES.PANEL.ADD; payload: Panel }
+  | { type: typeof ACTION_TYPES.PANEL.REMOVE; payload: string }
+  | { type: typeof ACTION_TYPES.PANEL.UPDATE; payload: { id: string; updates: Partial<Panel> } }
+  | { type: typeof ACTION_TYPES.PANEL.UPDATE_LAYOUT; payload: Layout[] }
+  | { type: typeof ACTION_TYPES.PANEL.LOAD_LAYOUT; payload: Panel[] };
 
 /**
  * パネル作成時の初期値オプション

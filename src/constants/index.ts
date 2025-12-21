@@ -63,6 +63,27 @@ export const STYLES = {
 } as const;
 
 // ========================================
+// Action Types
+// ========================================
+export const ACTION_TYPES = {
+  // Channel actions
+  CHANNEL: {
+    ADD: 'ADD_CHANNEL',
+    REMOVE: 'REMOVE_CHANNEL',
+    UPDATE: 'UPDATE_CHANNEL',
+    LOAD: 'LOAD_CHANNELS',
+  },
+  // Panel actions
+  PANEL: {
+    ADD: 'ADD_PANEL',
+    REMOVE: 'REMOVE_PANEL',
+    UPDATE: 'UPDATE_PANEL',
+    UPDATE_LAYOUT: 'UPDATE_LAYOUT',
+    LOAD_LAYOUT: 'LOAD_LAYOUT',
+  },
+} as const;
+
+// ========================================
 // UIテキスト
 // ========================================
 export const UI_TEXT = {

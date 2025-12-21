@@ -10,6 +10,7 @@ import {
 } from 'react';
 import type { Layout } from 'react-grid-layout';
 import type { Panel, PanelsState, PanelsAction } from '@/types';
+import { ACTION_TYPES } from '@/constants';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 
@@ -25,19 +26,19 @@ const initialState: PanelsState = {
 // Reducer
 function panelsReducer(state: PanelsState, action: PanelsAction): PanelsState {
   switch (action.type) {
-    case 'ADD_PANEL':
+    case ACTION_TYPES.PANEL.ADD:
       return {
         ...state,
         panels: [...state.panels, action.payload],
       };
 
-    case 'REMOVE_PANEL':
+    case ACTION_TYPES.PANEL.REMOVE:
       return {
         ...state,
         panels: state.panels.filter((panel) => panel.id !== action.payload),
       };
 
-    case 'UPDATE_PANEL':
+    case ACTION_TYPES.PANEL.UPDATE:
       return {
         ...state,
         panels: state.panels.map((panel) =>
@@ -47,7 +48,7 @@ function panelsReducer(state: PanelsState, action: PanelsAction): PanelsState {
         ),
       };
 
-    case 'UPDATE_LAYOUT':
+    case ACTION_TYPES.PANEL.UPDATE_LAYOUT:
       return {
         ...state,
         panels: state.panels.map((panel) => {
@@ -67,7 +68,7 @@ function panelsReducer(state: PanelsState, action: PanelsAction): PanelsState {
         }),
       };
 
-    case 'LOAD_LAYOUT':
+    case ACTION_TYPES.PANEL.LOAD_LAYOUT:
       return {
         ...state,
         panels: action.payload,
@@ -127,12 +128,12 @@ export function PanelsProvider({ children }: PanelsProviderProps) {
           if (data && data.panels) {
             const panels = data.panels as Panel[];
             if (!isCancelled) {
-              dispatch({ type: 'LOAD_LAYOUT', payload: panels });
+              dispatch({ type: ACTION_TYPES.PANEL.LOAD_LAYOUT, payload: panels });
             }
           } else {
             // データが存在しない場合は空配列
             if (!isCancelled) {
-              dispatch({ type: 'LOAD_LAYOUT', payload: [] });
+              dispatch({ type: ACTION_TYPES.PANEL.LOAD_LAYOUT, payload: [] });
             }
           }
         } catch (error) {
@@ -145,7 +146,7 @@ export function PanelsProvider({ children }: PanelsProviderProps) {
           try {
             const panels = JSON.parse(savedPanels) as Panel[];
             if (!isCancelled) {
-              dispatch({ type: 'LOAD_LAYOUT', payload: panels });
+              dispatch({ type: ACTION_TYPES.PANEL.LOAD_LAYOUT, payload: panels });
             }
           } catch (error) {
             console.error('Failed to load panels from localStorage:', error);
@@ -223,19 +224,19 @@ export function PanelsProvider({ children }: PanelsProviderProps) {
 
   // ヘルパー関数
   const addPanel = (panel: Panel) => {
-    dispatch({ type: 'ADD_PANEL', payload: panel });
+    dispatch({ type: ACTION_TYPES.PANEL.ADD, payload: panel });
   };
 
   const removePanel = (id: string) => {
-    dispatch({ type: 'REMOVE_PANEL', payload: id });
+    dispatch({ type: ACTION_TYPES.PANEL.REMOVE, payload: id });
   };
 
   const updatePanel = (id: string, updates: Partial<Panel>) => {
-    dispatch({ type: 'UPDATE_PANEL', payload: { id, updates } });
+    dispatch({ type: ACTION_TYPES.PANEL.UPDATE, payload: { id, updates } });
   };
 
   const updateLayout = (layout: Layout[]) => {
-    dispatch({ type: 'UPDATE_LAYOUT', payload: layout });
+    dispatch({ type: ACTION_TYPES.PANEL.UPDATE_LAYOUT, payload: layout });
   };
 
   const value: PanelsContextType = {

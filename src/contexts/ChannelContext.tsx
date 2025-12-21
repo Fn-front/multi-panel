@@ -9,7 +9,7 @@ import {
   useState,
 } from 'react';
 import type { Channel, ChannelsState, ChannelsAction } from '@/types/channel';
-import { STORAGE_KEYS } from '@/constants';
+import { STORAGE_KEYS, ACTION_TYPES } from '@/constants';
 import { loadFromStorage, saveArrayToStorage } from '@/utils/storage';
 import { formatDate, getCurrentMonthRange } from '@/utils/date';
 import { callSupabaseFunction } from '@/utils/supabase';
@@ -40,13 +40,13 @@ function channelsReducer(
   action: ChannelsAction,
 ): ChannelsState {
   switch (action.type) {
-    case 'ADD_CHANNEL':
+    case ACTION_TYPES.CHANNEL.ADD:
       return {
         ...state,
         channels: [...state.channels, action.payload],
       };
 
-    case 'REMOVE_CHANNEL':
+    case ACTION_TYPES.CHANNEL.REMOVE:
       return {
         ...state,
         channels: state.channels.filter(
@@ -54,7 +54,7 @@ function channelsReducer(
         ),
       };
 
-    case 'UPDATE_CHANNEL':
+    case ACTION_TYPES.CHANNEL.UPDATE:
       return {
         ...state,
         channels: state.channels.map((channel) =>
@@ -64,7 +64,7 @@ function channelsReducer(
         ),
       };
 
-    case 'LOAD_CHANNELS':
+    case ACTION_TYPES.CHANNEL.LOAD:
       return {
         ...state,
         channels: action.payload,
@@ -117,15 +117,15 @@ export function ChannelProvider({ children }: ChannelProviderProps) {
 
           if (data) {
             const channels = data.map(mapDbToChannel);
-            dispatch({ type: 'LOAD_CHANNELS', payload: channels });
+            dispatch({ type: ACTION_TYPES.CHANNEL.LOAD, payload: channels });
           } else {
             // データがない場合は空配列をセット
-            dispatch({ type: 'LOAD_CHANNELS', payload: [] });
+            dispatch({ type: ACTION_TYPES.CHANNEL.LOAD, payload: [] });
           }
         } catch (error) {
           console.error('Failed to load channels from Supabase:', error);
           // エラー時も空配列をセット
-          dispatch({ type: 'LOAD_CHANNELS', payload: [] });
+          dispatch({ type: ACTION_TYPES.CHANNEL.LOAD, payload: [] });
         }
       } else {
         // 未ログイン時: localStorageから読み込み
@@ -134,7 +134,7 @@ export function ChannelProvider({ children }: ChannelProviderProps) {
           [],
         );
         if (savedChannels?.length) {
-          dispatch({ type: 'LOAD_CHANNELS', payload: savedChannels });
+          dispatch({ type: ACTION_TYPES.CHANNEL.LOAD, payload: savedChannels });
         }
       }
 
@@ -177,7 +177,7 @@ export function ChannelProvider({ children }: ChannelProviderProps) {
         if (error) throw error;
 
         if (data) {
-          dispatch({ type: 'ADD_CHANNEL', payload: mapDbToChannel(data) });
+          dispatch({ type: ACTION_TYPES.CHANNEL.ADD, payload: mapDbToChannel(data) });
           await fetchCurrentMonthStreams(channel.channelId);
         }
       } catch (error) {
@@ -185,7 +185,7 @@ export function ChannelProvider({ children }: ChannelProviderProps) {
       }
     } else {
       // 未ログイン時: ローカルのみ
-      dispatch({ type: 'ADD_CHANNEL', payload: channel });
+      dispatch({ type: ACTION_TYPES.CHANNEL.ADD, payload: channel });
     }
   };
 
@@ -251,13 +251,13 @@ export function ChannelProvider({ children }: ChannelProviderProps) {
           );
         }
 
-        dispatch({ type: 'REMOVE_CHANNEL', payload: id });
+        dispatch({ type: ACTION_TYPES.CHANNEL.REMOVE, payload: id });
       } catch (error) {
         console.error('Failed to remove channel from Supabase:', error);
       }
     } else {
       // 未ログイン時: ローカルのみ
-      dispatch({ type: 'REMOVE_CHANNEL', payload: id });
+      dispatch({ type: ACTION_TYPES.CHANNEL.REMOVE, payload: id });
     }
   };
 
@@ -278,13 +278,13 @@ export function ChannelProvider({ children }: ChannelProviderProps) {
 
         if (error) throw error;
 
-        dispatch({ type: 'UPDATE_CHANNEL', payload: { id, updates } });
+        dispatch({ type: ACTION_TYPES.CHANNEL.UPDATE, payload: { id, updates } });
       } catch (error) {
         console.error('Failed to update channel in Supabase:', error);
       }
     } else {
       // 未ログイン時: ローカルのみ
-      dispatch({ type: 'UPDATE_CHANNEL', payload: { id, updates } });
+      dispatch({ type: ACTION_TYPES.CHANNEL.UPDATE, payload: { id, updates } });
     }
   };
 
