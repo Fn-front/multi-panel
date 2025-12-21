@@ -1,8 +1,8 @@
 'use client';
 
-import { useMemo, useCallback } from 'react';
+import { useMemo, useCallback, useState } from 'react';
 import GridLayout, { type Layout } from 'react-grid-layout';
-import { HiPlus } from 'react-icons/hi2';
+import { HiPlus, HiRectangleStack, HiSquares2X2 } from 'react-icons/hi2';
 import { VideoPanel } from '@/components/VideoPanel';
 import { Skeleton } from '@/components/Skeleton';
 import { usePanels } from '@/contexts/PanelsContext';
@@ -19,28 +19,42 @@ import styles from './PanelContainer.module.scss';
 export function PanelContainer() {
   const { state, isLoading, updateLayout, addPanel } = usePanels();
   const { width: containerWidth, isMobile } = useWindowSize();
+  const [mobileColumns, setMobileColumns] = useState(1);
 
   const layout: Layout[] = useMemo(
     () =>
       state.panels.map((panel, index) => {
         if (isMobile) {
-          // モバイル: 縦一列に配置、16:9のアスペクト比を計算
-          const gridItemWidth = containerWidth; // モバイルは1列なので全幅
-          const targetHeight = (gridItemWidth * 9) / 16;
-          const gridHeight = Math.round(targetHeight / GRID_LAYOUT.ROW_HEIGHT);
-          const height = Math.max(gridHeight, 3);
+          const gap = 8;
+          const gridItemWidth = mobileColumns === 2
+            ? (containerWidth - gap) / 2
+            : containerWidth - 2;
+          const videoHeight = (gridItemWidth * 9) / 16;
+          const controlBarHeight = 56;
+          const borderHeight = 2;
+          const totalHeight = Math.ceil(videoHeight + controlBarHeight + borderHeight);
+
+          // rowHeight=1のため、x, y, h は全てピクセル単位
+          // 2カラム時: cols=containerWidthにして、1グリッド単位=1px
+          // これによりwもピクセル単位で指定可能
+          const x = mobileColumns === 2 ? (index % 2) * (gridItemWidth + gap) : 0;
+          const y = mobileColumns === 2
+            ? Math.floor(index / 2) * (totalHeight + gap)
+            : index * (totalHeight + gap);
+          const w = mobileColumns === 2 ? gridItemWidth : 2;
 
           return {
             i: panel.id,
-            x: 0,
-            y: index * height, // 計算された高さ分だけY座標をずらす
-            w: 1, // 全幅
-            h: height, // 16:9のアスペクト比に基づく高さ
-            minW: 1,
-            minH: 3,
+            x,
+            y,
+            w,
+            h: totalHeight,
+            minW: w,
+            minH: totalHeight,
+            static: false,
           };
         }
-        // PC: 通常のレイアウト
+
         return {
           i: panel.id,
           x: panel.layout.x,
@@ -51,37 +65,27 @@ export function PanelContainer() {
           minH: GRID_LAYOUT.MIN_HEIGHT,
         };
       }),
-    [state.panels, isMobile, containerWidth],
+    [state.panels, isMobile, containerWidth, mobileColumns],
   );
 
-  // グリッドの列数（モバイルは1列、PCは12列）
-  const cols = isMobile ? 1 : GRID_LAYOUT.COLS;
+  // グリッドの列数（モバイル2カラム時は隙間を考慮して調整）
+  const cols = isMobile && mobileColumns === 2 ? containerWidth : (isMobile ? 2 : GRID_LAYOUT.COLS);
 
-  // SP時のみレイアウト変更時に16:9のアスペクト比を維持
+  // レイアウト変更時の処理
   const handleLayoutChange = useCallback(
     (newLayout: Layout[]) => {
+      // PC時のみレイアウトを保存
+      // モバイル時はuseMemoで計算されたレイアウトを使用するため、保存しない
       if (!isMobile) {
-        // PC時は通常通りレイアウトを保存
         updateLayout(newLayout);
-        return;
       }
-
-      // SP時: 16:9のアスペクト比を強制
-      const adjustedLayout = newLayout.map((item) => {
-        const gridItemWidth = containerWidth * item.w; // モバイルは1列なので全幅
-        const targetHeight = (gridItemWidth * 9) / 16;
-        const gridHeight = Math.round(targetHeight / GRID_LAYOUT.ROW_HEIGHT);
-
-        return {
-          ...item,
-          h: Math.max(gridHeight, GRID_LAYOUT.MIN_HEIGHT),
-        };
-      });
-
-      updateLayout(adjustedLayout);
     },
-    [containerWidth, isMobile, updateLayout],
+    [isMobile, updateLayout],
   );
+
+  const toggleMobileColumns = useCallback(() => {
+    setMobileColumns((prev) => (prev === 1 ? 2 : 1));
+  }, []);
 
   const handleAddPanel = useCallback(() => {
     addPanel({
@@ -122,6 +126,18 @@ export function PanelContainer() {
           <span>{UI_TEXT.PANEL.ADD}</span>
         </button>
       </div>
+      {isMobile && (
+        <div className={styles.columnToggle}>
+          <button
+            type='button'
+            className={styles.columnButton}
+            onClick={toggleMobileColumns}
+            aria-label={`${mobileColumns}カラム表示`}
+          >
+            {mobileColumns === 1 ? <HiRectangleStack /> : <HiSquares2X2 />}
+          </button>
+        </div>
+      )}
       <div className={styles.gridContainer}>
         {state.panels.length === 0 ? (
           <div className={styles.empty}>
@@ -138,17 +154,19 @@ export function PanelContainer() {
           </div>
         ) : (
           <GridLayout
+            key={isMobile ? `mobile-${mobileColumns}` : 'desktop'}
             className={styles.grid}
             layout={layout}
             cols={cols}
-            rowHeight={GRID_LAYOUT.ROW_HEIGHT}
+            rowHeight={isMobile ? 1 : GRID_LAYOUT.ROW_HEIGHT}
             width={containerWidth}
+            margin={isMobile ? [0, 0] : [10, 10]}
             onLayoutChange={handleLayoutChange}
             draggableHandle={isMobile ? undefined : `.${panelStyles.dragHandle}`}
             isDraggable={!isMobile}
-            isResizable={true}
-            resizeHandles={isMobile ? ['s'] : ['se', 'e']}
-            compactType='vertical'
+            isResizable={!isMobile}
+            resizeHandles={isMobile ? [] : ['se', 'e']}
+            compactType={isMobile ? null : 'vertical'}
             preventCollision={false}
           >
             {state.panels.map((panel) => (
