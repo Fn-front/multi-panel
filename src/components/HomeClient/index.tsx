@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { HiChevronLeft, HiChevronRight } from 'react-icons/hi2';
 import { PanelContainer } from '@/components/PanelContainer';
 import FavoriteChannels from '@/components/FavoriteChannels';
@@ -101,7 +102,7 @@ export function HomeClient({ initialSidebarVisible }: HomeClientProps) {
               <div className={styles.userInfo}>
                 {sidebarVisible ? (
                   <>
-                    <img
+                    <Image
                       src={
                         user.user_metadata?.avatar_url ||
                         `https://api.dicebear.com/7.x/initials/svg?seed=${user.email}`
@@ -109,6 +110,9 @@ export function HomeClient({ initialSidebarVisible }: HomeClientProps) {
                       alt='User avatar'
                       className={styles.userAvatar}
                       title={user.email || ''}
+                      width={40}
+                      height={40}
+                      unoptimized
                     />
                     <button
                       onClick={handleLogout}
@@ -119,7 +123,7 @@ export function HomeClient({ initialSidebarVisible }: HomeClientProps) {
                     </button>
                   </>
                 ) : (
-                  <img
+                  <Image
                     src={
                       user.user_metadata?.avatar_url ||
                       `https://api.dicebear.com/7.x/initials/svg?seed=${user.email}`
@@ -127,6 +131,9 @@ export function HomeClient({ initialSidebarVisible }: HomeClientProps) {
                     alt='User avatar'
                     className={styles.userAvatarCompact}
                     title={user.email || ''}
+                    width={40}
+                    height={40}
+                    unoptimized
                   />
                 )}
               </div>
