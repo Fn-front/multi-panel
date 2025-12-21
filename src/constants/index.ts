@@ -79,3 +79,32 @@ export const UI_TEXT = {
   // 曜日表示
   WEEKDAYS: ['日', '月', '火', '水', '木', '金', '土'] as const,
 } as const;
+
+// ========================================
+// FullCalendar設定
+// ========================================
+export const FULL_CALENDAR_CONFIG = {
+  // 初期表示ビュー
+  INITIAL_VIEW: 'timeGridWeek',
+  // 時間範囲
+  SLOT_MIN_TIME: '00:00:00',
+  SLOT_MAX_TIME: '24:00:00',
+  // 全日イベント表示
+  ALL_DAY_SLOT: false,
+  // 高さ設定
+  HEIGHT: '100%',
+  // 日表示制限（月表示）
+  DAY_MAX_EVENT_ROWS: false,
+  // ヘッダーツールバー（週表示）
+  HEADER_TOOLBAR_WEEK: {
+    left: 'prev,next today',
+    center: 'title',
+    right: 'timeGridWeek,timeGridDay',
+  },
+  // ヘッダーツールバー（月表示）
+  HEADER_TOOLBAR_MONTH: {
+    left: 'prev,next today',
+    center: 'title',
+    right: '',
+  },
+} as const;

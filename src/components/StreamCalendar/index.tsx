@@ -9,7 +9,7 @@ import { HiArrowPath } from 'react-icons/hi2';
 import type { CalendarEvent } from '@/types/youtube';
 import { Modal } from '@/components/Modal';
 import { Skeleton } from '@/components/Skeleton';
-import { UI_TEXT } from '@/constants';
+import { UI_TEXT, FULL_CALENDAR_CONFIG } from '@/constants';
 import { useCalendarAutoScroll } from './hooks/useCalendarAutoScroll';
 import { useInitialMountSkip } from './hooks/useInitialMountSkip';
 import { useEventHandler } from './hooks/useEventHandler';
@@ -123,13 +123,9 @@ export default function StreamCalendar({
         <div className={styles.calendarWrapper}>
           <FullCalendar
             plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-            initialView='timeGridWeek'
+            initialView={FULL_CALENDAR_CONFIG.INITIAL_VIEW}
             locale={jaLocale}
-            headerToolbar={{
-              left: 'prev,next today',
-              center: 'title',
-              right: 'timeGridWeek,timeGridDay',
-            }}
+            headerToolbar={FULL_CALENDAR_CONFIG.HEADER_TOOLBAR_WEEK}
             buttonText={{
               today: UI_TEXT.CALENDAR.TODAY,
               week: UI_TEXT.CALENDAR.WEEK,
@@ -146,10 +142,10 @@ export default function StreamCalendar({
             eventClassNames={getEventClassNames}
             eventContent={renderEventContent}
             datesSet={handleDatesSet}
-            height='100%'
-            slotMinTime='00:00:00'
-            slotMaxTime='24:00:00'
-            allDaySlot={false}
+            height={FULL_CALENDAR_CONFIG.HEIGHT}
+            slotMinTime={FULL_CALENDAR_CONFIG.SLOT_MIN_TIME}
+            slotMaxTime={FULL_CALENDAR_CONFIG.SLOT_MAX_TIME}
+            allDaySlot={FULL_CALENDAR_CONFIG.ALL_DAY_SLOT}
           />
         </div>
       </div>
@@ -164,11 +160,7 @@ export default function StreamCalendar({
             plugins={[dayGridPlugin, interactionPlugin]}
             initialView='dayGridMonth'
             locale={jaLocale}
-            headerToolbar={{
-              left: 'prev,next today',
-              center: 'title',
-              right: '',
-            }}
+            headerToolbar={FULL_CALENDAR_CONFIG.HEADER_TOOLBAR_MONTH}
             buttonText={{
               today: UI_TEXT.CALENDAR.TODAY,
             }}
@@ -177,8 +169,8 @@ export default function StreamCalendar({
             eventClassNames={getEventClassNames}
             eventContent={renderEventContent}
             datesSet={handleDatesSet}
-            height='100%'
-            dayMaxEventRows={false}
+            height={FULL_CALENDAR_CONFIG.HEIGHT}
+            dayMaxEventRows={FULL_CALENDAR_CONFIG.DAY_MAX_EVENT_ROWS}
           />
         </div>
       </Modal>
