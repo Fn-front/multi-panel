@@ -6,6 +6,7 @@ import { HiPlus } from 'react-icons/hi2';
 import { VideoPanel } from '@/components/VideoPanel';
 import { Skeleton } from '@/components/Skeleton';
 import { usePanels } from '@/contexts/PanelsContext';
+import { useWindowSize } from '@/hooks/useWindowSize';
 import { GRID_LAYOUT, PANEL_DEFAULTS, UI_TEXT } from '@/constants';
 import panelStyles from '@/components/VideoPanel/VideoPanel.module.scss';
 import 'react-grid-layout/css/styles.css';
@@ -17,20 +18,39 @@ import styles from './PanelContainer.module.scss';
  */
 export function PanelContainer() {
   const { state, isLoading, updateLayout, addPanel } = usePanels();
+  const { width: containerWidth, isMobile } = useWindowSize();
 
   const layout: Layout[] = useMemo(
     () =>
-      state.panels.map((panel) => ({
-        i: panel.id,
-        x: panel.layout.x,
-        y: panel.layout.y,
-        w: panel.layout.w,
-        h: panel.layout.h,
-        minW: GRID_LAYOUT.MIN_WIDTH,
-        minH: GRID_LAYOUT.MIN_HEIGHT,
-      })),
-    [state.panels],
+      state.panels.map((panel, index) => {
+        if (isMobile) {
+          // モバイル: 縦一列に配置
+          return {
+            i: panel.id,
+            x: 0,
+            y: index * 4, // 各パネルの高さ分だけY座標をずらす
+            w: 1, // 全幅
+            h: 4, // 高さ固定
+            minW: 1,
+            minH: 3,
+          };
+        }
+        // PC: 通常のレイアウト
+        return {
+          i: panel.id,
+          x: panel.layout.x,
+          y: panel.layout.y,
+          w: panel.layout.w,
+          h: panel.layout.h,
+          minW: GRID_LAYOUT.MIN_WIDTH,
+          minH: GRID_LAYOUT.MIN_HEIGHT,
+        };
+      }),
+    [state.panels, isMobile],
   );
+
+  // グリッドの列数（モバイルは1列、PCは12列）
+  const cols = isMobile ? 1 : GRID_LAYOUT.COLS;
 
   const handleAddPanel = useCallback(() => {
     addPanel({
@@ -89,11 +109,13 @@ export function PanelContainer() {
           <GridLayout
             className={styles.grid}
             layout={layout}
-            cols={GRID_LAYOUT.COLS}
+            cols={cols}
             rowHeight={GRID_LAYOUT.ROW_HEIGHT}
-            width={GRID_LAYOUT.WIDTH}
-            onLayoutChange={updateLayout}
-            draggableHandle={`.${panelStyles.dragHandle}`}
+            width={containerWidth}
+            onLayoutChange={isMobile ? undefined : updateLayout}
+            draggableHandle={isMobile ? undefined : `.${panelStyles.dragHandle}`}
+            isDraggable={!isMobile}
+            isResizable={!isMobile}
             resizeHandles={['se', 'e']}
             compactType='vertical'
             preventCollision={false}

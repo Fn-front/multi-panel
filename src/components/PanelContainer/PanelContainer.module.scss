@@ -56,15 +56,30 @@
   flex: 1;
   overflow: auto;
   position: relative;
+
+  @media (max-width: 768px) {
+    // モバイルでは横スクロールを防止
+    overflow-x: hidden;
+  }
 }
 
 .grid {
   position: relative;
   min-height: 100%;
+
+  @media (max-width: 768px) {
+    // モバイルでは幅100%
+    width: 100% !important;
+  }
 }
 
 .gridItem {
   position: relative;
+
+  @media (max-width: 768px) {
+    // モバイルでは左右にマージンを追加
+    margin: 0 var(--spacing-sm, 8px);
+  }
 }
 
 .dragHandle {
