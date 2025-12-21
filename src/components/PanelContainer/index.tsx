@@ -24,13 +24,18 @@ export function PanelContainer() {
     () =>
       state.panels.map((panel, index) => {
         if (isMobile) {
-          // モバイル: 縦一列に配置
+          // モバイル: 縦一列に配置、16:9のアスペクト比を計算
+          const gridItemWidth = containerWidth; // モバイルは1列なので全幅
+          const targetHeight = (gridItemWidth * 9) / 16;
+          const gridHeight = Math.round(targetHeight / GRID_LAYOUT.ROW_HEIGHT);
+          const height = Math.max(gridHeight, 3);
+
           return {
             i: panel.id,
             x: 0,
-            y: index * 4, // 各パネルの高さ分だけY座標をずらす
+            y: index * height, // 計算された高さ分だけY座標をずらす
             w: 1, // 全幅
-            h: 4, // 高さ固定
+            h: height, // 16:9のアスペクト比に基づく高さ
             minW: 1,
             minH: 3,
           };
@@ -46,17 +51,24 @@ export function PanelContainer() {
           minH: GRID_LAYOUT.MIN_HEIGHT,
         };
       }),
-    [state.panels, isMobile],
+    [state.panels, isMobile, containerWidth],
   );
 
   // グリッドの列数（モバイルは1列、PCは12列）
   const cols = isMobile ? 1 : GRID_LAYOUT.COLS;
 
-  // レイアウト変更時に16:9のアスペクト比を維持
+  // SP時のみレイアウト変更時に16:9のアスペクト比を維持
   const handleLayoutChange = useCallback(
     (newLayout: Layout[]) => {
+      if (!isMobile) {
+        // PC時は通常通りレイアウトを保存
+        updateLayout(newLayout);
+        return;
+      }
+
+      // SP時: 16:9のアスペクト比を強制
       const adjustedLayout = newLayout.map((item) => {
-        const gridItemWidth = (containerWidth / cols) * item.w;
+        const gridItemWidth = containerWidth * item.w; // モバイルは1列なので全幅
         const targetHeight = (gridItemWidth * 9) / 16;
         const gridHeight = Math.round(targetHeight / GRID_LAYOUT.ROW_HEIGHT);
 
@@ -68,7 +80,7 @@ export function PanelContainer() {
 
       updateLayout(adjustedLayout);
     },
-    [containerWidth, cols, updateLayout],
+    [containerWidth, isMobile, updateLayout],
   );
 
   const handleAddPanel = useCallback(() => {
