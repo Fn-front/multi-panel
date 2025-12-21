@@ -6,6 +6,7 @@ import { VideoPlayer } from '@/components/VideoPlayer';
 import { URLInput } from '@/components/URLInput';
 import { VolumeControl } from '@/components/VolumeControl';
 import { usePanels } from '@/contexts/PanelsContext';
+import { UI_TEXT } from '@/constants';
 import type { Panel } from '@/types';
 import styles from './VideoPanel.module.scss';
 
@@ -57,7 +58,7 @@ export function VideoPanel({ panel }: VideoPanelProps) {
           type='button'
           className={styles.removeButton}
           onClick={handleRemove}
-          aria-label='パネルを削除'
+          aria-label={UI_TEXT.PANEL.REMOVE}
         >
           <HiXMark />
         </button>
@@ -71,7 +72,7 @@ export function VideoPanel({ panel }: VideoPanelProps) {
           />
         ) : (
           <div className={styles.placeholder}>
-            <p>YouTube動画URLを入力してください</p>
+            <p>{UI_TEXT.PANEL.URL_INPUT_MESSAGE}</p>
           </div>
         )}
       </div>

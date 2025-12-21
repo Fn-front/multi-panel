@@ -4,6 +4,7 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import type { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
 import { callSupabaseFunction } from '@/utils/supabase';
+import { UI_TEXT } from '@/constants';
 
 interface AuthContextType {
   user: User | null;
@@ -118,7 +119,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           // 配信情報の取得はSIGNED_INイベント時のみ実行（ページリロード毎には実行しない）
         } else {
           setIsAllowed(false);
-          console.log('ホワイトリストに登録されていません');
+          console.log(UI_TEXT.AUTH.NOT_WHITELISTED);
           await supabase.auth.signOut();
         }
       }
@@ -158,7 +159,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             await fetchStreamsUntilMonthEnd();
           } else {
             setIsAllowed(false);
-            console.log('ホワイトリストに登録されていません');
+            console.log(UI_TEXT.AUTH.NOT_WHITELISTED);
             await supabase.auth.signOut();
           }
         }

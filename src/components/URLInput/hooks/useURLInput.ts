@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { isValidYouTubeVideoUrl } from '@/utils/youtube';
 import { sanitizeInput, VALIDATION_CONSTANTS } from '@/utils/validation';
+import { UI_TEXT } from '@/constants';
 
 interface UseURLInputProps {
   currentUrl: string;
@@ -20,9 +21,7 @@ export function useURLInput({ currentUrl, onUrlChange }: UseURLInputProps) {
 
       // 入力値の長さ制限
       if (value.length > VALIDATION_CONSTANTS.MAX_URL_LENGTH) {
-        setError(
-          `URLが長すぎます（最大${VALIDATION_CONSTANTS.MAX_URL_LENGTH}文字）`,
-        );
+        setError(UI_TEXT.PANEL.URL_TOO_LONG(VALIDATION_CONSTANTS.MAX_URL_LENGTH));
         return;
       }
 
@@ -47,7 +46,7 @@ export function useURLInput({ currentUrl, onUrlChange }: UseURLInputProps) {
       }
 
       if (!isValidYouTubeVideoUrl(sanitized)) {
-        setError('有効なYouTube動画URLを入力してください');
+        setError(UI_TEXT.PANEL.INVALID_URL);
         return;
       }
 

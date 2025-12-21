@@ -11,6 +11,7 @@ import { useChannels } from '@/contexts/ChannelContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePanels } from '@/contexts/PanelsContext';
 import { useCalendarEvents } from '@/hooks/useCalendarEvents';
+import { UI_TEXT } from '@/constants';
 import { useClientMount } from './hooks/useClientMount';
 import { useChannelIds } from './hooks/useChannelIds';
 import { useSidebar } from './hooks/useSidebar';
@@ -119,7 +120,7 @@ export function HomeClient({ initialSidebarVisible }: HomeClientProps) {
                       className={styles.logoutButton}
                       type='button'
                     >
-                      ログアウト
+                      {UI_TEXT.AUTH.LOGOUT}
                     </button>
                   </>
                 ) : (
@@ -143,14 +144,14 @@ export function HomeClient({ initialSidebarVisible }: HomeClientProps) {
                 className={styles.loginButton}
                 type='button'
               >
-                ログイン
+                {UI_TEXT.AUTH.LOGIN}
               </button>
             )}
             <button
               className={styles.toggleButton}
               onClick={toggleSidebar}
               aria-label={
-                sidebarVisible ? 'サイドバーを閉じる' : 'サイドバーを開く'
+                sidebarVisible ? UI_TEXT.SIDEBAR.CLOSE : UI_TEXT.SIDEBAR.OPEN
               }
               type='button'
             >
@@ -169,16 +170,16 @@ export function HomeClient({ initialSidebarVisible }: HomeClientProps) {
               </div>
 
               <div className={styles.notificationSettings}>
-                <h3>配信通知</h3>
+                <h3>{UI_TEXT.NOTIFICATION.TITLE}</h3>
                 {isMounted ? (
                   <>
                     <div className={styles.notificationToggle}>
                       <label>
                         {isEnabled
-                          ? `通知有効 (${notifiedCount}件通知済み)`
+                          ? `${UI_TEXT.NOTIFICATION.ENABLED} (${UI_TEXT.NOTIFICATION.COUNT(notifiedCount)})`
                           : permission === 'denied'
-                            ? '通知が拒否されています'
-                            : '通知を有効にする'}
+                            ? UI_TEXT.NOTIFICATION.DENIED
+                            : UI_TEXT.NOTIFICATION.ENABLE}
                       </label>
                       <button
                         onClick={handleNotificationToggle}
@@ -193,13 +194,13 @@ export function HomeClient({ initialSidebarVisible }: HomeClientProps) {
                     </div>
                     {permission === 'default' && (
                       <div className={styles.notificationStatus}>
-                        ブラウザの通知許可が必要です
+                        {UI_TEXT.NOTIFICATION.PERMISSION_REQUIRED}
                       </div>
                     )}
                   </>
                 ) : (
                   <div className={styles.notificationToggle}>
-                    <label>通知を有効にする</label>
+                    <label>{UI_TEXT.NOTIFICATION.ENABLE}</label>
                     <button type='button' disabled>
                       ON
                     </button>

@@ -3,6 +3,7 @@ import type { Channel } from '@/types/channel';
 import type { YouTubeChannelInfo } from '@/types/youtube';
 import { getChannelInfo } from '@/lib/youtube-api';
 import { extractVideoId } from '@/utils/youtube';
+import { UI_TEXT } from '@/constants';
 
 interface UseChannelManagementProps {
   channels: Channel[];
@@ -44,9 +45,7 @@ export function useChannelManagement({
       // Videos APIを使う必要がある（ここでは未対応）
       const videoId = extractVideoId(trimmed);
       if (videoId) {
-        setError(
-          '動画URLからチャンネルを追加することはできません。チャンネルURLを入力してください。',
-        );
+        setError(UI_TEXT.CHANNEL.INVALID_VIDEO_URL);
         return null;
       }
     } catch {
@@ -63,20 +62,20 @@ export function useChannelManagement({
       e.preventDefault();
 
       if (!inputValue.trim()) {
-        setError('チャンネルIDまたはURLを入力してください');
+        setError(UI_TEXT.CHANNEL.INPUT_REQUIRED);
         return;
       }
 
       const channelId = extractChannelId(inputValue);
 
       if (!channelId) {
-        setError('有効なチャンネルIDまたはURLを入力してください');
+        setError(UI_TEXT.CHANNEL.INVALID_INPUT);
         return;
       }
 
       // 既に登録済みかチェック
       if (channels.some((ch) => ch.channelId === channelId)) {
-        setError('このチャンネルは既に登録されています');
+        setError(UI_TEXT.CHANNEL.ALREADY_REGISTERED);
         return;
       }
 
@@ -88,7 +87,7 @@ export function useChannelManagement({
         const channelInfo = await getChannelInfo(channelId);
 
         if (!channelInfo) {
-          setError('チャンネルが見つかりませんでした');
+          setError(UI_TEXT.CHANNEL.NOT_FOUND);
           return;
         }
 
@@ -110,7 +109,7 @@ export function useChannelManagement({
       } catch (err) {
         console.error('Failed to add channel:', err);
         setError(
-          err instanceof Error ? err.message : 'チャンネルの追加に失敗しました',
+          err instanceof Error ? err.message : UI_TEXT.CHANNEL.ADD_FAILED,
         );
       } finally {
         setIsLoading(false);

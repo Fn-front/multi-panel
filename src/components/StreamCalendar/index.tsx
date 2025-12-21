@@ -110,7 +110,7 @@ export default function StreamCalendar({
                 onClick={onRefresh}
                 type='button'
                 disabled={isLoading}
-                aria-label='更新'
+                aria-label={UI_TEXT.CALENDAR.RELOAD}
               >
                 <HiArrowPath />
               </button>

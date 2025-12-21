@@ -1,6 +1,7 @@
 'use client';
 
 import { useConnectionStatus } from '@/hooks/useConnectionStatus';
+import { UI_TEXT } from '@/constants';
 import styles from './ConnectionStatusIndicator.module.scss';
 
 /**
@@ -27,9 +28,9 @@ export function ConnectionStatusIndicator() {
       <div className={styles.indicator} role='status' aria-live='polite'>
         <div className={styles.icon}>🔄</div>
         <div className={styles.message}>
-          <strong>接続を再試行中</strong>
+          <strong>{UI_TEXT.CONNECTION.RETRYING}</strong>
           <span className={styles.detail}>
-            {retryAttempt}/{retryMax} 回目の試行...
+            {UI_TEXT.CONNECTION.RETRY_COUNT(retryAttempt, retryMax)}
           </span>
         </div>
       </div>
@@ -43,13 +44,9 @@ export function ConnectionStatusIndicator() {
     <div className={styles.indicator} role='status' aria-live='polite'>
       <div className={styles.icon}>⏳</div>
       <div className={styles.message}>
-        <strong>接続プールがスリープ中</strong>
+        <strong>{UI_TEXT.CONNECTION.COLD_START}</strong>
         <span className={styles.detail}>
-          次のリクエストに{' '}
-          {lastResponseTime
-            ? `${(lastResponseTime / 1000).toFixed(1)}秒`
-            : '1-2秒'}{' '}
-          かかる可能性があります
+          {UI_TEXT.CONNECTION.COLD_START_MESSAGE(lastResponseTime)}
         </span>
       </div>
     </div>

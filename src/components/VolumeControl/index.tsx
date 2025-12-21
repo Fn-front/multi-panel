@@ -2,6 +2,7 @@
 
 import { useCallback, useMemo } from 'react';
 import { HiSpeakerWave, HiSpeakerXMark } from 'react-icons/hi2';
+import { UI_TEXT } from '@/constants';
 import { usePopoverControl } from './hooks/usePopoverControl';
 import styles from './VolumeControl.module.scss';
 
@@ -51,7 +52,7 @@ export function VolumeControl({
         type='button'
         className={styles.volumeButton}
         onClick={togglePopover}
-        aria-label='音量調整'
+        aria-label={UI_TEXT.PANEL.VOLUME_CONTROL}
       >
         <VolumeIcon />
       </button>
@@ -65,13 +66,13 @@ export function VolumeControl({
             step='0.01'
             value={volume ?? 0}
             onChange={handleVolumeChange}
-            aria-label='音量'
+            aria-label={UI_TEXT.PANEL.VOLUME}
           />
           <button
             type='button'
             className={styles.muteButton}
             onClick={toggleMute}
-            aria-label={muted ? 'ミュート解除' : 'ミュート'}
+            aria-label={muted ? UI_TEXT.PANEL.UNMUTE : UI_TEXT.PANEL.MUTE}
           >
             <VolumeIcon />
           </button>

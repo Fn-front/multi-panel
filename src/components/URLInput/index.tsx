@@ -1,6 +1,7 @@
 'use client';
 
 import { HiArrowPath } from 'react-icons/hi2';
+import { UI_TEXT } from '@/constants';
 import { VALIDATION_CONSTANTS } from '@/utils/validation';
 import { useURLInput } from './hooks/useURLInput';
 import styles from './URLInput.module.scss';
@@ -24,7 +25,7 @@ export function URLInput({ currentUrl, onUrlChange }: URLInputProps) {
       <input
         type='text'
         className={styles.input}
-        placeholder='YouTube動画URLを入力'
+        placeholder={UI_TEXT.PANEL.URL_PLACEHOLDER}
         value={inputValue}
         onChange={handleInputChange}
         maxLength={VALIDATION_CONSTANTS.MAX_URL_LENGTH}
@@ -34,7 +35,7 @@ export function URLInput({ currentUrl, onUrlChange }: URLInputProps) {
       <button
         type='submit'
         className={styles.button}
-        aria-label='動画を読み込み'
+        aria-label={UI_TEXT.PANEL.LOAD_VIDEO}
       >
         <HiArrowPath />
       </button>

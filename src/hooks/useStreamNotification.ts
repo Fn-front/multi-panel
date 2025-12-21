@@ -6,6 +6,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import type { YouTubeVideo } from '@/types/youtube';
 import { getMultipleChannelsSchedule } from '@/lib/youtube-api';
+import { UI_TEXT } from '@/constants';
 
 interface NotificationOptions {
   /** 通知の有効/無効 */
@@ -28,7 +29,7 @@ interface StreamNotificationState {
  */
 async function requestNotificationPermission(): Promise<NotificationPermission> {
   if (!('Notification' in window)) {
-    console.warn('このブラウザは通知をサポートしていません');
+    console.warn(UI_TEXT.NOTIFICATION.NOT_SUPPORTED);
     return 'denied';
   }
 
@@ -55,8 +56,8 @@ function showNotification(video: YouTubeVideo, minutesUntilStart: number) {
     minutesUntilStart > 0
       ? `${minutesUntilStart}分後に配信開始`
       : video.liveBroadcastContent === 'live'
-        ? '配信中'
-        : '配信開始';
+        ? UI_TEXT.NOTIFICATION.STREAMING_LIVE
+        : UI_TEXT.NOTIFICATION.STREAMING_START;
 
   const notification = new Notification(title, {
     body: `${video.channelName}\n${video.title}`,

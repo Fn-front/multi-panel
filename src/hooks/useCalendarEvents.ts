@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
+import { UI_TEXT } from '@/constants';
 import type { CalendarEvent } from '@/types/youtube';
 
 // モックデータ生成（開発用）
@@ -132,7 +133,7 @@ export function useCalendarEvents({
     } catch (err) {
       console.error('Failed to fetch schedule from Supabase:', err);
       setError(
-        err instanceof Error ? err.message : 'スケジュールの取得に失敗しました',
+        err instanceof Error ? err.message : UI_TEXT.CALENDAR.FETCH_ERROR,
       );
     } finally {
       setIsLoading(false);

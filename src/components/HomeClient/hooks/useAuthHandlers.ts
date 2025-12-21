@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { UI_TEXT } from '@/constants';
 
 /**
  * 認証関連のハンドラを管理するフック
@@ -15,8 +16,8 @@ export function useAuthHandlers() {
     try {
       await signOut();
     } catch (error) {
-      console.error('ログアウトに失敗しました:', error);
-      alert('ログアウトに失敗しました。');
+      console.error(UI_TEXT.AUTH.LOGIN_FAILED, error);
+      alert(UI_TEXT.AUTH.LOGIN_FAILED);
     }
   }, [signOut]);
 

@@ -3,6 +3,7 @@
 import { useCallback } from 'react';
 import { HiXMark, HiUserGroup } from 'react-icons/hi2';
 import type { Channel } from '@/types/channel';
+import { UI_TEXT } from '@/constants';
 import { useChannelManagement } from './hooks/useChannelManagement';
 import styles from './FavoriteChannels.module.scss';
 
@@ -59,7 +60,7 @@ export default function FavoriteChannels({
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <h2>お気に入りチャンネル</h2>
+        <h2>{UI_TEXT.CHANNEL.TITLE}</h2>
       </div>
 
       <form className={styles.addForm} onSubmit={handleSubmit}>
@@ -67,13 +68,13 @@ export default function FavoriteChannels({
           type='text'
           value={inputValue}
           onChange={handleInputChange}
-          placeholder='チャンネルURLまたはIDを入力'
+          placeholder={UI_TEXT.CHANNEL.PLACEHOLDER}
           disabled={isLoading}
           autoComplete='off'
           spellCheck='false'
         />
         <button type='submit' disabled={isLoading}>
-          {isLoading ? '追加中...' : '追加'}
+          {isLoading ? UI_TEXT.CHANNEL.ADDING : UI_TEXT.CHANNEL.ADD}
         </button>
       </form>
 
@@ -83,7 +84,7 @@ export default function FavoriteChannels({
         {channels.length === 0 ? (
           <div className={styles.emptyState}>
             <HiUserGroup />
-            <div>お気に入りチャンネルを追加してください</div>
+            <div>{UI_TEXT.CHANNEL.EMPTY}</div>
           </div>
         ) : (
           channels.map((channel) => {
@@ -112,7 +113,7 @@ export default function FavoriteChannels({
                 <button
                   className={styles.removeButton}
                   onClick={(e) => handleRemove(channel.id, e)}
-                  aria-label='削除'
+                  aria-label={UI_TEXT.CHANNEL.REMOVE}
                 >
                   <HiXMark />
                 </button>

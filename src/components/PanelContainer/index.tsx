@@ -6,7 +6,7 @@ import { HiPlus } from 'react-icons/hi2';
 import { VideoPanel } from '@/components/VideoPanel';
 import { Skeleton } from '@/components/Skeleton';
 import { usePanels } from '@/contexts/PanelsContext';
-import { GRID_LAYOUT, PANEL_DEFAULTS } from '@/constants';
+import { GRID_LAYOUT, PANEL_DEFAULTS, UI_TEXT } from '@/constants';
 import panelStyles from '@/components/VideoPanel/VideoPanel.module.scss';
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
@@ -65,24 +65,24 @@ export function PanelContainer() {
           type='button'
           className={styles.addButton}
           onClick={handleAddPanel}
-          aria-label='パネルを追加'
+          aria-label={UI_TEXT.PANEL.ADD}
         >
           <HiPlus />
-          <span>パネルを追加</span>
+          <span>{UI_TEXT.PANEL.ADD}</span>
         </button>
       </div>
       <div className={styles.gridContainer}>
         {state.panels.length === 0 ? (
           <div className={styles.empty}>
-            <p>パネルがありません</p>
+            <p>{UI_TEXT.PANEL.EMPTY}</p>
             <button
               type='button'
               className={styles.addButtonLarge}
               onClick={handleAddPanel}
-              aria-label='パネルを追加'
+              aria-label={UI_TEXT.PANEL.ADD}
             >
               <HiPlus />
-              <span>パネルを追加</span>
+              <span>{UI_TEXT.PANEL.ADD}</span>
             </button>
           </div>
         ) : (
