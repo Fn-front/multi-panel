@@ -13,6 +13,10 @@
   background: var(--bg-secondary, #2d2d2d);
   border-bottom: 1px solid var(--border-color, #404040);
   flex-shrink: 0;
+
+  @media (max-width: 768px) {
+    padding-left: 60px; // ハンバーガーメニュー分のスペースを確保
+  }
 }
 
 .addButton {
