@@ -106,20 +106,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(session?.user ?? null);
 
       if (session?.user) {
-        // 1回のクエリでホワイトリストチェック + セッション期限チェック + 最終ログイン更新
-        const { isAllowed, isExpired } = await checkAndUpdateAllowedUser(
+        // ページリロード時: ホワイトリストチェックのみ（期限チェックはTOKEN_REFRESHEDで行う）
+        const { isAllowed } = await checkAndUpdateAllowedUser(
           session.user.id,
-          true, // 最終ログイン日時を更新
+          false, // ページリロード時は最終ログイン日時を更新しない
+          true, // セッション期限チェックをスキップ
         );
 
-        if (isAllowed && !isExpired) {
+        if (isAllowed) {
           setIsAllowed(true);
           // 配信情報の取得はSIGNED_INイベント時のみ実行（ページリロード毎には実行しない）
         } else {
           setIsAllowed(false);
-          if (isExpired) {
-            await handleSessionExpired();
-          }
+          console.log('ホワイトリストに登録されていません');
+          await supabase.auth.signOut();
         }
       }
 
