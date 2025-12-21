@@ -54,7 +54,13 @@ export function VideoPlayer({
       )}
       <div className={styles.aspectRatio} ref={playerRef}>
         <div
-          style={{ opacity: isPlayerReady ? 1 : 0, transition: 'opacity 0.3s' }}
+          style={{
+            opacity: isPlayerReady ? 1 : 0,
+            transition: 'opacity 0.3s',
+            overflow: 'hidden',
+            width: '100%',
+            height: '100%',
+          }}
         >
           <ReactPlayer
             src={url}
