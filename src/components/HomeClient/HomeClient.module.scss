@@ -272,30 +272,30 @@
   }
 }
 
-// オーバーレイ
-.overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  z-index: 998;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.3s ease-in-out;
-
-  &.visible {
-    opacity: 1;
-    pointer-events: auto;
-  }
-}
-
 @media (max-width: 768px) {
   .hamburgerButton {
     display: flex;
     align-items: center;
     justify-content: center;
+  }
+
+  // オーバーレイ（モバイル専用）
+  .overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 998;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease-in-out;
+
+    &.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
   }
 
   .sidebar {
