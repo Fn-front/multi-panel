@@ -26,7 +26,7 @@ export function HomeClient({ initialSidebarVisible }: HomeClientProps) {
   const [notificationEnabled, setNotificationEnabled] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
-  const fetchedRangesRef = useRef<Set<string>>(new Set());
+  const fetchedMonthsRef = useRef<Set<string>>(new Set());
   const { state: channelState, addChannel, removeChannel } = useChannels();
   const { user, isLoading: authLoading, signOut } = useAuth();
   const { addPanel } = usePanels();
@@ -129,23 +129,43 @@ export function HomeClient({ initialSidebarVisible }: HomeClientProps) {
         dateInfo.view.type === 'dayGridMonth' ||
         dateInfo.view.type === 'timeGridWeek'
       ) {
-        // 日付範囲のキーを生成
-        const rangeKey = `${formatDate(dateInfo.start)}_${formatDate(dateInfo.end)}`;
+        // 表示範囲に含まれる月を抽出（年月でキャッシュ）
+        const monthsInRange = new Set<string>();
+        const currentDate = new Date(dateInfo.start);
+        const endDate = new Date(dateInfo.end);
 
-        // 既にフェッチ済みの範囲ならスキップ
-        if (fetchedRangesRef.current.has(rangeKey)) {
+        while (currentDate <= endDate) {
+          const monthKey = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}`;
+          monthsInRange.add(monthKey);
+          currentDate.setMonth(currentDate.getMonth() + 1);
+          currentDate.setDate(1); // 月の1日に設定
+        }
+
+        // 未取得の月のみフェッチ
+        const monthsToFetch = Array.from(monthsInRange).filter(
+          (month) => !fetchedMonthsRef.current.has(month),
+        );
+
+        if (monthsToFetch.length === 0) {
           return;
         }
 
         try {
-          await callSupabaseFunction('fetch-past-streams', {
-            channelIds,
-            startDate: formatDate(dateInfo.start),
-            endDate: formatDate(dateInfo.end),
-          });
+          // 各月のデータを取得
+          for (const monthKey of monthsToFetch) {
+            const [year, month] = monthKey.split('-').map(Number);
+            const monthStart = new Date(year, month - 1, 1);
+            const monthEnd = new Date(year, month, 0); // 月末
 
-          // フェッチ済みとしてマーク
-          fetchedRangesRef.current.add(rangeKey);
+            await callSupabaseFunction('fetch-past-streams', {
+              channelIds,
+              startDate: formatDate(monthStart),
+              endDate: formatDate(monthEnd),
+            });
+
+            // フェッチ済みとしてマーク
+            fetchedMonthsRef.current.add(monthKey);
+          }
 
           // データ再取得
           fetchSchedule();
