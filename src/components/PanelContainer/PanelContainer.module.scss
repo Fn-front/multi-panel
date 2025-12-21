@@ -75,11 +75,6 @@
 
 .gridItem {
   position: relative;
-
-  @media (max-width: 768px) {
-    // モバイルでは左右にマージンを追加
-    margin: 0 var(--spacing-sm, 8px);
-  }
 }
 
 .dragHandle {
