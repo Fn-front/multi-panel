@@ -156,17 +156,34 @@ export function HomeClient({ initialSidebarVisible }: HomeClientProps) {
         }
 
         try {
+          const now = new Date();
+          const currentMonth = new Date(
+            now.getFullYear(),
+            now.getMonth(),
+            1,
+          );
+
           // 各月のデータを取得
           for (const monthKey of monthsToFetch) {
             const [year, month] = monthKey.split('-').map(Number);
             const monthStart = new Date(year, month - 1, 1);
             const monthEnd = new Date(year, month, 0); // 月末
 
-            await callSupabaseFunction('fetch-past-streams', {
-              channelIds,
-              startDate: formatDate(monthStart),
-              endDate: formatDate(monthEnd),
-            });
+            // 過去月・現在月・来月まで取得（週表示で月跨ぎに対応）
+            // それより先の未来月はスキップ
+            const nextMonth = new Date(
+              now.getFullYear(),
+              now.getMonth() + 1,
+              1,
+            );
+
+            if (monthStart <= nextMonth) {
+              await callSupabaseFunction('fetch-past-streams', {
+                channelIds,
+                startDate: formatDate(monthStart),
+                endDate: formatDate(monthEnd),
+              });
+            }
 
             // フェッチ済みとしてマーク
             fetchedMonthsRef.current.add(monthKey);
