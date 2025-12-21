@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { onRetry, type RetryEvent } from '@/lib/supabase';
 
 /**
  * Supabase接続状態を監視するフック
@@ -11,7 +12,40 @@ export function useConnectionStatus() {
   const [status, setStatus] = useState<'warm' | 'cold' | 'unknown'>('unknown');
   const [lastResponseTime, setLastResponseTime] = useState<number | null>(null);
   const [slowRequestCount, setSlowRequestCount] = useState(0);
+  const [isRetrying, setIsRetrying] = useState(false);
+  const [retryAttempt, setRetryAttempt] = useState(0);
+  const [retryMax, setRetryMax] = useState(0);
   const warmTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const retryTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // リトライイベントのリスナー設定
+  useEffect(() => {
+    const unsubscribe = onRetry((event: RetryEvent) => {
+      setIsRetrying(true);
+      setRetryAttempt(event.attempt);
+      setRetryMax(event.maxRetries);
+      console.log(
+        `[ConnectionStatus] Retry attempt ${event.attempt}/${event.maxRetries}`,
+      );
+
+      // リトライ表示を3秒間表示してから非表示に
+      if (retryTimeoutRef.current) {
+        clearTimeout(retryTimeoutRef.current);
+      }
+      retryTimeoutRef.current = setTimeout(() => {
+        setIsRetrying(false);
+        setRetryAttempt(0);
+        setRetryMax(0);
+      }, 3000);
+    });
+
+    return () => {
+      unsubscribe();
+      if (retryTimeoutRef.current) {
+        clearTimeout(retryTimeoutRef.current);
+      }
+    };
+  }, []);
 
   // オリジナルのfetchをラップして計測
   useEffect(() => {
@@ -103,5 +137,11 @@ export function useConnectionStatus() {
     slowRequestCount,
     /** コールドスタート中かどうか */
     isColdStart: status === 'cold',
+    /** リトライ中かどうか */
+    isRetrying,
+    /** 現在のリトライ試行回数 */
+    retryAttempt,
+    /** 最大リトライ回数 */
+    retryMax,
   };
 }

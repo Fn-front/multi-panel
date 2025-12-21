@@ -9,10 +9,32 @@ import styles from './ConnectionStatusIndicator.module.scss';
  * Supabase接続プールの状態をユーザーに通知
  */
 export function ConnectionStatusIndicator() {
-  const { status, lastResponseTime, isColdStart } = useConnectionStatus();
+  const {
+    status,
+    lastResponseTime,
+    isColdStart,
+    isRetrying,
+    retryAttempt,
+    retryMax,
+  } = useConnectionStatus();
 
   // 初回読み込み中は表示しない
   if (status === 'unknown') return null;
+
+  // リトライ中の表示を優先
+  if (isRetrying) {
+    return (
+      <div className={styles.indicator} role='status' aria-live='polite'>
+        <div className={styles.icon}>🔄</div>
+        <div className={styles.message}>
+          <strong>接続を再試行中</strong>
+          <span className={styles.detail}>
+            {retryAttempt}/{retryMax} 回目の試行...
+          </span>
+        </div>
+      </div>
+    );
+  }
 
   // 接続が温かい場合は表示しない
   if (!isColdStart) return null;
