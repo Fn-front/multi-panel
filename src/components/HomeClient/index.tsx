@@ -302,10 +302,7 @@ export function HomeClient({ initialSidebarVisible }: HomeClientProps) {
         <PanelContainer />
       </main>
 
-      <LoginModal
-        isOpen={isLoginModalOpen}
-        onClose={handleLoginModalClose}
-      />
+      <LoginModal isOpen={isLoginModalOpen} onClose={handleLoginModalClose} />
     </div>
   );
 }

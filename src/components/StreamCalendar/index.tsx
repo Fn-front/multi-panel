@@ -168,9 +168,7 @@ export default function StreamCalendar({
               <path d='M5 3.5L5 8.5L8.5 6z' fill='white' />
             </svg>
           )}
-          {timeDisplay && (
-            <div className='fc-event-time'>{timeDisplay}</div>
-          )}
+          {timeDisplay && <div className='fc-event-time'>{timeDisplay}</div>}
           <div className='fc-event-title'>
             <span>{eventInfo.event.title}</span>
           </div>
@@ -179,7 +177,6 @@ export default function StreamCalendar({
     },
     [],
   );
-
 
   if (isLoading) {
     return (

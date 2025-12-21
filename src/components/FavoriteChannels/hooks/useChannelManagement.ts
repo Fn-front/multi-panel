@@ -119,10 +119,13 @@ export function useChannelManagement({
     [inputValue, channels, extractChannelId, onAddChannel],
   );
 
-  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setInputValue(e.target.value);
-    setError(null);
-  }, []);
+  const handleInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setInputValue(e.target.value);
+      setError(null);
+    },
+    [],
+  );
 
   return {
     inputValue,

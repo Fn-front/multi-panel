@@ -76,7 +76,9 @@ export function useConnectionStatus() {
           warmTimeoutRef.current = setTimeout(() => {
             setStatus('warm');
             setSlowRequestCount(0);
-            console.log('[ConnectionStatus] Auto-recovered to warm state after error');
+            console.log(
+              '[ConnectionStatus] Auto-recovered to warm state after error',
+            );
           }, 5000);
         }
         throw error;

@@ -23,7 +23,11 @@ export function ConnectionStatusIndicator() {
       <div className={styles.message}>
         <strong>接続プールがスリープ中</strong>
         <span className={styles.detail}>
-          次のリクエストに {lastResponseTime ? `${(lastResponseTime / 1000).toFixed(1)}秒` : '1-2秒'} かかる可能性があります
+          次のリクエストに{' '}
+          {lastResponseTime
+            ? `${(lastResponseTime / 1000).toFixed(1)}秒`
+            : '1-2秒'}{' '}
+          かかる可能性があります
         </span>
       </div>
     </div>

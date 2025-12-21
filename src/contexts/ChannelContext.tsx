@@ -235,10 +235,7 @@ export function ChannelProvider({ children }: ChannelProviderProps) {
           .eq('channel_id', channelToRemove.channelId);
 
         if (streamEventsError) {
-          console.error(
-            'Failed to delete stream_events:',
-            streamEventsError,
-          );
+          console.error('Failed to delete stream_events:', streamEventsError);
         }
 
         // 紐づくfetched_date_rangesを削除
