@@ -89,15 +89,11 @@ export function useCalendarEvents({
       setError(null);
 
       // Supabaseからstream_eventsを取得
-      // カレンダー表示のため、現在月の1日から未来のデータまで取得
-      const now = new Date();
-      const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-
+      // fetch-past-streamsで取得済みの過去月データも含めて全て表示
       const { data, error: supabaseError } = await supabase
         .from('stream_events')
         .select('*')
         .in('channel_id', channelIds)
-        .gte('scheduled_start_time', currentMonthStart.toISOString())
         .order('scheduled_start_time', { ascending: true });
 
       if (supabaseError) throw supabaseError;
