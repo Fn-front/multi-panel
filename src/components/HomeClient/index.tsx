@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { HiChevronLeft, HiChevronRight } from 'react-icons/hi2';
+import { HiChevronLeft, HiChevronRight, HiBars3 } from 'react-icons/hi2';
 import { PanelContainer } from '@/components/PanelContainer';
 import FavoriteChannels from '@/components/FavoriteChannels';
 import StreamCalendar from '@/components/StreamCalendar';
@@ -19,6 +19,7 @@ import { useNotificationManager } from './hooks/useNotificationManager';
 import { useAuthHandlers } from './hooks/useAuthHandlers';
 import { useCalendarMonthFetch } from './hooks/useCalendarMonthFetch';
 import { useCalendarEventHandler } from './hooks/useCalendarEventHandler';
+import { useScrollLock } from './hooks/useScrollLock';
 import styles from './HomeClient.module.scss';
 
 type HomeClientProps = {
@@ -78,11 +79,32 @@ export function HomeClient({ initialSidebarVisible }: HomeClientProps) {
     onAddPanel: addPanel,
   });
 
+  // モバイルでサイドバーが開いているときスクロールをロック
+  useScrollLock(sidebarVisible);
 
   return (
     <div className={styles.container}>
+      {/* ハンバーガーメニューボタン（モバイルのみ） */}
+      <button
+        className={styles.hamburgerButton}
+        onClick={toggleSidebar}
+        aria-label={sidebarVisible ? UI_TEXT.SIDEBAR.CLOSE : UI_TEXT.SIDEBAR.OPEN}
+        type='button'
+      >
+        <HiBars3 />
+      </button>
+
+      {/* オーバーレイ（モバイルのみ） */}
+      {sidebarVisible && (
+        <div
+          className={`${styles.overlay} ${sidebarVisible ? styles.visible : ''}`}
+          onClick={toggleSidebar}
+          aria-hidden='true'
+        />
+      )}
+
       <aside
-        className={`${styles.sidebar} ${!sidebarVisible ? styles.collapsed : ''}`}
+        className={`${styles.sidebar} ${sidebarVisible ? styles.visible : styles.collapsed}`}
         style={
           !sidebarVisible
             ? {
