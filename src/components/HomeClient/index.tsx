@@ -34,6 +34,12 @@ export function HomeClient({ initialSidebarVisible }: HomeClientProps) {
   // クライアントサイドでのみマウント状態を有効化
   useEffect(() => {
     setIsMounted(true);
+
+    // 現在月を初期キャッシュに追加（ログイン時に既に取得済みのため）
+    const now = new Date();
+    const currentMonthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    fetchedMonthsRef.current.add(currentMonthKey);
+    console.log('[Calendar] Initialized with current month:', currentMonthKey);
   }, []);
 
   // チャンネルIDの配列をメモ化
