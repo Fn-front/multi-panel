@@ -26,21 +26,26 @@ export function PanelContainer() {
       state.panels.map((panel, index) => {
         if (isMobile) {
           const gap = 8;
-          const gridItemWidth = mobileColumns === 2
-            ? (containerWidth - gap) / 2
-            : containerWidth - 2;
+          const gridItemWidth =
+            mobileColumns === 2
+              ? (containerWidth - gap) / 2
+              : containerWidth - 2;
           const videoHeight = (gridItemWidth * 9) / 16;
           const controlBarHeight = 56;
           const borderHeight = 2;
-          const totalHeight = Math.ceil(videoHeight + controlBarHeight + borderHeight);
+          const totalHeight = Math.ceil(
+            videoHeight + controlBarHeight + borderHeight,
+          );
 
           // rowHeight=1のため、x, y, h は全てピクセル単位
           // 2カラム時: cols=containerWidthにして、1グリッド単位=1px
           // これによりwもピクセル単位で指定可能
-          const x = mobileColumns === 2 ? (index % 2) * (gridItemWidth + gap) : 0;
-          const y = mobileColumns === 2
-            ? Math.floor(index / 2) * (totalHeight + gap)
-            : index * (totalHeight + gap);
+          const x =
+            mobileColumns === 2 ? (index % 2) * (gridItemWidth + gap) : 0;
+          const y =
+            mobileColumns === 2
+              ? Math.floor(index / 2) * (totalHeight + gap)
+              : index * (totalHeight + gap);
           const w = mobileColumns === 2 ? gridItemWidth : 2;
 
           return {
@@ -69,7 +74,12 @@ export function PanelContainer() {
   );
 
   // グリッドの列数（モバイル2カラム時は隙間を考慮して調整）
-  const cols = isMobile && mobileColumns === 2 ? containerWidth : (isMobile ? 2 : GRID_LAYOUT.COLS);
+  const cols =
+    isMobile && mobileColumns === 2
+      ? containerWidth
+      : isMobile
+        ? 2
+        : GRID_LAYOUT.COLS;
 
   // レイアウト変更時の処理
   const handleLayoutChange = useCallback(
@@ -162,7 +172,9 @@ export function PanelContainer() {
             width={containerWidth}
             margin={isMobile ? [0, 0] : [10, 10]}
             onLayoutChange={handleLayoutChange}
-            draggableHandle={isMobile ? undefined : `.${panelStyles.dragHandle}`}
+            draggableHandle={
+              isMobile ? undefined : `.${panelStyles.dragHandle}`
+            }
             isDraggable={!isMobile}
             isResizable={!isMobile}
             resizeHandles={isMobile ? [] : ['se', 'e']}
