@@ -112,11 +112,11 @@ export function PanelContainer() {
             cols={cols}
             rowHeight={GRID_LAYOUT.ROW_HEIGHT}
             width={containerWidth}
-            onLayoutChange={isMobile ? undefined : updateLayout}
+            onLayoutChange={updateLayout}
             draggableHandle={isMobile ? undefined : `.${panelStyles.dragHandle}`}
             isDraggable={!isMobile}
-            isResizable={!isMobile}
-            resizeHandles={['se', 'e']}
+            isResizable={true}
+            resizeHandles={isMobile ? ['s'] : ['se', 'e']}
             compactType='vertical'
             preventCollision={false}
           >

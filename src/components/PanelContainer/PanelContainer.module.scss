@@ -75,6 +75,13 @@
 
 .gridItem {
   position: relative;
+
+  @media (max-width: 768px) {
+    // モバイルでリサイズハンドルを見やすく
+    .react-resizable-handle {
+      opacity: 0.8;
+    }
+  }
 }
 
 .dragHandle {
