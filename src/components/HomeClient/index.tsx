@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import { HiChevronLeft, HiChevronRight } from 'react-icons/hi2';
 import { PanelContainer } from '@/components/PanelContainer';
 import FavoriteChannels from '@/components/FavoriteChannels';
@@ -10,11 +10,12 @@ import { Skeleton } from '@/components/Skeleton';
 import { useChannels } from '@/contexts/ChannelContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePanels } from '@/contexts/PanelsContext';
-import { useStreamNotification } from '@/hooks/useStreamNotification';
 import { useCalendarEvents } from '@/hooks/useCalendarEvents';
+import { useSidebar } from '@/hooks/useSidebar';
+import { useNotificationManager } from '@/hooks/useNotificationManager';
+import { useAuthHandlers } from '@/hooks/useAuthHandlers';
+import { useCalendarMonthFetch } from '@/hooks/useCalendarMonthFetch';
 import type { CalendarEvent } from '@/types/youtube';
-import { formatDate } from '@/utils/date';
-import { callSupabaseFunction } from '@/utils/supabase';
 import styles from './HomeClient.module.scss';
 
 type HomeClientProps = {
@@ -22,31 +23,14 @@ type HomeClientProps = {
 };
 
 export function HomeClient({ initialSidebarVisible }: HomeClientProps) {
-  const [sidebarVisible, setSidebarVisible] = useState(initialSidebarVisible);
-  const [notificationEnabled, setNotificationEnabled] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
-  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
-  const fetchedMonthsRef = useRef<Set<string>>(new Set());
   const { state: channelState, addChannel, removeChannel } = useChannels();
-  const { user, isLoading: authLoading, signOut } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const { addPanel } = usePanels();
 
   // クライアントサイドでのみマウント状態を有効化
   useEffect(() => {
     setIsMounted(true);
-
-    // 現在月を初期キャッシュに追加（ログイン時に既に取得済みのため）
-    const now = new Date();
-    const currentMonthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-    fetchedMonthsRef.current.add(currentMonthKey);
-
-    // 月の最終週（22日以降）の場合、来月もキャッシュに追加
-    // ログイン時のfetch-channel-streamsで既に月末までのデータ取得済みのため
-    if (now.getDate() >= 22) {
-      const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-      const nextMonthKey = `${nextMonth.getFullYear()}-${String(nextMonth.getMonth() + 1).padStart(2, '0')}`;
-      fetchedMonthsRef.current.add(nextMonthKey);
-    }
   }, []);
 
   // チャンネルIDの配列をメモ化
@@ -55,7 +39,26 @@ export function HomeClient({ initialSidebarVisible }: HomeClientProps) {
     [channelState.channels],
   );
 
-  // カレンダーイベント管理
+  // カスタムフック: サイドバー管理
+  const { sidebarVisible, toggleSidebar } = useSidebar(initialSidebarVisible);
+
+  // カスタムフック: 認証ハンドラ
+  const {
+    isLoginModalOpen,
+    openLoginModal,
+    closeLoginModal,
+    handleLogout,
+  } = useAuthHandlers();
+
+  // カスタムフック: 通知管理
+  const {
+    permission,
+    isEnabled,
+    notifiedCount,
+    handleToggle: handleNotificationToggle,
+  } = useNotificationManager({ channelIds });
+
+  // カスタムフック: カレンダーイベント管理
   const {
     events: calendarEvents,
     isLoading: isCalendarLoading,
@@ -66,35 +69,12 @@ export function HomeClient({ initialSidebarVisible }: HomeClientProps) {
     refreshInterval: 5 * 60 * 1000,
   });
 
-  // 通知設定をメモ化
-  const notificationOptions = useMemo(
-    () => ({
-      enabled: notificationEnabled,
-      checkInterval: 3 * 60 * 1000, // 3分
-      notifyBeforeMinutes: 5, // 5分前
-    }),
-    [notificationEnabled],
-  );
-
-  // 通知機能
-  const { permission, requestPermission, isEnabled, notifiedCount } =
-    useStreamNotification(channelIds, notificationOptions);
-
-  const toggleSidebar = useCallback(() => {
-    setSidebarVisible((prev) => {
-      const newState = !prev;
-      // Cookieに保存（1年間有効）
-      document.cookie = `sidebar-visible=${newState}; path=/; max-age=${60 * 60 * 24 * 365}`;
-      return newState;
-    });
-  }, []);
-
-  const handleNotificationToggle = useCallback(async () => {
-    if (permission !== 'granted') {
-      await requestPermission();
-    }
-    setNotificationEnabled((prev) => !prev);
-  }, [permission, requestPermission]);
+  // カスタムフック: カレンダー月変更時のデータフェッチ
+  const { handleDatesSet } = useCalendarMonthFetch({
+    channelIds,
+    userId: user?.id,
+    onFetchComplete: fetchSchedule,
+  });
 
   const handleCalendarEventClick = useCallback(
     (event: CalendarEvent) => {
@@ -119,91 +99,6 @@ export function HomeClient({ initialSidebarVisible }: HomeClientProps) {
     [addPanel],
   );
 
-  const handleLogout = useCallback(async () => {
-    try {
-      await signOut();
-    } catch (error) {
-      console.error('ログアウトに失敗しました:', error);
-      alert('ログアウトに失敗しました。');
-    }
-  }, [signOut]);
-
-  const handleLoginModalClose = useCallback(() => {
-    setIsLoginModalOpen(false);
-  }, []);
-
-  // カレンダー月変更時のハンドラー
-  const handleCalendarDatesSet = useCallback(
-    async (dateInfo: { start: Date; end: Date; view: { type: string } }) => {
-      if (!user || channelIds.length === 0) return;
-
-      // 月表示・週表示の場合のみ過去データを取得
-      if (
-        dateInfo.view.type === 'dayGridMonth' ||
-        dateInfo.view.type === 'timeGridWeek'
-      ) {
-        // 表示範囲に含まれる月を抽出（年月でキャッシュ）
-        const monthsInRange = new Set<string>();
-        const currentDate = new Date(dateInfo.start);
-        const endDate = new Date(dateInfo.end);
-
-        while (currentDate <= endDate) {
-          const monthKey = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}`;
-          monthsInRange.add(monthKey);
-          currentDate.setMonth(currentDate.getMonth() + 1);
-          currentDate.setDate(1); // 月の1日に設定
-        }
-
-        // 未取得の月のみフェッチ
-        const monthsToFetch = Array.from(monthsInRange).filter(
-          (month) => !fetchedMonthsRef.current.has(month),
-        );
-
-        if (monthsToFetch.length === 0) {
-          return;
-        }
-
-        try {
-          const now = new Date();
-
-          // 各月のデータを取得
-          for (const monthKey of monthsToFetch) {
-            const [year, month] = monthKey.split('-').map(Number);
-            const monthStart = new Date(year, month - 1, 1);
-            const monthEnd = new Date(year, month, 0); // 月末
-
-            // 過去月・現在月・来月まで取得（週表示で月跨ぎに対応）
-            // それより先の未来月はスキップ
-            const nextMonth = new Date(
-              now.getFullYear(),
-              now.getMonth() + 1,
-              1,
-            );
-
-            if (monthStart <= nextMonth) {
-              await callSupabaseFunction('fetch-past-streams', {
-                channelIds,
-                startDate: formatDate(monthStart),
-                endDate: formatDate(monthEnd),
-              });
-            }
-
-            // フェッチ済みとしてマーク
-            fetchedMonthsRef.current.add(monthKey);
-          }
-
-          // データ再取得
-          fetchSchedule();
-        } catch (error) {
-          console.error(
-            'Failed to fetch past streams on calendar move:',
-            error,
-          );
-        }
-      }
-    },
-    [user, channelIds, fetchSchedule],
-  );
 
   return (
     <div className={styles.container}>
@@ -260,7 +155,7 @@ export function HomeClient({ initialSidebarVisible }: HomeClientProps) {
               </div>
             ) : (
               <button
-                onClick={() => setIsLoginModalOpen(true)}
+                onClick={openLoginModal}
                 className={styles.loginButton}
                 type='button'
               >
@@ -335,7 +230,7 @@ export function HomeClient({ initialSidebarVisible }: HomeClientProps) {
                   isLoading={isCalendarLoading}
                   error={calendarError}
                   onRefresh={fetchSchedule}
-                  onDatesSet={handleCalendarDatesSet}
+                  onDatesSet={handleDatesSet}
                 />
               </div>
             </>
@@ -347,7 +242,7 @@ export function HomeClient({ initialSidebarVisible }: HomeClientProps) {
         <PanelContainer />
       </main>
 
-      <LoginModal isOpen={isLoginModalOpen} onClose={handleLoginModalClose} />
+      <LoginModal isOpen={isLoginModalOpen} onClose={closeLoginModal} />
     </div>
   );
 }
