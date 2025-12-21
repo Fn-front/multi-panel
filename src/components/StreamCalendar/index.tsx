@@ -50,9 +50,12 @@ export default function StreamCalendar({
     eventsCount: events.length,
   });
 
-  // イベントクリック時の処理
+  // イベントクリック時の処理（週表示・月表示共通）
   const handleEventClick = useCallback(
-    (info: { event: { id: string } }) => {
+    (info: { event: { id: string }; jsEvent: Event }) => {
+      // デフォルトのイベント動作をキャンセル
+      info.jsEvent.preventDefault();
+
       const event = events.find((e) => e.id === info.event.id);
       if (!event) return;
 
