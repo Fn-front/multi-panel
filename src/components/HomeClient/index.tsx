@@ -1,6 +1,5 @@
 'use client';
 
-import { useState, useCallback, useEffect, useMemo } from 'react';
 import { HiChevronLeft, HiChevronRight } from 'react-icons/hi2';
 import { PanelContainer } from '@/components/PanelContainer';
 import FavoriteChannels from '@/components/FavoriteChannels';
@@ -11,11 +10,13 @@ import { useChannels } from '@/contexts/ChannelContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePanels } from '@/contexts/PanelsContext';
 import { useCalendarEvents } from '@/hooks/useCalendarEvents';
-import { useSidebar } from '@/hooks/useSidebar';
-import { useNotificationManager } from '@/hooks/useNotificationManager';
-import { useAuthHandlers } from '@/hooks/useAuthHandlers';
-import { useCalendarMonthFetch } from '@/hooks/useCalendarMonthFetch';
-import type { CalendarEvent } from '@/types/youtube';
+import { useClientMount } from './hooks/useClientMount';
+import { useChannelIds } from './hooks/useChannelIds';
+import { useSidebar } from './hooks/useSidebar';
+import { useNotificationManager } from './hooks/useNotificationManager';
+import { useAuthHandlers } from './hooks/useAuthHandlers';
+import { useCalendarMonthFetch } from './hooks/useCalendarMonthFetch';
+import { useCalendarEventHandler } from './hooks/useCalendarEventHandler';
 import styles from './HomeClient.module.scss';
 
 type HomeClientProps = {
@@ -23,26 +24,20 @@ type HomeClientProps = {
 };
 
 export function HomeClient({ initialSidebarVisible }: HomeClientProps) {
-  const [isMounted, setIsMounted] = useState(false);
   const { state: channelState, addChannel, removeChannel } = useChannels();
   const { user, isLoading: authLoading } = useAuth();
   const { addPanel } = usePanels();
 
-  // クライアントサイドでのみマウント状態を有効化
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
+  // クライアントサイドマウント状態
+  const isMounted = useClientMount();
 
-  // チャンネルIDの配列をメモ化
-  const channelIds = useMemo(
-    () => channelState.channels.map((ch) => ch.channelId),
-    [channelState.channels],
-  );
+  // チャンネルIDの配列
+  const channelIds = useChannelIds(channelState.channels);
 
-  // カスタムフック: サイドバー管理
+  // サイドバー管理
   const { sidebarVisible, toggleSidebar } = useSidebar(initialSidebarVisible);
 
-  // カスタムフック: 認証ハンドラ
+  // 認証ハンドラ
   const {
     isLoginModalOpen,
     openLoginModal,
@@ -50,7 +45,7 @@ export function HomeClient({ initialSidebarVisible }: HomeClientProps) {
     handleLogout,
   } = useAuthHandlers();
 
-  // カスタムフック: 通知管理
+  // 通知管理
   const {
     permission,
     isEnabled,
@@ -58,7 +53,7 @@ export function HomeClient({ initialSidebarVisible }: HomeClientProps) {
     handleToggle: handleNotificationToggle,
   } = useNotificationManager({ channelIds });
 
-  // カスタムフック: カレンダーイベント管理
+  // カレンダーイベント管理
   const {
     events: calendarEvents,
     isLoading: isCalendarLoading,
@@ -69,35 +64,17 @@ export function HomeClient({ initialSidebarVisible }: HomeClientProps) {
     refreshInterval: 5 * 60 * 1000,
   });
 
-  // カスタムフック: カレンダー月変更時のデータフェッチ
+  // カレンダー月変更時のデータフェッチ
   const { handleDatesSet } = useCalendarMonthFetch({
     channelIds,
     userId: user?.id,
     onFetchComplete: fetchSchedule,
   });
 
-  const handleCalendarEventClick = useCallback(
-    (event: CalendarEvent) => {
-      // 新しいパネルを追加
-      const newPanel = {
-        id: `panel-${Date.now()}`,
-        url: event.url,
-        title: event.title,
-        volume: 0.5,
-        isMuted: false,
-        showChat: true,
-        layout: {
-          i: `panel-${Date.now()}`,
-          x: 0,
-          y: 0,
-          w: 6,
-          h: 4,
-        },
-      };
-      addPanel(newPanel);
-    },
-    [addPanel],
-  );
+  // カレンダーイベントクリックハンドラ
+  const { handleEventClick } = useCalendarEventHandler({
+    onAddPanel: addPanel,
+  });
 
 
   return (
@@ -225,7 +202,7 @@ export function HomeClient({ initialSidebarVisible }: HomeClientProps) {
 
               <div className={`${styles.section} ${styles.calendarSection}`}>
                 <StreamCalendar
-                  onEventClick={handleCalendarEventClick}
+                  onEventClick={handleEventClick}
                   events={calendarEvents}
                   isLoading={isCalendarLoading}
                   error={calendarError}
