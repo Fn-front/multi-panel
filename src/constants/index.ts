@@ -81,6 +81,14 @@ export const ACTION_TYPES = {
     UPDATE_LAYOUT: 'UPDATE_LAYOUT',
     LOAD_LAYOUT: 'LOAD_LAYOUT',
   },
+  // Favorite actions
+  FAVORITE: {
+    ADD: 'ADD_FAVORITE',
+    REMOVE: 'REMOVE_FAVORITE',
+    UPDATE: 'UPDATE_FAVORITE',
+    REORDER: 'REORDER_FAVORITES',
+    LOAD: 'LOAD_FAVORITES',
+  },
 } as const;
 
 // ========================================

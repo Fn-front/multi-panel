@@ -8,6 +8,7 @@ import {
   type ReactNode,
 } from 'react';
 import type { Channel, ChannelsState, ChannelsAction } from '@/types';
+import { ACTION_TYPES } from '@/constants';
 
 // LocalStorage キー
 const STORAGE_KEY = 'multi-panel:channels';
@@ -23,13 +24,13 @@ function channelsReducer(
   action: ChannelsAction,
 ): ChannelsState {
   switch (action.type) {
-    case 'ADD_CHANNEL':
+    case ACTION_TYPES.CHANNEL.ADD:
       return {
         ...state,
         channels: [...state.channels, action.payload],
       };
 
-    case 'REMOVE_CHANNEL':
+    case ACTION_TYPES.CHANNEL.REMOVE:
       return {
         ...state,
         channels: state.channels.filter(
@@ -37,7 +38,7 @@ function channelsReducer(
         ),
       };
 
-    case 'UPDATE_CHANNEL':
+    case ACTION_TYPES.CHANNEL.UPDATE:
       return {
         ...state,
         channels: state.channels.map((channel) =>
@@ -47,7 +48,7 @@ function channelsReducer(
         ),
       };
 
-    case 'LOAD_CHANNELS':
+    case ACTION_TYPES.CHANNEL.LOAD:
       return {
         ...state,
         channels: action.payload,
@@ -87,7 +88,7 @@ export function ChannelsProvider({ children }: ChannelsProviderProps) {
     if (savedChannels) {
       try {
         const channels = JSON.parse(savedChannels) as Channel[];
-        dispatch({ type: 'LOAD_CHANNELS', payload: channels });
+        dispatch({ type: ACTION_TYPES.CHANNEL.LOAD, payload: channels });
       } catch (error) {
         console.error('Failed to load channels from localStorage:', error);
       }
@@ -105,15 +106,15 @@ export function ChannelsProvider({ children }: ChannelsProviderProps) {
 
   // ヘルパー関数
   const addChannel = (channel: Channel) => {
-    dispatch({ type: 'ADD_CHANNEL', payload: channel });
+    dispatch({ type: ACTION_TYPES.CHANNEL.ADD, payload: channel });
   };
 
   const removeChannel = (id: string) => {
-    dispatch({ type: 'REMOVE_CHANNEL', payload: id });
+    dispatch({ type: ACTION_TYPES.CHANNEL.REMOVE, payload: id });
   };
 
   const updateChannel = (id: string, updates: Partial<Channel>) => {
-    dispatch({ type: 'UPDATE_CHANNEL', payload: { id, updates } });
+    dispatch({ type: ACTION_TYPES.CHANNEL.UPDATE, payload: { id, updates } });
   };
 
   const value: ChannelsContextType = {

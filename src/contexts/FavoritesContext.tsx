@@ -8,6 +8,7 @@ import {
   type ReactNode,
 } from 'react';
 import type { Favorite, FavoritesState, FavoritesAction } from '@/types';
+import { ACTION_TYPES } from '@/constants';
 
 // LocalStorage キー
 const STORAGE_KEY = 'multi-panel:favorites';
@@ -23,13 +24,13 @@ function favoritesReducer(
   action: FavoritesAction,
 ): FavoritesState {
   switch (action.type) {
-    case 'ADD_FAVORITE':
+    case ACTION_TYPES.FAVORITE.ADD:
       return {
         ...state,
         favorites: [...state.favorites, action.payload],
       };
 
-    case 'REMOVE_FAVORITE':
+    case ACTION_TYPES.FAVORITE.REMOVE:
       return {
         ...state,
         favorites: state.favorites.filter(
@@ -37,7 +38,7 @@ function favoritesReducer(
         ),
       };
 
-    case 'UPDATE_FAVORITE':
+    case ACTION_TYPES.FAVORITE.UPDATE:
       return {
         ...state,
         favorites: state.favorites.map((favorite) =>
@@ -47,13 +48,13 @@ function favoritesReducer(
         ),
       };
 
-    case 'REORDER_FAVORITES':
+    case ACTION_TYPES.FAVORITE.REORDER:
       return {
         ...state,
         favorites: action.payload,
       };
 
-    case 'LOAD_FAVORITES':
+    case ACTION_TYPES.FAVORITE.LOAD:
       return {
         ...state,
         favorites: action.payload,
@@ -94,7 +95,7 @@ export function FavoritesProvider({ children }: FavoritesProviderProps) {
     if (savedFavorites) {
       try {
         const favorites = JSON.parse(savedFavorites) as Favorite[];
-        dispatch({ type: 'LOAD_FAVORITES', payload: favorites });
+        dispatch({ type: ACTION_TYPES.FAVORITE.LOAD, payload: favorites });
       } catch (error) {
         console.error('Failed to load favorites from localStorage:', error);
       }
@@ -112,19 +113,19 @@ export function FavoritesProvider({ children }: FavoritesProviderProps) {
 
   // ヘルパー関数
   const addFavorite = (favorite: Favorite) => {
-    dispatch({ type: 'ADD_FAVORITE', payload: favorite });
+    dispatch({ type: ACTION_TYPES.FAVORITE.ADD, payload: favorite });
   };
 
   const removeFavorite = (id: string) => {
-    dispatch({ type: 'REMOVE_FAVORITE', payload: id });
+    dispatch({ type: ACTION_TYPES.FAVORITE.REMOVE, payload: id });
   };
 
   const updateFavorite = (id: string, updates: Partial<Favorite>) => {
-    dispatch({ type: 'UPDATE_FAVORITE', payload: { id, updates } });
+    dispatch({ type: ACTION_TYPES.FAVORITE.UPDATE, payload: { id, updates } });
   };
 
   const reorderFavorites = (favorites: Favorite[]) => {
-    dispatch({ type: 'REORDER_FAVORITES', payload: favorites });
+    dispatch({ type: ACTION_TYPES.FAVORITE.REORDER, payload: favorites });
   };
 
   const value: FavoritesContextType = {

@@ -1,3 +1,5 @@
+import { ACTION_TYPES } from '@/constants';
+
 /**
  * お気に入りURL情報を表す型
  */
@@ -26,14 +28,14 @@ export type FavoritesState = {
  * お気に入り操作のアクション型
  */
 export type FavoritesAction =
-  | { type: 'ADD_FAVORITE'; payload: Favorite }
-  | { type: 'REMOVE_FAVORITE'; payload: string }
+  | { type: typeof ACTION_TYPES.FAVORITE.ADD; payload: Favorite }
+  | { type: typeof ACTION_TYPES.FAVORITE.REMOVE; payload: string }
   | {
-      type: 'UPDATE_FAVORITE';
+      type: typeof ACTION_TYPES.FAVORITE.UPDATE;
       payload: { id: string; updates: Partial<Favorite> };
     }
-  | { type: 'REORDER_FAVORITES'; payload: Favorite[] }
-  | { type: 'LOAD_FAVORITES'; payload: Favorite[] };
+  | { type: typeof ACTION_TYPES.FAVORITE.REORDER; payload: Favorite[] }
+  | { type: typeof ACTION_TYPES.FAVORITE.LOAD; payload: Favorite[] };
 
 /**
  * お気に入り追加時の入力データ
