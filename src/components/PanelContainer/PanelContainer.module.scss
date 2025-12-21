@@ -109,10 +109,6 @@
 
 .gridItem {
   position: relative;
-
-  @media (max-width: 768px) {
-    height: auto !important;
-  }
 }
 
 .empty {

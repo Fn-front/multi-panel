@@ -57,9 +57,6 @@ export function VideoPlayer({
           style={{
             opacity: isPlayerReady ? 1 : 0,
             transition: 'opacity 0.3s',
-            overflow: 'hidden',
-            width: '100%',
-            height: '100%',
           }}
         >
           <ReactPlayer
