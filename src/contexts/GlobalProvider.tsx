@@ -3,7 +3,6 @@
 import { type ReactNode } from 'react';
 import { AuthProvider, useAuth } from './AuthContext';
 import { PanelsProvider } from './PanelsContext';
-import { ChannelsProvider as OldChannelsProvider } from './ChannelsContext';
 import { FavoritesProvider } from './FavoritesContext';
 import { ChannelProvider } from './ChannelContext';
 
@@ -61,11 +60,9 @@ export function GlobalProvider({ children }: GlobalProviderProps) {
     <AuthProvider>
       <LoadingOverlay />
       <PanelsProvider>
-        <OldChannelsProvider>
-          <FavoritesProvider>
-            <ChannelProvider>{children}</ChannelProvider>
-          </FavoritesProvider>
-        </OldChannelsProvider>
+        <FavoritesProvider>
+          <ChannelProvider>{children}</ChannelProvider>
+        </FavoritesProvider>
       </PanelsProvider>
     </AuthProvider>
   );
