@@ -39,7 +39,6 @@ export function HomeClient({ initialSidebarVisible }: HomeClientProps) {
     const now = new Date();
     const currentMonthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
     fetchedMonthsRef.current.add(currentMonthKey);
-    console.log('[Calendar] Initialized with current month:', currentMonthKey);
   }, []);
 
   // チャンネルIDの配列をメモ化
