@@ -39,6 +39,14 @@ export function HomeClient({ initialSidebarVisible }: HomeClientProps) {
     const now = new Date();
     const currentMonthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
     fetchedMonthsRef.current.add(currentMonthKey);
+
+    // 月の最終週（22日以降）の場合、来月もキャッシュに追加
+    // ログイン時のfetch-channel-streamsで既に月末までのデータ取得済みのため
+    if (now.getDate() >= 22) {
+      const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+      const nextMonthKey = `${nextMonth.getFullYear()}-${String(nextMonth.getMonth() + 1).padStart(2, '0')}`;
+      fetchedMonthsRef.current.add(nextMonthKey);
+    }
   }, []);
 
   // チャンネルIDの配列をメモ化
@@ -157,11 +165,6 @@ export function HomeClient({ initialSidebarVisible }: HomeClientProps) {
 
         try {
           const now = new Date();
-          const currentMonth = new Date(
-            now.getFullYear(),
-            now.getMonth(),
-            1,
-          );
 
           // 各月のデータを取得
           for (const monthKey of monthsToFetch) {
