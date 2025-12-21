@@ -9,6 +9,7 @@ import { HiArrowPath } from 'react-icons/hi2';
 import type { CalendarEvent } from '@/types/youtube';
 import { Modal } from '@/components/Modal';
 import { Skeleton } from '@/components/Skeleton';
+import { UI_TEXT } from '@/constants';
 import { useCalendarAutoScroll } from './hooks/useCalendarAutoScroll';
 import { useInitialMountSkip } from './hooks/useInitialMountSkip';
 import { useEventHandler } from './hooks/useEventHandler';
@@ -74,7 +75,7 @@ export default function StreamCalendar({
     return (
       <div className={styles.calendarContainer}>
         <div className={styles.header}>
-          <h2>配信カレンダー</h2>
+          <h2>{UI_TEXT.CALENDAR.TITLE}</h2>
         </div>
         <div className={styles.loading}>
           <Skeleton height={36} />
@@ -88,11 +89,11 @@ export default function StreamCalendar({
     return (
       <div className={styles.calendarContainer}>
         <div className={styles.header}>
-          <h2>配信カレンダー</h2>
+          <h2>{UI_TEXT.CALENDAR.TITLE}</h2>
         </div>
         <div className={styles.error}>
           <div className={styles.errorMessage}>{error}</div>
-          {onRefresh && <button onClick={onRefresh}>再読み込み</button>}
+          {onRefresh && <button onClick={onRefresh}>{UI_TEXT.CALENDAR.RELOAD}</button>}
         </div>
       </div>
     );
@@ -102,7 +103,7 @@ export default function StreamCalendar({
     <>
       <div className={styles.calendarContainer}>
         <div className={styles.header}>
-          <h2>配信カレンダー</h2>
+          <h2>{UI_TEXT.CALENDAR.TITLE}</h2>
           <div className={styles.controls}>
             {onRefresh && (
               <button
@@ -115,7 +116,7 @@ export default function StreamCalendar({
               </button>
             )}
             <button onClick={open} type='button'>
-              月
+              {UI_TEXT.CALENDAR.MONTH}
             </button>
           </div>
         </div>
@@ -130,15 +131,14 @@ export default function StreamCalendar({
               right: 'timeGridWeek,timeGridDay',
             }}
             buttonText={{
-              today: '今日',
-              week: '週',
-              day: '日',
+              today: UI_TEXT.CALENDAR.TODAY,
+              week: UI_TEXT.CALENDAR.WEEK,
+              day: UI_TEXT.CALENDAR.DAY,
             }}
             dayHeaderContent={(args) => {
               const date = args.date;
               const day = date.getDate();
-              const weekdays = ['日', '月', '火', '水', '木', '金', '土'];
-              const weekday = weekdays[date.getDay()];
+              const weekday = UI_TEXT.WEEKDAYS[date.getDay()];
               return `${day}\n${weekday}`;
             }}
             events={calendarEvents}
@@ -157,7 +157,7 @@ export default function StreamCalendar({
       <Modal
         isOpen={isOpen}
         onClose={close}
-        title='配信カレンダー（月表示）'
+        title={UI_TEXT.CALENDAR.MONTH_VIEW_TITLE}
       >
         <div className={styles.modalCalendar}>
           <FullCalendar
@@ -170,7 +170,7 @@ export default function StreamCalendar({
               right: '',
             }}
             buttonText={{
-              today: '今日',
+              today: UI_TEXT.CALENDAR.TODAY,
             }}
             events={calendarEvents}
             eventClick={handleEventClick}

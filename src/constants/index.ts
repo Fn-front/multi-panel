@@ -61,3 +61,21 @@ export const STYLES = {
   /** 大きいアイコンサイズ */
   ICON_SIZE_LG: '24px',
 } as const;
+
+// ========================================
+// UIテキスト
+// ========================================
+export const UI_TEXT = {
+  // カレンダー関連
+  CALENDAR: {
+    TITLE: '配信カレンダー',
+    MONTH_VIEW_TITLE: '配信カレンダー（月表示）',
+    TODAY: '今日',
+    WEEK: '週',
+    DAY: '日',
+    MONTH: '月',
+    RELOAD: '再読み込み',
+  },
+  // 曜日表示
+  WEEKDAYS: ['日', '月', '火', '水', '木', '金', '土'] as const,
+} as const;
