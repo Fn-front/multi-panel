@@ -51,3 +51,22 @@ export const callSupabaseFunction = async <T = unknown>(
 
   return response.json();
 };
+
+/**
+ * Promise にタイムアウトを追加するユーティリティ関数
+ * @param promise - タイムアウトを追加する Promise
+ * @param timeoutMs - タイムアウト時間（ミリ秒）
+ * @param errorMessage - タイムアウト時のエラーメッセージ
+ */
+export function withTimeout<T>(
+  promise: Promise<T>,
+  timeoutMs: number,
+  errorMessage = 'Operation timed out',
+): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) =>
+      setTimeout(() => reject(new Error(errorMessage)), timeoutMs),
+    ),
+  ]);
+}

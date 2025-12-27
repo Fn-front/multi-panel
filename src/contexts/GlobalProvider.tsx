@@ -5,6 +5,8 @@ import { AuthProvider, useAuth } from './AuthContext';
 import { PanelsProvider } from './PanelsContext';
 import { FavoritesProvider } from './FavoritesContext';
 import { ChannelProvider } from './ChannelContext';
+import { useTimeout } from '@/hooks/useTimeout';
+import { Spinner } from '@/components/Spinner';
 
 type GlobalProviderProps = {
   children: ReactNode;
@@ -15,6 +17,7 @@ type GlobalProviderProps = {
  */
 function LoadingOverlay() {
   const { isLoading } = useAuth();
+  const { hasTimeout } = useTimeout();
 
   if (!isLoading) return null;
 
@@ -28,26 +31,31 @@ function LoadingOverlay() {
         bottom: 0,
         backgroundColor: 'rgba(0, 0, 0, 0.5)',
         display: 'flex',
+        flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
+        gap: '20px',
         zIndex: 9999,
       }}
     >
-      <div
-        style={{
-          width: '50px',
-          height: '50px',
-          border: '5px solid rgba(255, 255, 255, 0.3)',
-          borderTopColor: '#fff',
-          borderRadius: '50%',
-          animation: 'spin 1s linear infinite',
-        }}
-      />
-      <style>{`
-        @keyframes spin {
-          to { transform: rotate(360deg); }
-        }
-      `}</style>
+      <Spinner size={50} />
+      <div style={{ color: '#fff', fontSize: '18px' }}>読み込み中...</div>
+      {hasTimeout && (
+        <button
+          onClick={() => window.location.reload()}
+          style={{
+            padding: '10px 20px',
+            fontSize: '16px',
+            backgroundColor: '#fff',
+            color: '#000',
+            border: 'none',
+            borderRadius: '5px',
+            cursor: 'pointer',
+          }}
+        >
+          ページをリロード
+        </button>
+      )}
     </div>
   );
 }

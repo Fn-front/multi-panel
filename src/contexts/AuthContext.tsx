@@ -3,8 +3,9 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import type { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
-import { callSupabaseFunction } from '@/utils/supabase';
+import { callSupabaseFunction, withTimeout } from '@/utils/supabase';
 import { UI_TEXT } from '@/constants';
+import { useTimeout } from '@/hooks/useTimeout';
 
 interface AuthContextType {
   user: User | null;
@@ -22,6 +23,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isAllowed, setIsAllowed] = useState(false);
+  const { setHasTimeout } = useTimeout();
 
   // セッション有効期限（24時間）
   const SESSION_EXPIRY_HOURS = 24;
@@ -46,12 +48,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     updateLogin = false,
     skipExpiryCheck = false,
   ): Promise<{ isAllowed: boolean; isExpired: boolean }> => {
-    // 1回のクエリで情報取得
-    const { data, error } = await supabase
-      .from('allowed_users')
-      .select('user_id, last_login_at')
-      .eq('user_id', userId)
-      .single();
+    // 1回のクエリで情報取得（5秒タイムアウト）
+    const { data, error } = await withTimeout(
+      supabase
+        .from('allowed_users')
+        .select('user_id, last_login_at')
+        .eq('user_id', userId)
+        .single(),
+      5000,
+      'Allowed users check timeout',
+    ).catch((err) => {
+      console.error('checkAndUpdateAllowedUser timeout:', err);
+      setHasTimeout(true);
+      return { data: null, error: err };
+    });
 
     if (error) {
       console.error('ホワイトリストチェックエラー:', error);
@@ -101,8 +111,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // セッション初期化
   useEffect(() => {
-    // 現在のセッションを取得
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
+    // 現在のセッションを取得（5秒タイムアウト）
+    withTimeout(supabase.auth.getSession(), 5000, 'Auth session timeout')
+      .catch((err) => {
+        console.error('getSession timeout:', err);
+        setHasTimeout(true);
+        return { data: { session: null }, error: err };
+      })
+      .then(async ({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
 
@@ -189,7 +205,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [setHasTimeout]);
 
   // GitHub OAuth ログイン
   const signInWithGitHub = async () => {

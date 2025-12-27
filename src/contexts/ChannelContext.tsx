@@ -12,9 +12,10 @@ import type { Channel, ChannelsState, ChannelsAction } from '@/types/channel';
 import { STORAGE_KEYS, ACTION_TYPES } from '@/constants';
 import { loadFromStorage, saveArrayToStorage } from '@/utils/storage';
 import { formatDate, getCurrentMonthRange } from '@/utils/date';
-import { callSupabaseFunction } from '@/utils/supabase';
+import { callSupabaseFunction, withTimeout } from '@/utils/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
+import { useTimeout } from '@/hooks/useTimeout';
 
 // DB型からChannel型への変換
 const mapDbToChannel = (dbChannel: {
@@ -96,6 +97,7 @@ export function ChannelProvider({ children }: ChannelProviderProps) {
   const [state, dispatch] = useReducer(channelsReducer, initialState);
   const [isLoading, setIsLoading] = useState(true);
   const { user } = useAuth();
+  const { setHasTimeout } = useTimeout();
 
   // 初期データ読み込み（ログイン時: Supabase, 未ログイン時: localStorage）
   useEffect(() => {
@@ -108,10 +110,18 @@ export function ChannelProvider({ children }: ChannelProviderProps) {
         localStorage.removeItem(STORAGE_KEYS.CHANNELS);
 
         try {
-          const { data, error } = await supabase
-            .from('favorite_channels')
-            .select('*')
-            .order('added_at', { ascending: true });
+          const { data, error } = await withTimeout(
+            supabase
+              .from('favorite_channels')
+              .select('*')
+              .order('added_at', { ascending: true}),
+            5000,
+            'Favorite channels fetch timeout',
+          ).catch((err) => {
+            console.error('favorite_channels timeout:', err);
+            setHasTimeout(true);
+            return { data: null, error: err };
+          });
 
           if (error) throw error;
 
