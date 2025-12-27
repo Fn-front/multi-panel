@@ -178,13 +178,15 @@ export function ChannelProvider({ children }: ChannelProviderProps) {
       // ログイン時: Supabaseに追加（論理削除済みの場合は復元）
       try {
         // 論理削除されたレコードも含めて重複チェック
-        const { data: existingChannel } = await supabase
+        const { data: existingChannel, error: existingError } = await supabase
           .from('favorite_channels')
           .select('*')
           .eq('user_id', user.id)
           .eq('channel_id', channel.channelId)
           .is('deleted_at', null)
           .maybeSingle();
+
+        if (existingError) throw existingError;
 
         if (existingChannel) {
           // 既にアクティブなチャンネルが存在する場合はエラー
@@ -193,13 +195,15 @@ export function ChannelProvider({ children }: ChannelProviderProps) {
         }
 
         // 論理削除されたレコードを確認
-        const { data: deletedChannel } = await supabase
+        const { data: deletedChannel, error: deletedError } = await supabase
           .from('favorite_channels')
           .select('*')
           .eq('user_id', user.id)
           .eq('channel_id', channel.channelId)
           .not('deleted_at', 'is', null)
           .maybeSingle();
+
+        if (deletedError) throw deletedError;
 
         if (deletedChannel) {
           // 論理削除されたレコードが存在する場合は復元
@@ -249,6 +253,7 @@ export function ChannelProvider({ children }: ChannelProviderProps) {
         }
       } catch (error) {
         console.error('Failed to add channel to Supabase:', error);
+        throw error;
       }
     } else {
       // 未ログイン時: ローカルのみ

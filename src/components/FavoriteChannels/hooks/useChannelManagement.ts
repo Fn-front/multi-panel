@@ -127,7 +127,7 @@ export function useChannelManagement({
           thumbnail: channelInfo.thumbnail,
         };
 
-        onAddChannel(newChannel);
+        await onAddChannel(newChannel);
         setInputValue('');
       } catch (err) {
         console.error('Failed to add channel:', err);
