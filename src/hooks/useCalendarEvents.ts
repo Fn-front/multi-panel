@@ -2,6 +2,8 @@ import { useState, useCallback, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { UI_TEXT } from '@/constants';
+import { formatDate, getCurrentMonthRange } from '@/utils/date';
+import { callSupabaseFunction } from '@/utils/supabase';
 import type { CalendarEvent } from '@/types/youtube';
 
 // モックデータ生成（開発用）
@@ -140,6 +142,35 @@ export function useCalendarEvents({
     }
   }, [channelIds, user]);
 
+  // 更新ボタン用: YouTubeから現在月のデータを取得してからfetchScheduleを実行
+  const refreshSchedule = useCallback(async () => {
+    if (!user || channelIds.length === 0) {
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      const { startDate, endDate } = getCurrentMonthRange();
+
+      await callSupabaseFunction('fetch-past-streams', {
+        channelIds,
+        startDate: formatDate(startDate),
+        endDate: formatDate(endDate),
+      });
+
+      // データ取得後、Supabaseから最新データを読み込み
+      await fetchSchedule();
+    } catch (err) {
+      console.error('Failed to refresh schedule:', err);
+      setError(
+        err instanceof Error ? err.message : UI_TEXT.CALENDAR.FETCH_ERROR,
+      );
+      setIsLoading(false);
+    }
+  }, [user, channelIds, fetchSchedule]);
+
   // 初回読み込みと定期更新
   useEffect(() => {
     fetchSchedule();
@@ -154,5 +185,6 @@ export function useCalendarEvents({
     isLoading,
     error,
     fetchSchedule,
+    refreshSchedule,
   };
 }

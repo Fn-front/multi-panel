@@ -58,6 +58,7 @@ export function HomeClient({ initialSidebarVisible }: HomeClientProps) {
     isLoading: isCalendarLoading,
     error: calendarError,
     fetchSchedule,
+    refreshSchedule,
   } = useCalendarEvents({
     channelIds,
     refreshInterval: 5 * 60 * 1000,
@@ -223,7 +224,7 @@ export function HomeClient({ initialSidebarVisible }: HomeClientProps) {
                   events={calendarEvents}
                   isLoading={isCalendarLoading}
                   error={calendarError}
-                  onRefresh={fetchSchedule}
+                  onRefresh={refreshSchedule}
                   onDatesSet={handleDatesSet}
                 />
               </div>
