@@ -30,7 +30,7 @@ export function useCalendarEvents({
     try {
       setError(null);
 
-      // Supabaseからstream_eventsを取得（30秒タイムアウト）
+      // Supabaseからstream_eventsを取得（60秒タイムアウト）
       // fetch-past-streamsで取得済みの過去月データも含めて全て表示
       const { data, error: supabaseError } = await withTimeout(
         supabase
@@ -38,12 +38,13 @@ export function useCalendarEvents({
           .select('*')
           .in('channel_id', channelIds)
           .order('scheduled_start_time', { ascending: true }),
-        30000,
+        60000,
         'Stream events fetch timeout',
       ).catch((err) => {
         console.error('stream_events timeout:', err);
         setHasTimeout(true);
-        return { data: null, error: err };
+        // タイムアウト時は空データを返してエラーをスローしない
+        return { data: [], error: null };
       });
 
       if (supabaseError) throw supabaseError;

@@ -48,14 +48,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     updateLogin = false,
     skipExpiryCheck = false,
   ): Promise<{ isAllowed: boolean; isExpired: boolean }> => {
-    // 1回のクエリで情報取得（5秒タイムアウト）
+    // 1回のクエリで情報取得（15秒タイムアウト）
     const { data, error } = await withTimeout(
       supabase
         .from('allowed_users')
         .select('user_id, last_login_at')
         .eq('user_id', userId)
         .single(),
-      5000,
+      15000,
       'Allowed users check timeout',
     ).catch((err) => {
       console.error('checkAndUpdateAllowedUser timeout:', err);
@@ -111,8 +111,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // セッション初期化
   useEffect(() => {
-    // 現在のセッションを取得（5秒タイムアウト）
-    withTimeout(supabase.auth.getSession(), 5000, 'Auth session timeout')
+    // 現在のセッションを取得（15秒タイムアウト）
+    withTimeout(supabase.auth.getSession(), 15000, 'Auth session timeout')
       .catch((err) => {
         console.error('getSession timeout:', err);
         setHasTimeout(true);
