@@ -33,19 +33,38 @@ function getYouTubeClient(): AxiosInstance {
 }
 
 /**
- * チャンネルIDから詳細情報を取得
+ * チャンネルIDまたはハンドルから詳細情報を取得
  */
 export async function getChannelInfo(
-  channelId: string,
+  channelIdOrHandle: string,
 ): Promise<YouTubeChannelInfo | null> {
   const client = getYouTubeClient();
 
   try {
-    const response = await client.get<YouTubeChannelsResponse>('/channels', {
-      params: {
+    let params: Record<string, string>;
+
+    // @で始まる場合はハンドルとして扱う
+    if (channelIdOrHandle.startsWith('@')) {
+      params = {
         part: 'snippet',
-        id: channelId,
-      },
+        forHandle: channelIdOrHandle.slice(1), // @を除く
+      };
+    } else if (channelIdOrHandle.startsWith('UC')) {
+      // UCで始まる場合はチャンネルID
+      params = {
+        part: 'snippet',
+        id: channelIdOrHandle,
+      };
+    } else {
+      // それ以外はカスタムURL/ユーザー名として扱う
+      params = {
+        part: 'snippet',
+        forUsername: channelIdOrHandle,
+      };
+    }
+
+    const response = await client.get<YouTubeChannelsResponse>('/channels', {
+      params,
     });
 
     const data = response.data;
