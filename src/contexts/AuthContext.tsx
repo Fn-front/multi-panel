@@ -238,8 +238,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (error) {
         console.error('ログアウトエラー:', error);
-        throw error;
+        // エラーが発生してもローカル状態とストレージをクリア
+        setSession(null);
+        setUser(null);
+        setIsAllowed(false);
+
+        // LocalStorageを手動でクリア
+        if (typeof window !== 'undefined') {
+          const storageKey = `sb-${process.env.NEXT_PUBLIC_SUPABASE_URL!.split('//')[1].split('.')[0]}-auth-token`;
+          localStorage.removeItem(storageKey);
+        }
+        return;
       }
+
+      // 正常にログアウトできた場合もローカル状態をクリア
+      setSession(null);
+      setUser(null);
+      setIsAllowed(false);
     } finally {
       setIsLoading(false);
     }
