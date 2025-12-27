@@ -35,9 +35,27 @@ export function useChannelManagement({
 
       // youtube.com/channel/... 形式
       if (url.pathname.startsWith('/channel/')) {
-        const channelId = url.pathname.replace('/channel/', '');
+        const channelId = url.pathname.replace('/channel/', '').split('/')[0];
         if (/^UC[\w-]{22}$/.test(channelId)) {
           return channelId;
+        }
+      }
+
+      // youtube.com/@handle 形式
+      if (url.pathname.startsWith('/@')) {
+        const handle = url.pathname.slice(2).split('/')[0];
+        if (handle) {
+          // ハンドルをそのまま返す（getChannelInfo APIで解決）
+          return `@${handle}`;
+        }
+      }
+
+      // youtube.com/c/customname 形式
+      if (url.pathname.startsWith('/c/')) {
+        const customName = url.pathname.split('/c/')[1]?.split('/')[0];
+        if (customName) {
+          // カスタム名をそのまま返す（getChannelInfo APIで解決）
+          return customName;
         }
       }
 
@@ -49,7 +67,12 @@ export function useChannelManagement({
         return null;
       }
     } catch {
-      // URLではない場合はそのまま返す（検証はAPI呼び出し時に行う）
+      // URLではない場合
+      // @で始まる場合はハンドルとして扱う
+      if (trimmed.startsWith('@')) {
+        return trimmed;
+      }
+      // それ以外はそのまま返す（検証はAPI呼び出し時に行う）
       return trimmed;
     }
 
