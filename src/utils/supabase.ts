@@ -32,7 +32,10 @@ const getSupabaseClient = (): AxiosInstance => {
   }
 
   if (!supabaseClient) {
-    supabaseClient = createSupabaseClient(config.supabaseUrl, config.supabaseKey);
+    supabaseClient = createSupabaseClient(
+      config.supabaseUrl,
+      config.supabaseKey,
+    );
   }
 
   return supabaseClient;
@@ -50,12 +53,15 @@ export const callSupabaseFunction = async <T = unknown>(
   try {
     const response = await client.post<T>(`/${functionName}`, body);
     return response.data;
-  } catch (error: any) {
-    const errorMessage = error.response?.data?.error || error.message;
+  } catch (error: unknown) {
+    const err = error as {
+      response?: { data?: { error?: string } };
+      message?: string;
+    };
+    const errorMessage =
+      err.response?.data?.error || err.message || 'Unknown error';
     console.error(`[Supabase Function Error] ${functionName}:`, errorMessage);
-    throw new Error(
-      `Failed to call ${functionName}: ${errorMessage}`,
-    );
+    throw new Error(`Failed to call ${functionName}: ${errorMessage}`);
   }
 };
 

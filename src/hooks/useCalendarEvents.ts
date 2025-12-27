@@ -3,22 +3,18 @@ import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { UI_TEXT } from '@/constants';
 import { formatDate, getCurrentMonthRange } from '@/utils/date';
-import { callSupabaseFunction, withTimeout } from '@/utils/supabase';
+import { callSupabaseFunction } from '@/utils/supabase';
 import type { CalendarEvent } from '@/types/youtube';
-import { useTimeout } from '@/hooks/useTimeout';
 
 type UseCalendarEventsOptions = {
   channelIds: string[];
 };
 
-export function useCalendarEvents({
-  channelIds,
-}: UseCalendarEventsOptions) {
+export function useCalendarEvents({ channelIds }: UseCalendarEventsOptions) {
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
-  const { setHasTimeout } = useTimeout();
 
   const fetchSchedule = useCallback(async () => {
     if (!user || channelIds.length === 0) {
@@ -30,22 +26,13 @@ export function useCalendarEvents({
     try {
       setError(null);
 
-      // Supabaseからstream_eventsを取得（60秒タイムアウト）
+      // Supabaseからstream_eventsを取得（タイムアウトなし）
       // fetch-past-streamsで取得済みの過去月データも含めて全て表示
-      const { data, error: supabaseError } = await withTimeout(
-        supabase
-          .from('stream_events')
-          .select('*')
-          .in('channel_id', channelIds)
-          .order('scheduled_start_time', { ascending: true }),
-        60000,
-        'Stream events fetch timeout',
-      ).catch((err) => {
-        console.error('stream_events timeout:', err);
-        setHasTimeout(true);
-        // タイムアウト時は空データを返してエラーをスローしない
-        return { data: [], error: null };
-      });
+      const { data, error: supabaseError } = await supabase
+        .from('stream_events')
+        .select('*')
+        .in('channel_id', channelIds)
+        .order('scheduled_start_time', { ascending: true });
 
       if (supabaseError) throw supabaseError;
 

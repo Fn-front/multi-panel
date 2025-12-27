@@ -114,7 +114,7 @@ export function ChannelProvider({ children }: ChannelProviderProps) {
             supabase
               .from('favorite_channels')
               .select('*')
-              .order('added_at', { ascending: true}),
+              .order('added_at', { ascending: true }),
             5000,
             'Favorite channels fetch timeout',
           ).catch((err) => {

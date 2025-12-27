@@ -2,7 +2,7 @@
  * HTTP クライアント - axios ベースの共通エラーハンドリング
  */
 
-import axios, { AxiosError, AxiosInstance, AxiosRequestConfig } from 'axios';
+import axios, { type AxiosError, type AxiosInstance } from 'axios';
 
 /**
  * 共通エラーハンドリング用のaxiosインスタンス
@@ -117,8 +117,11 @@ export const createYouTubeClient = (apiKey: string): AxiosInstance => {
     (response) => response,
     (error: AxiosError) => {
       if (error.response?.status === 403) {
-        const data = error.response.data as any;
-        if (data?.error?.errors?.[0]?.reason === 'quotaExceeded') {
+        const data = error.response.data as Record<string, unknown>;
+        if (
+          (data?.error as Record<string, unknown>)?.errors?.[0]?.reason ===
+          'quotaExceeded'
+        ) {
           console.warn('YouTube API quota exceeded');
         }
       }
