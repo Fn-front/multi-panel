@@ -111,10 +111,12 @@ export function ChannelProvider({ children }: ChannelProviderProps) {
 
         try {
           const { data, error } = await withTimeout(
-            supabase
-              .from('favorite_channels')
-              .select('*')
-              .order('added_at', { ascending: true }),
+            Promise.resolve(
+              supabase
+                .from('favorite_channels')
+                .select('*')
+                .order('added_at', { ascending: true }),
+            ),
             5000,
             'Favorite channels fetch timeout',
           ).catch((err) => {

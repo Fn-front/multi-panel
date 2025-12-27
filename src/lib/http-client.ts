@@ -118,10 +118,11 @@ export const createYouTubeClient = (apiKey: string): AxiosInstance => {
     (error: AxiosError) => {
       if (error.response?.status === 403) {
         const data = error.response.data as Record<string, unknown>;
-        if (
-          (data?.error as Record<string, unknown>)?.errors?.[0]?.reason ===
-          'quotaExceeded'
-        ) {
+        const errorData = data?.error as Record<string, unknown> | undefined;
+        const errors = errorData?.errors as
+          | Array<Record<string, unknown>>
+          | undefined;
+        if (errors?.[0]?.reason === 'quotaExceeded') {
           console.warn('YouTube API quota exceeded');
         }
       }

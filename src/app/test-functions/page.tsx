@@ -15,7 +15,10 @@ export default function TestFunctionsPage() {
     try {
       console.log('Invoking function:', functionName);
 
-      const data = await callSupabaseFunction(functionName, body || {});
+      const data = await callSupabaseFunction(
+        functionName,
+        (body as Record<string, unknown>) || ({} as Record<string, unknown>),
+      );
       console.log('Result:', data);
 
       setResult(JSON.stringify(data, null, 2));

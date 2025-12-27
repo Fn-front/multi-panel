@@ -1,11 +1,17 @@
 'use client';
 
 import Image from 'next/image';
-import { HiChevronLeft, HiChevronRight, HiBars3 } from 'react-icons/hi2';
+import {
+  HiChevronLeft,
+  HiChevronRight,
+  HiBars3,
+  HiCog6Tooth,
+} from 'react-icons/hi2';
 import { PanelContainer } from '@/components/PanelContainer';
 import FavoriteChannels from '@/components/FavoriteChannels';
 import StreamCalendar from '@/components/StreamCalendar';
 import { LoginModal } from '@/components/LoginModal';
+import { SettingsModal } from '@/components/SettingsModal';
 import { Skeleton } from '@/components/Skeleton';
 import { useChannels } from '@/contexts/ChannelContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -20,6 +26,7 @@ import { useAuthHandlers } from './hooks/useAuthHandlers';
 import { useCalendarMonthFetch } from './hooks/useCalendarMonthFetch';
 import { useCalendarEventHandler } from './hooks/useCalendarEventHandler';
 import { useScrollLock } from './hooks/useScrollLock';
+import { useSettingsModal } from './hooks/useSettingsModal';
 import styles from './HomeClient.module.scss';
 
 type HomeClientProps = {
@@ -43,6 +50,10 @@ export function HomeClient({ initialSidebarVisible }: HomeClientProps) {
   // 認証ハンドラ
   const { isLoginModalOpen, openLoginModal, closeLoginModal, handleLogout } =
     useAuthHandlers();
+
+  // 設定モーダル
+  const { isSettingsModalOpen, openSettingsModal, closeSettingsModal } =
+    useSettingsModal();
 
   // 通知管理
   const {
@@ -124,13 +135,23 @@ export function HomeClient({ initialSidebarVisible }: HomeClientProps) {
                       height={40}
                       unoptimized
                     />
-                    <button
-                      onClick={handleLogout}
-                      className={styles.logoutButton}
-                      type='button'
-                    >
-                      {UI_TEXT.AUTH.LOGOUT}
-                    </button>
+                    <div className={styles.buttonGroup}>
+                      <button
+                        onClick={handleLogout}
+                        className={styles.logoutButton}
+                        type='button'
+                      >
+                        {UI_TEXT.AUTH.LOGOUT}
+                      </button>
+                      <button
+                        onClick={openSettingsModal}
+                        className={styles.settingsButton}
+                        type='button'
+                        aria-label={UI_TEXT.SETTINGS.TITLE}
+                      >
+                        <HiCog6Tooth />
+                      </button>
+                    </div>
                   </>
                 ) : (
                   <Image
@@ -178,45 +199,6 @@ export function HomeClient({ initialSidebarVisible }: HomeClientProps) {
                 />
               </div>
 
-              <div className={styles.notificationSettings}>
-                <h3>{UI_TEXT.NOTIFICATION.TITLE}</h3>
-                {isMounted ? (
-                  <>
-                    <div className={styles.notificationToggle}>
-                      <label>
-                        {isEnabled
-                          ? `${UI_TEXT.NOTIFICATION.ENABLED} (${UI_TEXT.NOTIFICATION.COUNT(notifiedCount)})`
-                          : permission === 'denied'
-                            ? UI_TEXT.NOTIFICATION.DENIED
-                            : UI_TEXT.NOTIFICATION.ENABLE}
-                      </label>
-                      <button
-                        onClick={handleNotificationToggle}
-                        className={
-                          permission === 'denied' ? styles.disabled : ''
-                        }
-                        disabled={permission === 'denied'}
-                        type='button'
-                      >
-                        {isEnabled ? 'OFF' : 'ON'}
-                      </button>
-                    </div>
-                    {permission === 'default' && (
-                      <div className={styles.notificationStatus}>
-                        {UI_TEXT.NOTIFICATION.PERMISSION_REQUIRED}
-                      </div>
-                    )}
-                  </>
-                ) : (
-                  <div className={styles.notificationToggle}>
-                    <label>{UI_TEXT.NOTIFICATION.ENABLE}</label>
-                    <button type='button' disabled>
-                      ON
-                    </button>
-                  </div>
-                )}
-              </div>
-
               <div className={`${styles.section} ${styles.calendarSection}`}>
                 <StreamCalendar
                   onEventClick={handleEventClick}
@@ -237,6 +219,15 @@ export function HomeClient({ initialSidebarVisible }: HomeClientProps) {
       </main>
 
       <LoginModal isOpen={isLoginModalOpen} onClose={closeLoginModal} />
+      <SettingsModal
+        isOpen={isSettingsModalOpen}
+        onClose={closeSettingsModal}
+        isMounted={isMounted}
+        permission={permission}
+        isEnabled={isEnabled}
+        notifiedCount={notifiedCount}
+        onToggle={handleNotificationToggle}
+      />
     </div>
   );
 }

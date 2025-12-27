@@ -94,11 +94,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   ): Promise<{ isAllowed: boolean; isExpired: boolean }> => {
     const executeQuery = async () => {
       return await withTimeout(
-        supabase
-          .from('allowed_users')
-          .select('user_id, last_login_at')
-          .eq('user_id', userId)
-          .single(),
+        Promise.resolve(
+          supabase
+            .from('allowed_users')
+            .select('user_id, last_login_at')
+            .eq('user_id', userId)
+            .single(),
+        ),
         30000,
         'Allowed users check timeout',
       );

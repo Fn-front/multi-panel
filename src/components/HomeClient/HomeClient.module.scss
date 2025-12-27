@@ -105,6 +105,12 @@
         text-overflow: ellipsis;
       }
 
+      .buttonGroup {
+        display: flex;
+        gap: var(--spacing-xs, 6px);
+        align-items: center;
+      }
+
       .logoutButton {
         padding: 6px 12px;
         background: var(--bg-tertiary, #2a2a2a);
@@ -117,6 +123,29 @@
 
         &:hover {
           background: var(--bg-hover, #3a3a3a);
+        }
+      }
+
+      .settingsButton {
+        padding: 6px;
+        background: var(--bg-tertiary, #2a2a2a);
+        color: var(--text-primary, #ffffff);
+        border: 1px solid var(--border-color, #404040);
+        border-radius: var(--radius-sm, 4px);
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        svg {
+          width: 18px;
+          height: 18px;
+        }
+
+        &:hover {
+          background: var(--bg-hover, #3a3a3a);
+          color: var(--accent-primary, #3b82f6);
         }
       }
     }
@@ -153,60 +182,9 @@
     &.calendarSection {
       flex: 1;
       min-height: 400px;
+      max-height: 500px;
       display: flex;
       flex-direction: column;
-    }
-  }
-
-  .notificationSettings {
-    padding: var(--spacing-md, 16px);
-    background: var(--bg-tertiary, #2a2a2a);
-    border-radius: var(--radius-md, 8px);
-
-    h3 {
-      font-size: var(--text-base, 16px);
-      font-weight: var(--font-semibold, 600);
-      color: var(--text-primary, #ffffff);
-      margin: 0 0 var(--spacing-sm, 12px) 0;
-    }
-
-    .notificationToggle {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: var(--spacing-sm, 8px);
-
-      label {
-        font-size: var(--text-sm, 14px);
-        color: var(--text-secondary, #a0a0a0);
-      }
-
-      button {
-        padding: var(--spacing-xs, 6px) var(--spacing-sm, 12px);
-        background: var(--accent-primary, #3b82f6);
-        border: none;
-        border-radius: var(--radius-sm, 4px);
-        color: var(--text-primary, #ffffff);
-        font-size: var(--text-sm, 14px);
-        cursor: pointer;
-        transition: all var(--transition-base, 200ms ease-in-out);
-
-        &:hover {
-          background: var(--accent-hover, #2563eb);
-        }
-
-        &.disabled {
-          background: var(--bg-hover, #353535);
-          color: var(--text-tertiary, #707070);
-          cursor: not-allowed;
-        }
-      }
-    }
-
-    .notificationStatus {
-      margin-top: var(--spacing-xs, 8px);
-      font-size: var(--text-xs, 12px);
-      color: var(--text-tertiary, #707070);
     }
   }
 }

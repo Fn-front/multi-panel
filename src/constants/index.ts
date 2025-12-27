@@ -176,6 +176,10 @@ export const UI_TEXT = {
     OPEN: 'サイドバーを開く',
     CLOSE: 'サイドバーを閉じる',
   },
+  // 設定関連
+  SETTINGS: {
+    TITLE: '設定',
+  },
   // 接続状態関連
   CONNECTION: {
     RETRYING: '接続を再試行中',
