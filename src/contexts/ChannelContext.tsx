@@ -171,27 +171,77 @@ export function ChannelProvider({ children }: ChannelProviderProps) {
   // ヘルパー関数
   const addChannel = async (channel: Channel) => {
     if (user) {
-      // ログイン時: Supabaseに追加
+      // ログイン時: Supabaseに追加（論理削除済みの場合は復元）
       try {
-        const { data, error } = await supabase
+        // 論理削除されたレコードも含めて重複チェック
+        const { data: existingChannel } = await supabase
           .from('favorite_channels')
-          .insert({
-            user_id: user.id,
-            channel_id: channel.channelId,
-            channel_title: channel.name,
-            channel_thumbnail: channel.thumbnail || null,
-          })
-          .select()
-          .single();
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('channel_id', channel.channelId)
+          .is('deleted_at', null)
+          .maybeSingle();
 
-        if (error) throw error;
+        if (existingChannel) {
+          // 既にアクティブなチャンネルが存在する場合はエラー
+          console.warn('Channel already exists:', channel.channelId);
+          return;
+        }
 
-        if (data) {
-          dispatch({
-            type: ACTION_TYPES.CHANNEL.ADD,
-            payload: mapDbToChannel(data),
-          });
-          await fetchCurrentMonthStreams(channel.channelId);
+        // 論理削除されたレコードを確認
+        const { data: deletedChannel } = await supabase
+          .from('favorite_channels')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('channel_id', channel.channelId)
+          .not('deleted_at', 'is', null)
+          .maybeSingle();
+
+        if (deletedChannel) {
+          // 論理削除されたレコードが存在する場合は復元
+          const { data, error } = await supabase
+            .from('favorite_channels')
+            .update({
+              channel_title: channel.name,
+              channel_thumbnail: channel.thumbnail || null,
+              deleted_at: null,
+              updated_at: new Date().toISOString(),
+            })
+            .eq('id', deletedChannel.id)
+            .select()
+            .single();
+
+          if (error) throw error;
+
+          if (data) {
+            dispatch({
+              type: ACTION_TYPES.CHANNEL.ADD,
+              payload: mapDbToChannel(data),
+            });
+            await fetchCurrentMonthStreams(channel.channelId);
+          }
+        } else {
+          // 新規追加
+          const { data, error } = await supabase
+            .from('favorite_channels')
+            .insert({
+              user_id: user.id,
+              channel_id: channel.channelId,
+              channel_title: channel.name,
+              channel_thumbnail: channel.thumbnail || null,
+            })
+            .select()
+            .single();
+
+          if (error) throw error;
+
+          if (data) {
+            dispatch({
+              type: ACTION_TYPES.CHANNEL.ADD,
+              payload: mapDbToChannel(data),
+            });
+            await fetchCurrentMonthStreams(channel.channelId);
+          }
         }
       } catch (error) {
         console.error('Failed to add channel to Supabase:', error);
@@ -224,7 +274,7 @@ export function ChannelProvider({ children }: ChannelProviderProps) {
 
   const removeChannel = async (id: string) => {
     if (user) {
-      // ログイン時: Supabaseから削除
+      // ログイン時: Supabaseで論理削除（favorite_channelsのみ）
       try {
         // 削除するチャンネルのchannel_idを取得
         const channelToRemove = state.channels.find((ch) => ch.id === id);
@@ -233,15 +283,15 @@ export function ChannelProvider({ children }: ChannelProviderProps) {
           return;
         }
 
-        // favorite_channelsから削除
+        // favorite_channelsを論理削除（deleted_atを設定）
         const { error } = await supabase
           .from('favorite_channels')
-          .delete()
+          .update({ deleted_at: new Date().toISOString() })
           .eq('id', id);
 
         if (error) throw error;
 
-        // 紐づくstream_eventsを削除
+        // 紐づくstream_eventsを物理削除
         const { error: streamEventsError } = await supabase
           .from('stream_events')
           .delete()
@@ -251,7 +301,7 @@ export function ChannelProvider({ children }: ChannelProviderProps) {
           console.error('Failed to delete stream_events:', streamEventsError);
         }
 
-        // 紐づくfetched_date_rangesを削除
+        // 紐づくfetched_date_rangesを物理削除
         const { error: fetchedRangesError } = await supabase
           .from('fetched_date_ranges')
           .delete()
