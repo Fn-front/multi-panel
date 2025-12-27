@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import Image from 'next/image';
 import {
   HiChevronLeft,
@@ -51,14 +51,15 @@ export function HomeClient({ initialSidebarVisible }: HomeClientProps) {
   const channelIds = useChannelIds(channelState.channels);
 
   // チャンネルIDと色のマップ
-  const channelColorMap = channelState.channels.reduce<Record<string, string>>(
-    (acc, channel) => {
-      if (channel.color) {
-        acc[channel.channelId] = channel.color;
-      }
-      return acc;
-    },
-    {},
+  const channelColorMap = useMemo(
+    () =>
+      channelState.channels.reduce<Record<string, string>>((acc, channel) => {
+        if (channel.color) {
+          acc[channel.channelId] = channel.color;
+        }
+        return acc;
+      }, {}),
+    [channelState.channels],
   );
 
   // サイドバー管理
@@ -227,6 +228,7 @@ export function HomeClient({ initialSidebarVisible }: HomeClientProps) {
 
               <div className={`${styles.section} ${styles.calendarSection}`}>
                 <StreamCalendar
+                  key={JSON.stringify(channelColorMap)}
                   onEventClick={handleEventClick}
                   events={calendarEvents}
                   isLoading={isCalendarLoading}
