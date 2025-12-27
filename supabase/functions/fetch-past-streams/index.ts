@@ -3,10 +3,34 @@
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import axios from 'https://deno.land/x/axiod@0.26.2/mod.ts';
 
 const YOUTUBE_API_KEY = Deno.env.get('YOUTUBE_API_KEY');
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+
+// YouTube API用のaxiosインスタンス
+const youtubeApi = axios.create({
+  baseURL: 'https://www.googleapis.com/youtube/v3',
+  timeout: 30000,
+  params: {
+    key: YOUTUBE_API_KEY,
+  },
+});
+
+// レスポンスインターセプター: YouTube API固有のエラーハンドリング
+youtubeApi.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 403) {
+      const data = error.response.data;
+      if (data?.error?.errors?.[0]?.reason === 'quotaExceeded') {
+        console.warn('YouTube API quota exceeded');
+      }
+    }
+    return Promise.reject(error);
+  },
+);
 
 interface YouTubeVideo {
   id: string;
@@ -201,68 +225,64 @@ async function fetchPastStreamsByDateRange(
   endDate: string,
   channelThumbnail?: string | null
 ): Promise<YouTubeVideo[]> {
-  // Search APIで過去の配信を検索
-  const searchUrl = new URL('https://www.googleapis.com/youtube/v3/search');
-  searchUrl.searchParams.set('part', 'snippet');
-  searchUrl.searchParams.set('channelId', channelId);
-  searchUrl.searchParams.set('eventType', 'completed');
-  searchUrl.searchParams.set('type', 'video');
-  searchUrl.searchParams.set('maxResults', '50');
-  searchUrl.searchParams.set('order', 'date');
-  searchUrl.searchParams.set('publishedAfter', new Date(startDate).toISOString());
-  searchUrl.searchParams.set('publishedBefore', new Date(endDate + 'T23:59:59Z').toISOString());
-  searchUrl.searchParams.set('key', YOUTUBE_API_KEY!);
+  try {
+    // Search APIで過去の配信を検索
+    const searchResponse = await youtubeApi.get('/search', {
+      params: {
+        part: 'snippet',
+        channelId,
+        eventType: 'completed',
+        type: 'video',
+        maxResults: '50',
+        order: 'date',
+        publishedAfter: new Date(startDate).toISOString(),
+        publishedBefore: new Date(endDate + 'T23:59:59Z').toISOString(),
+      },
+    });
 
-  const searchResponse = await fetch(searchUrl.toString());
-  if (!searchResponse.ok) {
+    const searchData = searchResponse.data;
+
+    if (!searchData.items || searchData.items.length === 0) {
+      return [];
+    }
+
+    // 動画IDを収集
+    const videoIds = searchData.items
+      .map((item: any) => item.id.videoId)
+      .filter(Boolean);
+
+    if (videoIds.length === 0) {
+      return [];
+    }
+
+    // Videos APIで詳細情報を取得
+    const videosResponse = await youtubeApi.get('/videos', {
+      params: {
+        part: 'snippet,liveStreamingDetails',
+        id: videoIds.join(','),
+      },
+    });
+
+    const videosData = videosResponse.data;
+
+    return videosData.items.map((video: any) => ({
+      id: video.id,
+      title: video.snippet.title,
+      thumbnail: video.snippet.thumbnails.high.url,
+      channelId: video.snippet.channelId,
+      channelTitle: video.snippet.channelTitle,
+      channelThumbnail: channelThumbnail || undefined,
+      publishedAt: video.snippet.publishedAt,
+      liveBroadcastContent: 'none',
+      scheduledStartTime: video.liveStreamingDetails?.scheduledStartTime,
+      actualStartTime: video.liveStreamingDetails?.actualStartTime,
+      actualEndTime: video.liveStreamingDetails?.actualEndTime,
+    }));
+  } catch (error: any) {
     throw new Error(
-      `YouTube Search API error: ${searchResponse.status} ${searchResponse.statusText}`
+      `YouTube API error: ${error.response?.status} ${error.message}`
     );
   }
-
-  const searchData = await searchResponse.json();
-
-  if (!searchData.items || searchData.items.length === 0) {
-    return [];
-  }
-
-  // 動画IDを収集
-  const videoIds = searchData.items
-    .map((item: any) => item.id.videoId)
-    .filter(Boolean);
-
-  if (videoIds.length === 0) {
-    return [];
-  }
-
-  // Videos APIで詳細情報を取得
-  const videosUrl = new URL('https://www.googleapis.com/youtube/v3/videos');
-  videosUrl.searchParams.set('part', 'snippet,liveStreamingDetails');
-  videosUrl.searchParams.set('id', videoIds.join(','));
-  videosUrl.searchParams.set('key', YOUTUBE_API_KEY!);
-
-  const videosResponse = await fetch(videosUrl.toString());
-  if (!videosResponse.ok) {
-    throw new Error(
-      `YouTube Videos API error: ${videosResponse.status} ${videosResponse.statusText}`
-    );
-  }
-
-  const videosData = await videosResponse.json();
-
-  return videosData.items.map((video: any) => ({
-    id: video.id,
-    title: video.snippet.title,
-    thumbnail: video.snippet.thumbnails.high.url,
-    channelId: video.snippet.channelId,
-    channelTitle: video.snippet.channelTitle,
-    channelThumbnail: channelThumbnail || undefined,
-    publishedAt: video.snippet.publishedAt,
-    liveBroadcastContent: 'none',
-    scheduledStartTime: video.liveStreamingDetails?.scheduledStartTime,
-    actualStartTime: video.liveStreamingDetails?.actualStartTime,
-    actualEndTime: video.liveStreamingDetails?.actualEndTime,
-  }));
 }
 
 async function fetchPastStreams(
@@ -274,65 +294,61 @@ async function fetchPastStreams(
   const publishedAfter = new Date();
   publishedAfter.setDate(publishedAfter.getDate() - daysAgo);
 
-  // Search APIで過去の配信を検索
-  const searchUrl = new URL('https://www.googleapis.com/youtube/v3/search');
-  searchUrl.searchParams.set('part', 'snippet');
-  searchUrl.searchParams.set('channelId', channelId);
-  searchUrl.searchParams.set('eventType', 'completed');
-  searchUrl.searchParams.set('type', 'video');
-  searchUrl.searchParams.set('maxResults', '50');
-  searchUrl.searchParams.set('order', 'date');
-  searchUrl.searchParams.set('publishedAfter', publishedAfter.toISOString());
-  searchUrl.searchParams.set('key', YOUTUBE_API_KEY!);
+  try {
+    // Search APIで過去の配信を検索
+    const searchResponse = await youtubeApi.get('/search', {
+      params: {
+        part: 'snippet',
+        channelId,
+        eventType: 'completed',
+        type: 'video',
+        maxResults: '50',
+        order: 'date',
+        publishedAfter: publishedAfter.toISOString(),
+      },
+    });
 
-  const searchResponse = await fetch(searchUrl.toString());
-  if (!searchResponse.ok) {
+    const searchData = searchResponse.data;
+
+    if (!searchData.items || searchData.items.length === 0) {
+      return [];
+    }
+
+    // 動画IDを収集
+    const videoIds = searchData.items
+      .map((item: any) => item.id.videoId)
+      .filter(Boolean);
+
+    if (videoIds.length === 0) {
+      return [];
+    }
+
+    // Videos APIで詳細情報を取得
+    const videosResponse = await youtubeApi.get('/videos', {
+      params: {
+        part: 'snippet,liveStreamingDetails',
+        id: videoIds.join(','),
+      },
+    });
+
+    const videosData = videosResponse.data;
+
+    return videosData.items.map((video: any) => ({
+      id: video.id,
+      title: video.snippet.title,
+      thumbnail: video.snippet.thumbnails.high.url,
+      channelId: video.snippet.channelId,
+      channelTitle: video.snippet.channelTitle,
+      channelThumbnail: channelThumbnail || undefined,
+      publishedAt: video.snippet.publishedAt,
+      liveBroadcastContent: 'none',
+      scheduledStartTime: video.liveStreamingDetails?.scheduledStartTime,
+      actualStartTime: video.liveStreamingDetails?.actualStartTime,
+      actualEndTime: video.liveStreamingDetails?.actualEndTime,
+    }));
+  } catch (error: any) {
     throw new Error(
-      `YouTube Search API error: ${searchResponse.status} ${searchResponse.statusText}`
+      `YouTube API error: ${error.response?.status} ${error.message}`
     );
   }
-
-  const searchData = await searchResponse.json();
-
-  if (!searchData.items || searchData.items.length === 0) {
-    return [];
-  }
-
-  // 動画IDを収集
-  const videoIds = searchData.items
-    .map((item: any) => item.id.videoId)
-    .filter(Boolean);
-
-  if (videoIds.length === 0) {
-    return [];
-  }
-
-  // Videos APIで詳細情報を取得
-  const videosUrl = new URL('https://www.googleapis.com/youtube/v3/videos');
-  videosUrl.searchParams.set('part', 'snippet,liveStreamingDetails');
-  videosUrl.searchParams.set('id', videoIds.join(','));
-  videosUrl.searchParams.set('key', YOUTUBE_API_KEY!);
-
-  const videosResponse = await fetch(videosUrl.toString());
-  if (!videosResponse.ok) {
-    throw new Error(
-      `YouTube Videos API error: ${videosResponse.status} ${videosResponse.statusText}`
-    );
-  }
-
-  const videosData = await videosResponse.json();
-
-  return videosData.items.map((video: any) => ({
-    id: video.id,
-    title: video.snippet.title,
-    thumbnail: video.snippet.thumbnails.high.url,
-    channelId: video.snippet.channelId,
-    channelTitle: video.snippet.channelTitle,
-    channelThumbnail: channelThumbnail || undefined,
-    publishedAt: video.snippet.publishedAt,
-    liveBroadcastContent: 'none',
-    scheduledStartTime: video.liveStreamingDetails?.scheduledStartTime,
-    actualStartTime: video.liveStreamingDetails?.actualStartTime,
-    actualEndTime: video.liveStreamingDetails?.actualEndTime,
-  }));
 }

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { callSupabaseFunction } from '@/utils/supabase';
 
 export default function TestFunctionsPage() {
   const [result, setResult] = useState<string>('');
@@ -14,31 +15,10 @@ export default function TestFunctionsPage() {
     try {
       console.log('Invoking function:', functionName);
 
-      // 直接fetchで呼び出し
-      const response = await fetch(
-        `https://thqnjduwbfpbxoifovui.supabase.co/functions/v1/${functionName}`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY}`,
-          },
-          body: JSON.stringify(body || {}),
-        },
-      );
-
-      console.log('Response status:', response.status);
-
-      const data = await response.json();
+      const data = await callSupabaseFunction(functionName, body || {});
       console.log('Result:', data);
 
-      if (!response.ok) {
-        setResult(
-          `エラー (${response.status}): ${JSON.stringify(data, null, 2)}`,
-        );
-      } else {
-        setResult(JSON.stringify(data, null, 2));
-      }
+      setResult(JSON.stringify(data, null, 2));
     } catch (err) {
       console.error('Exception:', err);
       setResult(`例外: ${err}`);

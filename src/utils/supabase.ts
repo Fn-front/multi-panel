@@ -2,6 +2,9 @@
  * Supabase関連のユーティリティ関数
  */
 
+import { createSupabaseClient } from '@/lib/http-client';
+import type { AxiosInstance } from 'axios';
+
 /**
  * Supabase環境変数の設定を取得
  */
@@ -17,6 +20,24 @@ export const getSupabaseConfig = () => {
   return { supabaseUrl, supabaseKey };
 };
 
+let supabaseClient: AxiosInstance | null = null;
+
+/**
+ * Supabase Axiosクライアントを取得
+ */
+const getSupabaseClient = (): AxiosInstance => {
+  const config = getSupabaseConfig();
+  if (!config) {
+    throw new Error('Supabase credentials not configured');
+  }
+
+  if (!supabaseClient) {
+    supabaseClient = createSupabaseClient(config.supabaseUrl, config.supabaseKey);
+  }
+
+  return supabaseClient;
+};
+
 /**
  * Supabase Functionを呼び出す
  */
@@ -24,32 +45,18 @@ export const callSupabaseFunction = async <T = unknown>(
   functionName: string,
   body: Record<string, unknown>,
 ): Promise<T> => {
-  const config = getSupabaseConfig();
-  if (!config) {
-    throw new Error('Supabase credentials not configured');
-  }
+  const client = getSupabaseClient();
 
-  const response = await fetch(
-    `${config.supabaseUrl}/functions/v1/${functionName}`,
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${config.supabaseKey}`,
-      },
-      body: JSON.stringify(body),
-    },
-  );
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    console.error(`[Supabase Function Error] ${functionName}:`, errorText);
+  try {
+    const response = await client.post<T>(`/${functionName}`, body);
+    return response.data;
+  } catch (error: any) {
+    const errorMessage = error.response?.data?.error || error.message;
+    console.error(`[Supabase Function Error] ${functionName}:`, errorMessage);
     throw new Error(
-      `Failed to call ${functionName}: ${response.statusText} - ${errorText}`,
+      `Failed to call ${functionName}: ${errorMessage}`,
     );
   }
-
-  return response.json();
 };
 
 /**

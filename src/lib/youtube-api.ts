@@ -9,40 +9,27 @@ import type {
   YouTubeChannelInfo,
   YouTubeVideo,
 } from '@/types/youtube';
+import { createYouTubeClient } from '@/lib/http-client';
+import type { AxiosInstance } from 'axios';
 
-const API_BASE_URL = 'https://www.googleapis.com/youtube/v3';
+let youtubeClient: AxiosInstance | null = null;
 
 /**
- * APIキーの取得と存在チェック
+ * YouTube API クライアントを取得
  */
-function validateApiKey(): string {
+function getYouTubeClient(): AxiosInstance {
   const apiKey = process.env.NEXT_PUBLIC_YOUTUBE_API_KEY;
   if (!apiKey) {
     throw new Error(
       'YouTube API Key is not configured. Please set NEXT_PUBLIC_YOUTUBE_API_KEY in .env.local',
     );
   }
-  return apiKey;
-}
 
-/**
- * YouTube Data API エラーハンドリング
- */
-async function handleApiResponse<T>(response: Response): Promise<T> {
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({
-      error: {
-        code: response.status,
-        message: response.statusText,
-      },
-    }));
-
-    throw new Error(
-      `YouTube API Error: ${error.error?.message || 'Unknown error'} (${error.error?.code || response.status})`,
-    );
+  if (!youtubeClient) {
+    youtubeClient = createYouTubeClient(apiKey);
   }
 
-  return response.json();
+  return youtubeClient;
 }
 
 /**
@@ -51,17 +38,17 @@ async function handleApiResponse<T>(response: Response): Promise<T> {
 export async function getChannelInfo(
   channelId: string,
 ): Promise<YouTubeChannelInfo | null> {
-  const apiKey = validateApiKey();
-
-  const url = new URL(`${API_BASE_URL}/channels`);
-  url.searchParams.set('part', 'snippet');
-  url.searchParams.set('id', channelId);
-  url.searchParams.set('key', apiKey);
+  const client = getYouTubeClient();
 
   try {
-    const response = await fetch(url.toString());
-    const data = await handleApiResponse<YouTubeChannelsResponse>(response);
+    const response = await client.get<YouTubeChannelsResponse>('/channels', {
+      params: {
+        part: 'snippet',
+        id: channelId,
+      },
+    });
 
+    const data = response.data;
     if (!data.items || data.items.length === 0) {
       return null;
     }
@@ -86,22 +73,22 @@ export async function getChannelInfo(
 export async function getChannelUpcomingStreams(
   channelId: string,
 ): Promise<YouTubeVideo[]> {
-  const apiKey = validateApiKey();
-
-  // Search APIで配信予定・ライブ中の動画を検索
-  const searchUrl = new URL(`${API_BASE_URL}/search`);
-  searchUrl.searchParams.set('part', 'snippet');
-  searchUrl.searchParams.set('channelId', channelId);
-  searchUrl.searchParams.set('eventType', 'upcoming');
-  searchUrl.searchParams.set('type', 'video');
-  searchUrl.searchParams.set('maxResults', '50');
-  searchUrl.searchParams.set('order', 'date');
-  searchUrl.searchParams.set('key', apiKey);
+  const client = getYouTubeClient();
 
   try {
-    const response = await fetch(searchUrl.toString());
-    const data = await handleApiResponse<YouTubeSearchResponse>(response);
+    // Search APIで配信予定・ライブ中の動画を検索
+    const searchResponse = await client.get<YouTubeSearchResponse>('/search', {
+      params: {
+        part: 'snippet',
+        channelId,
+        eventType: 'upcoming',
+        type: 'video',
+        maxResults: '50',
+        order: 'date',
+      },
+    });
 
+    const data = searchResponse.data;
     if (!data.items || data.items.length === 0) {
       return [];
     }
@@ -116,14 +103,14 @@ export async function getChannelUpcomingStreams(
     }
 
     // Videos APIで詳細情報を取得（配信開始時刻を含む）
-    const videosUrl = new URL(`${API_BASE_URL}/videos`);
-    videosUrl.searchParams.set('part', 'snippet,liveStreamingDetails');
-    videosUrl.searchParams.set('id', videoIds.join(','));
-    videosUrl.searchParams.set('key', apiKey);
+    const videosResponse = await client.get<YouTubeVideosResponse>('/videos', {
+      params: {
+        part: 'snippet,liveStreamingDetails',
+        id: videoIds.join(','),
+      },
+    });
 
-    const videosResponse = await fetch(videosUrl.toString());
-    const videosData =
-      await handleApiResponse<YouTubeVideosResponse>(videosResponse);
+    const videosData = videosResponse.data;
 
     return videosData.items.map((video) => ({
       id: video.id,
@@ -147,20 +134,20 @@ export async function getChannelUpcomingStreams(
 export async function getChannelLiveStreams(
   channelId: string,
 ): Promise<YouTubeVideo[]> {
-  const apiKey = validateApiKey();
-
-  const searchUrl = new URL(`${API_BASE_URL}/search`);
-  searchUrl.searchParams.set('part', 'snippet');
-  searchUrl.searchParams.set('channelId', channelId);
-  searchUrl.searchParams.set('eventType', 'live');
-  searchUrl.searchParams.set('type', 'video');
-  searchUrl.searchParams.set('maxResults', '10');
-  searchUrl.searchParams.set('key', apiKey);
+  const client = getYouTubeClient();
 
   try {
-    const response = await fetch(searchUrl.toString());
-    const data = await handleApiResponse<YouTubeSearchResponse>(response);
+    const searchResponse = await client.get<YouTubeSearchResponse>('/search', {
+      params: {
+        part: 'snippet',
+        channelId,
+        eventType: 'live',
+        type: 'video',
+        maxResults: '10',
+      },
+    });
 
+    const data = searchResponse.data;
     if (!data.items || data.items.length === 0) {
       return [];
     }
@@ -173,14 +160,14 @@ export async function getChannelLiveStreams(
       return [];
     }
 
-    const videosUrl = new URL(`${API_BASE_URL}/videos`);
-    videosUrl.searchParams.set('part', 'snippet,liveStreamingDetails');
-    videosUrl.searchParams.set('id', videoIds.join(','));
-    videosUrl.searchParams.set('key', apiKey);
+    const videosResponse = await client.get<YouTubeVideosResponse>('/videos', {
+      params: {
+        part: 'snippet,liveStreamingDetails',
+        id: videoIds.join(','),
+      },
+    });
 
-    const videosResponse = await fetch(videosUrl.toString());
-    const videosData =
-      await handleApiResponse<YouTubeVideosResponse>(videosResponse);
+    const videosData = videosResponse.data;
 
     return videosData.items.map((video) => ({
       id: video.id,
@@ -204,22 +191,22 @@ export async function getChannelLiveStreams(
 export async function getChannelPastStreams(
   channelId: string,
 ): Promise<YouTubeVideo[]> {
-  const apiKey = validateApiKey();
-
-  // Search APIで過去の動画を検索
-  const searchUrl = new URL(`${API_BASE_URL}/search`);
-  searchUrl.searchParams.set('part', 'snippet');
-  searchUrl.searchParams.set('channelId', channelId);
-  searchUrl.searchParams.set('eventType', 'completed');
-  searchUrl.searchParams.set('type', 'video');
-  searchUrl.searchParams.set('maxResults', '50');
-  searchUrl.searchParams.set('order', 'date');
-  searchUrl.searchParams.set('key', apiKey);
+  const client = getYouTubeClient();
 
   try {
-    const response = await fetch(searchUrl.toString());
-    const data = await handleApiResponse<YouTubeSearchResponse>(response);
+    // Search APIで過去の動画を検索
+    const searchResponse = await client.get<YouTubeSearchResponse>('/search', {
+      params: {
+        part: 'snippet',
+        channelId,
+        eventType: 'completed',
+        type: 'video',
+        maxResults: '50',
+        order: 'date',
+      },
+    });
 
+    const data = searchResponse.data;
     if (!data.items || data.items.length === 0) {
       return [];
     }
@@ -232,14 +219,14 @@ export async function getChannelPastStreams(
       return [];
     }
 
-    const videosUrl = new URL(`${API_BASE_URL}/videos`);
-    videosUrl.searchParams.set('part', 'snippet,liveStreamingDetails');
-    videosUrl.searchParams.set('id', videoIds.join(','));
-    videosUrl.searchParams.set('key', apiKey);
+    const videosResponse = await client.get<YouTubeVideosResponse>('/videos', {
+      params: {
+        part: 'snippet,liveStreamingDetails',
+        id: videoIds.join(','),
+      },
+    });
 
-    const videosResponse = await fetch(videosUrl.toString());
-    const videosData =
-      await handleApiResponse<YouTubeVideosResponse>(videosResponse);
+    const videosData = videosResponse.data;
 
     return videosData.items.map((video) => ({
       id: video.id,
