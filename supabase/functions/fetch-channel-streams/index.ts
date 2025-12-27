@@ -129,7 +129,12 @@ serve(async (req) => {
 
     // stream_eventsテーブルに保存（upsert）
     if (allVideos.length > 0) {
-      const streamEvents = allVideos.map((video) => ({
+      // 重複を排除（video_idでユニーク化）
+      const uniqueVideos = Array.from(
+        new Map(allVideos.map((video) => [video.id, video])).values()
+      );
+
+      const streamEvents = uniqueVideos.map((video) => ({
         video_id: video.id,
         channel_id: video.channelId,
         title: video.title,
@@ -150,7 +155,7 @@ serve(async (req) => {
 
       if (upsertError) throw upsertError;
 
-      console.log(`Saved ${streamEvents.length} stream events`);
+      console.log(`Saved ${streamEvents.length} stream events (${allVideos.length - uniqueVideos.length} duplicates removed)`);
     }
 
     return new Response(
