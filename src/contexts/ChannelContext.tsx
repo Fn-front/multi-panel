@@ -12,7 +12,7 @@ import type { Channel, ChannelsState, ChannelsAction } from '@/types/channel';
 import { STORAGE_KEYS, ACTION_TYPES } from '@/constants';
 import { loadFromStorage, saveArrayToStorage } from '@/utils/storage';
 import { formatDate, getCurrentMonthRange } from '@/utils/date';
-import { callSupabaseFunction, withTimeout } from '@/utils/supabase';
+import { callSupabaseFunction, withTimeout, withRetry } from '@/utils/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { useTimeout } from '@/hooks/useTimeout';
@@ -177,80 +177,82 @@ export function ChannelProvider({ children }: ChannelProviderProps) {
     if (user) {
       // ログイン時: Supabaseに追加（論理削除済みの場合は復元）
       try {
-        // 論理削除されたレコードも含めて重複チェック
-        const { data: existingChannel, error: existingError } = await supabase
-          .from('favorite_channels')
-          .select('*')
-          .eq('user_id', user.id)
-          .eq('channel_id', channel.channelId)
-          .is('deleted_at', null)
-          .maybeSingle();
-
-        if (existingError) throw existingError;
-
-        if (existingChannel) {
-          // 既にアクティブなチャンネルが存在する場合はエラー
-          console.warn('Channel already exists:', channel.channelId);
-          return;
-        }
-
-        // 論理削除されたレコードを確認
-        const { data: deletedChannel, error: deletedError } = await supabase
-          .from('favorite_channels')
-          .select('*')
-          .eq('user_id', user.id)
-          .eq('channel_id', channel.channelId)
-          .not('deleted_at', 'is', null)
-          .maybeSingle();
-
-        if (deletedError) throw deletedError;
-
-        if (deletedChannel) {
-          // 論理削除されたレコードが存在する場合は復元
-          const { data, error } = await supabase
+        await withRetry(async () => {
+          // 論理削除されたレコードも含めて重複チェック
+          const { data: existingChannel, error: existingError } = await supabase
             .from('favorite_channels')
-            .update({
-              channel_title: channel.name,
-              channel_thumbnail: channel.thumbnail || null,
-              deleted_at: null,
-              updated_at: new Date().toISOString(),
-            })
-            .eq('id', deletedChannel.id)
-            .select()
-            .single();
+            .select('*')
+            .eq('user_id', user.id)
+            .eq('channel_id', channel.channelId)
+            .is('deleted_at', null)
+            .maybeSingle();
 
-          if (error) throw error;
+          if (existingError) throw existingError;
 
-          if (data) {
-            dispatch({
-              type: ACTION_TYPES.CHANNEL.ADD,
-              payload: mapDbToChannel(data),
-            });
-            await fetchCurrentMonthStreams(channel.channelId);
+          if (existingChannel) {
+            // 既にアクティブなチャンネルが存在する場合はエラー
+            console.warn('Channel already exists:', channel.channelId);
+            return;
           }
-        } else {
-          // 新規追加
-          const { data, error } = await supabase
+
+          // 論理削除されたレコードを確認
+          const { data: deletedChannel, error: deletedError } = await supabase
             .from('favorite_channels')
-            .insert({
-              user_id: user.id,
-              channel_id: channel.channelId,
-              channel_title: channel.name,
-              channel_thumbnail: channel.thumbnail || null,
-            })
-            .select()
-            .single();
+            .select('*')
+            .eq('user_id', user.id)
+            .eq('channel_id', channel.channelId)
+            .not('deleted_at', 'is', null)
+            .maybeSingle();
 
-          if (error) throw error;
+          if (deletedError) throw deletedError;
 
-          if (data) {
-            dispatch({
-              type: ACTION_TYPES.CHANNEL.ADD,
-              payload: mapDbToChannel(data),
-            });
-            await fetchCurrentMonthStreams(channel.channelId);
+          if (deletedChannel) {
+            // 論理削除されたレコードが存在する場合は復元
+            const { data, error } = await supabase
+              .from('favorite_channels')
+              .update({
+                channel_title: channel.name,
+                channel_thumbnail: channel.thumbnail || null,
+                deleted_at: null,
+                updated_at: new Date().toISOString(),
+              })
+              .eq('id', deletedChannel.id)
+              .select()
+              .single();
+
+            if (error) throw error;
+
+            if (data) {
+              dispatch({
+                type: ACTION_TYPES.CHANNEL.ADD,
+                payload: mapDbToChannel(data),
+              });
+              await fetchCurrentMonthStreams(channel.channelId);
+            }
+          } else {
+            // 新規追加
+            const { data, error } = await supabase
+              .from('favorite_channels')
+              .insert({
+                user_id: user.id,
+                channel_id: channel.channelId,
+                channel_title: channel.name,
+                channel_thumbnail: channel.thumbnail || null,
+              })
+              .select()
+              .single();
+
+            if (error) throw error;
+
+            if (data) {
+              dispatch({
+                type: ACTION_TYPES.CHANNEL.ADD,
+                payload: mapDbToChannel(data),
+              });
+              await fetchCurrentMonthStreams(channel.channelId);
+            }
           }
-        }
+        });
       } catch (error) {
         console.error('Failed to add channel to Supabase:', error);
         throw error;

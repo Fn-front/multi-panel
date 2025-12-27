@@ -83,3 +83,47 @@ export function withTimeout<T>(
     ),
   ]);
 }
+
+/**
+ * リトライ付きでPromiseを実行する
+ * @param fn - 実行する関数
+ * @param options - リトライオプション
+ */
+export async function withRetry<T>(
+  fn: () => Promise<T>,
+  options: {
+    maxRetries?: number;
+    delayMs?: number;
+    backoff?: boolean;
+  } = {},
+): Promise<T> {
+  const { maxRetries = 2, delayMs = 1000, backoff = true } = options;
+
+  let lastError: Error | null = null;
+
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      return await fn();
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error(String(error));
+
+      // 最後のリトライでエラーの場合は投げる
+      if (attempt === maxRetries) {
+        break;
+      }
+
+      // 待機時間を計算（バックオフの場合は指数的に増加）
+      const delay = backoff ? delayMs * Math.pow(2, attempt) : delayMs;
+
+      console.warn(
+        `[Retry] Attempt ${attempt + 1}/${maxRetries + 1} failed. Retrying in ${delay}ms...`,
+        lastError.message,
+      );
+
+      // 次のリトライまで待機
+      await new Promise((resolve) => setTimeout(resolve, delay));
+    }
+  }
+
+  throw lastError;
+}
