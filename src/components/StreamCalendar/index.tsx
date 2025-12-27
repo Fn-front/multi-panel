@@ -1,5 +1,6 @@
 'use client';
 
+import { memo } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
@@ -37,15 +38,18 @@ interface StreamCalendarProps {
     end: Date;
     view: { type: string };
   }) => void;
+  /** チャンネルIDと色のマップ */
+  channelColorMap?: Record<string, string>;
 }
 
-export default function StreamCalendar({
+const StreamCalendar = memo(function StreamCalendar({
   onEventClick,
   events,
   isLoading,
   error,
   onRefresh,
   onDatesSet,
+  channelColorMap = {},
 }: StreamCalendarProps) {
   // カレンダーマウント後に現在時刻までスクロール
   useCalendarAutoScroll({
@@ -57,7 +61,7 @@ export default function StreamCalendar({
   const { handleEventClick } = useEventHandler({ events, onEventClick });
 
   // イベントスタイル（色）設定
-  const { getEventClassNames } = useEventStyles();
+  const { getEventClassNames } = useEventStyles({ channelColorMap });
 
   // イベント表示内容のレンダリング
   const { renderEventContent } = useEventRenderer();
@@ -143,6 +147,13 @@ export default function StreamCalendar({
             eventClick={handleEventClick}
             eventClassNames={getEventClassNames}
             eventContent={renderEventContent}
+            eventDidMount={(info) => {
+              const channelId = info.event.extendedProps?.channelId;
+              if (channelId && channelColorMap[channelId]) {
+                info.el.style.backgroundColor = channelColorMap[channelId];
+                info.el.style.borderColor = channelColorMap[channelId];
+              }
+            }}
             datesSet={handleDatesSet}
             height={FULL_CALENDAR_CONFIG.HEIGHT}
             slotMinTime={FULL_CALENDAR_CONFIG.SLOT_MIN_TIME}
@@ -170,6 +181,13 @@ export default function StreamCalendar({
             eventClick={handleEventClick}
             eventClassNames={getEventClassNames}
             eventContent={renderEventContent}
+            eventDidMount={(info) => {
+              const channelId = info.event.extendedProps?.channelId;
+              if (channelId && channelColorMap[channelId]) {
+                info.el.style.backgroundColor = channelColorMap[channelId];
+                info.el.style.borderColor = channelColorMap[channelId];
+              }
+            }}
             datesSet={handleDatesSet}
             height={FULL_CALENDAR_CONFIG.HEIGHT}
             dayMaxEventRows={FULL_CALENDAR_CONFIG.DAY_MAX_EVENT_ROWS}
@@ -178,4 +196,6 @@ export default function StreamCalendar({
       </Modal>
     </>
   );
-}
+});
+
+export default StreamCalendar;

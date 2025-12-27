@@ -1,5 +1,6 @@
 'use client';
 
+import { useCallback } from 'react';
 import Image from 'next/image';
 import {
   HiChevronLeft,
@@ -34,7 +35,12 @@ type HomeClientProps = {
 };
 
 export function HomeClient({ initialSidebarVisible }: HomeClientProps) {
-  const { state: channelState, addChannel, removeChannel } = useChannels();
+  const {
+    state: channelState,
+    addChannel,
+    removeChannel,
+    updateChannel,
+  } = useChannels();
   const { user, isLoading: authLoading } = useAuth();
   const { addPanel } = usePanels();
 
@@ -43,6 +49,17 @@ export function HomeClient({ initialSidebarVisible }: HomeClientProps) {
 
   // チャンネルIDの配列
   const channelIds = useChannelIds(channelState.channels);
+
+  // チャンネルIDと色のマップ
+  const channelColorMap = channelState.channels.reduce<Record<string, string>>(
+    (acc, channel) => {
+      if (channel.color) {
+        acc[channel.channelId] = channel.color;
+      }
+      return acc;
+    },
+    {},
+  );
 
   // サイドバー管理
   const { sidebarVisible, toggleSidebar } = useSidebar(initialSidebarVisible);
@@ -88,6 +105,14 @@ export function HomeClient({ initialSidebarVisible }: HomeClientProps) {
 
   // モバイルでサイドバーが開いているときスクロールをロック
   useScrollLock(sidebarVisible);
+
+  // チャンネル色変更ハンドラー
+  const handleColorChange = useCallback(
+    (id: string, color: string) => {
+      updateChannel(id, { color });
+    },
+    [updateChannel],
+  );
 
   return (
     <div className={styles.container}>
@@ -196,6 +221,7 @@ export function HomeClient({ initialSidebarVisible }: HomeClientProps) {
                   channels={channelState.channels}
                   onAddChannel={addChannel}
                   onRemoveChannel={removeChannel}
+                  onColorChange={handleColorChange}
                 />
               </div>
 
@@ -207,6 +233,7 @@ export function HomeClient({ initialSidebarVisible }: HomeClientProps) {
                   error={calendarError}
                   onRefresh={refreshSchedule}
                   onDatesSet={handleDatesSet}
+                  channelColorMap={channelColorMap}
                 />
               </div>
             </>

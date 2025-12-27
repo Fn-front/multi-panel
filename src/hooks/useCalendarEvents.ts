@@ -60,6 +60,7 @@ export function useCalendarEvents({ channelIds }: UseCalendarEventsOptions) {
                   ? 'upcoming'
                   : 'video',
             url: `https://www.youtube.com/watch?v=${event.video_id}`,
+            channelId: event.channel_id,
             channelName: event.channel_title,
             channelThumbnail: event.channel_thumbnail || undefined,
           });

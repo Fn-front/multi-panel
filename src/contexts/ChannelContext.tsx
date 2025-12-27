@@ -23,11 +23,13 @@ const mapDbToChannel = (dbChannel: {
   channel_id: string;
   channel_title: string;
   channel_thumbnail: string | null;
+  color?: string | null;
 }): Channel => ({
   id: dbChannel.id,
   channelId: dbChannel.channel_id,
   name: dbChannel.channel_title,
   thumbnail: dbChannel.channel_thumbnail || undefined,
+  color: dbChannel.color || undefined,
 });
 
 // 初期状態
@@ -335,6 +337,7 @@ export function ChannelProvider({ children }: ChannelProviderProps) {
         if (updates.name) updateData.channel_title = updates.name;
         if (updates.thumbnail !== undefined)
           updateData.channel_thumbnail = updates.thumbnail || null;
+        if (updates.color !== undefined) updateData.color = updates.color;
 
         const { error } = await supabase
           .from('favorite_channels')

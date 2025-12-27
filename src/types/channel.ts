@@ -12,6 +12,8 @@ export type Channel = {
   name: string;
   /** サムネイルURL */
   thumbnail?: string;
+  /** カレンダー表示色 */
+  color?: string;
 };
 
 /**

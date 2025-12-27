@@ -138,6 +138,8 @@ export type CalendarEvent = {
   eventType: 'video' | 'live' | 'upcoming';
   /** YouTube動画URL */
   url: string;
+  /** チャンネルID */
+  channelId: string;
   /** チャンネル名 */
   channelName: string;
   /** チャンネルサムネイルURL */

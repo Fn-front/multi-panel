@@ -154,6 +154,27 @@
       }
     }
 
+    .actions {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-xs, 6px);
+    }
+
+    .colorButton {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 2px solid var(--border-color, #404040);
+      cursor: pointer;
+      transition: all var(--transition-base, 200ms ease-in-out);
+      flex-shrink: 0;
+
+      &:hover {
+        transform: scale(1.15);
+        border-color: var(--text-primary, #ffffff);
+      }
+    }
+
     .removeButton {
       padding: 4px;
       background: transparent;

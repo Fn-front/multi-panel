@@ -1,10 +1,11 @@
 'use client';
 
-import { useCallback } from 'react';
+import { useCallback, useState, memo } from 'react';
 import { HiXMark, HiUserGroup } from 'react-icons/hi2';
 import type { Channel } from '@/types/channel';
 import { UI_TEXT } from '@/constants';
 import { useChannelManagement } from './hooks/useChannelManagement';
+import { ColorPicker } from '@/components/ColorPicker';
 import styles from './FavoriteChannels.module.scss';
 
 interface FavoriteChannelsProps {
@@ -16,13 +17,16 @@ interface FavoriteChannelsProps {
   onRemoveChannel: (id: string) => void;
   /** チャンネルクリック時のコールバック */
   onChannelClick?: (channelId: string) => void;
+  /** チャンネル色変更時のコールバック */
+  onColorChange?: (id: string, color: string) => void;
 }
 
-export default function FavoriteChannels({
+const FavoriteChannels = memo(function FavoriteChannels({
   channels,
   onAddChannel,
   onRemoveChannel,
   onChannelClick,
+  onColorChange,
 }: FavoriteChannelsProps) {
   const {
     inputValue,
@@ -33,6 +37,11 @@ export default function FavoriteChannels({
     handleInputChange,
   } = useChannelManagement({ channels, onAddChannel });
 
+  const [colorPickerState, setColorPickerState] = useState<{
+    channelId: string;
+    position: { top: number; left: number };
+  } | null>(null);
+
   const handleRemove = useCallback(
     (id: string, e: React.MouseEvent) => {
       e.stopPropagation();
@@ -40,6 +49,35 @@ export default function FavoriteChannels({
     },
     [onRemoveChannel],
   );
+
+  const handleColorClick = useCallback(
+    (channelId: string, e: React.MouseEvent) => {
+      e.stopPropagation();
+      const button = e.currentTarget as HTMLElement;
+      const rect = button.getBoundingClientRect();
+      setColorPickerState({
+        channelId,
+        position: {
+          top: rect.bottom + 4,
+          left: rect.left,
+        },
+      });
+    },
+    [],
+  );
+
+  const handleColorChange = useCallback(
+    (color: string) => {
+      if (colorPickerState && onColorChange) {
+        onColorChange(colorPickerState.channelId, color);
+      }
+    },
+    [colorPickerState, onColorChange],
+  );
+
+  const handleColorPickerClose = useCallback(() => {
+    setColorPickerState(null);
+  }, []);
 
   const handleChannelClick = useCallback(
     (channelId: string) => {
@@ -110,18 +148,42 @@ export default function FavoriteChannels({
                     <p className={styles.description}>{description}</p>
                   )}
                 </div>
-                <button
-                  className={styles.removeButton}
-                  onClick={(e) => handleRemove(channel.id, e)}
-                  aria-label={UI_TEXT.CHANNEL.REMOVE}
-                >
-                  <HiXMark />
-                </button>
+                <div className={styles.actions}>
+                  <button
+                    className={styles.colorButton}
+                    onClick={(e) => handleColorClick(channel.id, e)}
+                    style={{ backgroundColor: channel.color || '#3b82f6' }}
+                    aria-label='色を変更'
+                    type='button'
+                  />
+                  <button
+                    className={styles.removeButton}
+                    onClick={(e) => handleRemove(channel.id, e)}
+                    aria-label={UI_TEXT.CHANNEL.REMOVE}
+                    type='button'
+                  >
+                    <HiXMark />
+                  </button>
+                </div>
               </div>
             );
           })
         )}
       </div>
+
+      {colorPickerState && (
+        <ColorPicker
+          selectedColor={
+            channels.find((ch) => ch.id === colorPickerState.channelId)
+              ?.color || '#3b82f6'
+          }
+          onChange={handleColorChange}
+          onClose={handleColorPickerClose}
+          position={colorPickerState.position}
+        />
+      )}
     </div>
   );
-}
+});
+
+export default FavoriteChannels;

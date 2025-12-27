@@ -15,6 +15,7 @@ export function useCalendarEvents(events: CalendarEvent[]) {
         extendedProps: {
           eventType: event.eventType,
           url: event.url,
+          channelId: event.channelId,
           channelName: event.channelName,
           channelThumbnail: event.channelThumbnail,
         },
