@@ -61,7 +61,6 @@ export function HomeClient({ initialSidebarVisible }: HomeClientProps) {
     refreshSchedule,
   } = useCalendarEvents({
     channelIds,
-    refreshInterval: 5 * 60 * 1000,
   });
 
   // カレンダー月変更時のデータフェッチ
