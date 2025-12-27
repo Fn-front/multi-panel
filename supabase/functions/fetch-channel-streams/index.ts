@@ -137,11 +137,16 @@ serve(async (req) => {
       const existingVideoIds = existingEvents.map((e) => e.video_id);
       console.log(`Checking ${existingVideoIds.length} existing live/upcoming videos`);
 
+      // チャンネルIDとサムネイルのマップを作成
+      const channelThumbnailMap = new Map(
+        uniqueChannels.map((ch) => [ch.channel_id, ch.channel_thumbnail])
+      );
+
       // 既存配信の最新情報を取得（最大50件ずつ）
       const batchSize = 50;
       for (let i = 0; i < existingVideoIds.length; i += batchSize) {
         const batch = existingVideoIds.slice(i, i + batchSize);
-        const updatedVideos = await fetchVideoDetails(batch);
+        const updatedVideos = await fetchVideoDetails(batch, channelThumbnailMap);
         allVideos.push(...updatedVideos);
 
         // レート制限対策
@@ -199,7 +204,10 @@ serve(async (req) => {
   }
 });
 
-async function fetchVideoDetails(videoIds: string[]): Promise<YouTubeVideo[]> {
+async function fetchVideoDetails(
+  videoIds: string[],
+  channelThumbnailMap: Map<string, string | null | undefined>
+): Promise<YouTubeVideo[]> {
   if (videoIds.length === 0) {
     return [];
   }
@@ -220,7 +228,7 @@ async function fetchVideoDetails(videoIds: string[]): Promise<YouTubeVideo[]> {
       thumbnail: video.snippet.thumbnails.high.url,
       channelId: video.snippet.channelId,
       channelTitle: video.snippet.channelTitle,
-      channelThumbnail: undefined,
+      channelThumbnail: channelThumbnailMap.get(video.snippet.channelId) || undefined,
       publishedAt: video.snippet.publishedAt,
       liveBroadcastContent: video.snippet.liveBroadcastContent || 'none',
       scheduledStartTime: video.liveStreamingDetails?.scheduledStartTime,
