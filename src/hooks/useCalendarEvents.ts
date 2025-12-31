@@ -78,7 +78,7 @@ export function useCalendarEvents({ channelIds }: UseCalendarEventsOptions) {
     }
   }, [channelIds, user]);
 
-  // 更新ボタン用: YouTubeから現在月のデータを取得してからfetchScheduleを実行
+  // 更新ボタン用: 配信予定・配信中のみ更新（過去のアーカイブは更新しない）
   const refreshSchedule = useCallback(async () => {
     if (!user || channelIds.length === 0) {
       return;
@@ -88,13 +88,8 @@ export function useCalendarEvents({ channelIds }: UseCalendarEventsOptions) {
       setIsLoading(true);
       setError(null);
 
-      const { startDate, endDate } = getCurrentMonthRange();
-
-      await callSupabaseFunction('fetch-past-streams', {
-        channelIds,
-        startDate: formatDate(startDate),
-        endDate: formatDate(endDate),
-      });
+      // fetch-channel-streamsで配信予定・配信中を更新
+      await callSupabaseFunction('fetch-channel-streams', {});
 
       // データ取得後、Supabaseから最新データを読み込み
       await fetchSchedule();

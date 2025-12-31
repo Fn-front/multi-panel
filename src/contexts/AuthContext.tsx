@@ -3,7 +3,7 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import type { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
-import { callSupabaseFunction, withTimeout } from '@/utils/supabase';
+import { callSupabaseFunction } from '@/utils/supabase';
 import { UI_TEXT } from '@/constants';
 import { useTimeout } from '@/hooks/useTimeout';
 
@@ -24,7 +24,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [isAllowed, setIsAllowed] = useState(false);
   const { setHasTimeout } = useTimeout();
-  const [, setIsRetrying] = useState(false);
+  const [hasProcessedInitialSignIn, setHasProcessedInitialSignIn] =
+    useState(false);
 
   // セッション有効期限（24時間）
   const SESSION_EXPIRY_HOURS = 24;
@@ -54,97 +55,63 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  /**
-   * タイムアウト時のリトライ処理
-   */
-  const retryWithPolling = async <T,>(
-    operation: () => Promise<T>,
-    maxRetries = 3,
-  ): Promise<T> => {
-    setIsRetrying(true);
-    let lastError: Error | null = null;
-
-    for (let i = 0; i < maxRetries; i++) {
-      try {
-        const result = await operation();
-        setIsRetrying(false);
-        return result;
-      } catch (error) {
-        lastError = error as Error;
-        if (i < maxRetries - 1) {
-          // 1秒待機してリトライ
-          await new Promise((resolve) => setTimeout(resolve, 1000));
-        }
-      }
-    }
-
-    setIsRetrying(false);
-    setHasTimeout(true);
-    throw lastError || new Error('Retry failed');
-  };
 
   /**
    * ホワイトリストチェック + セッション期限チェック + 最終ログイン更新を1回のクエリで実行
    * 最適化: 3回のクエリ → 1回のクエリに統合してコールドスタート時間を短縮
+   * fetch-retryによる自動リトライに任せる（二重リトライを避ける）
    */
   const checkAndUpdateAllowedUser = async (
     userId: string,
     updateLogin = false,
     skipExpiryCheck = false,
   ): Promise<{ isAllowed: boolean; isExpired: boolean }> => {
-    const executeQuery = async () => {
-      return await withTimeout(
-        Promise.resolve(
-          supabase
-            .from('allowed_users')
-            .select('user_id, last_login_at')
-            .eq('user_id', userId)
-            .single(),
-        ),
-        30000,
-        'Allowed users check timeout',
-      );
-    };
-
-    // タイムアウト時は自動リトライ（エラーは表示しない）
-    const { data, error } = await executeQuery().catch(async () => {
-      return await retryWithPolling(executeQuery);
-    });
-
-    if (error) {
-      console.error('ホワイトリストチェックエラー:', error);
-      return { isAllowed: false, isExpired: true };
-    }
-
-    if (!data) {
-      return { isAllowed: false, isExpired: true };
-    }
-
-    // セッション期限チェック（スキップオプションがある場合はスキップ）
-    let isExpired = false;
-    if (!skipExpiryCheck && data.last_login_at) {
-      const lastLogin = new Date(data.last_login_at);
-      const now = new Date();
-      const hoursSinceLogin =
-        (now.getTime() - lastLogin.getTime()) / (1000 * 60 * 60);
-      isExpired = hoursSinceLogin >= SESSION_EXPIRY_HOURS;
-    }
-
-    // 最終ログイン日時を更新（必要な場合のみ）
-    if (updateLogin && !isExpired) {
-      // 非同期で更新（待たない）- レスポンスタイムを優先
-      supabase
+    try {
+      const { data, error } = await supabase
         .from('allowed_users')
-        .update({ last_login_at: new Date().toISOString() })
+        .select('user_id, last_login_at')
         .eq('user_id', userId)
-        .then(({ error: updateError }) => {
-          if (updateError) {
-            console.error('最終ログイン日時の更新エラー:', updateError);
-          }
-        });
-    }
+        .single();
 
-    return { isAllowed: true, isExpired };
+      if (error) {
+        console.error('ホワイトリストチェックエラー:', error);
+        return { isAllowed: false, isExpired: true };
+      }
+
+      if (!data) {
+        return { isAllowed: false, isExpired: true };
+      }
+
+      // セッション期限チェック（スキップオプションがある場合はスキップ）
+      let isExpired = false;
+      if (!skipExpiryCheck && data.last_login_at) {
+        const lastLogin = new Date(data.last_login_at);
+        const now = new Date();
+        const hoursSinceLogin =
+          (now.getTime() - lastLogin.getTime()) / (1000 * 60 * 60);
+        isExpired = hoursSinceLogin >= SESSION_EXPIRY_HOURS;
+      }
+
+      // 最終ログイン日時を更新（必要な場合のみ）
+      if (updateLogin && !isExpired) {
+        // 非同期で更新（待たない）- レスポンスタイムを優先
+        supabase
+          .from('allowed_users')
+          .update({ last_login_at: new Date().toISOString() })
+          .eq('user_id', userId)
+          .then(({ error: updateError }) => {
+            if (updateError) {
+              console.error('最終ログイン日時の更新エラー:', updateError);
+            }
+          });
+      }
+
+      return { isAllowed: true, isExpired };
+    } catch (error) {
+      console.error('ホワイトリストチェック例外:', error);
+      setHasTimeout(true);
+      return { isAllowed: false, isExpired: true };
+    }
   };
 
   // ログイン時: 今日〜月末の配信予定を取得
@@ -173,19 +140,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // セッション初期化
   useEffect(() => {
-    const executeGetSession = async () => {
-      return await withTimeout(
-        supabase.auth.getSession(),
-        30000,
-        'Auth session timeout',
-      );
-    };
-
-    // タイムアウト時は自動リトライ
-    executeGetSession()
-      .catch(async () => {
-        return await retryWithPolling(executeGetSession);
-      })
+    // fetch-retryによる自動リトライに任せる
+    supabase.auth
+      .getSession()
       .then(async ({ data: { session } }) => {
         setSession(session);
         setUser(session?.user ?? null);
@@ -209,6 +166,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
 
         setIsLoading(false);
+      })
+      .catch((error) => {
+        console.error('[getSession] Failed:', error);
+        setHasTimeout(true);
+        setIsLoading(false);
       });
 
     // 認証状態の変更を監視
@@ -223,6 +185,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(null);
         setIsAllowed(false);
         setIsLoading(false);
+        setHasProcessedInitialSignIn(false); // フラグをリセット
         return;
       }
 
@@ -231,7 +194,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (session?.user) {
         // SIGNED_INイベント時のみ配信情報を取得し、セッション期限チェックをスキップ
-        if (event === 'SIGNED_IN') {
+        // ただし、初回のSIGNED_INのみ処理（重複イベントを無視）
+        if (event === 'SIGNED_IN' && !hasProcessedInitialSignIn) {
+          setHasProcessedInitialSignIn(true);
+
           const { isAllowed } = await checkAndUpdateAllowedUser(
             session.user.id,
             true, // 最終ログイン日時を更新
@@ -265,6 +231,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           }
         }
         // INITIAL_SESSIONは初期化時に既に処理済みのためスキップ
+        // 重複SIGNED_INイベントもスキップ
       } else {
         setIsAllowed(false);
       }

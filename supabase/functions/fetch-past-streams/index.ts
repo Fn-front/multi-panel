@@ -188,8 +188,12 @@ serve(async (req) => {
         scheduled_start_time: video.scheduledStartTime,
         actual_start_time: video.actualStartTime,
         actual_end_time: video.actualEndTime,
-        live_broadcast_content: 'none',
-        event_type: 'completed',
+        live_broadcast_content: video.liveBroadcastContent,
+        event_type: video.liveBroadcastContent === 'live'
+          ? 'live'
+          : video.liveBroadcastContent === 'upcoming'
+            ? 'upcoming'
+            : 'completed',
         published_at: video.publishedAt,
       }));
 
@@ -226,7 +230,7 @@ async function fetchPastStreamsByDateRange(
   channelThumbnail?: string | null
 ): Promise<YouTubeVideo[]> {
   try {
-    // Search APIで過去の配信を検索
+    // Search APIで完了済みの配信のみ検索（過去のアーカイブ専用）
     const searchResponse = await youtubeApi.get('/search', {
       params: {
         part: 'snippet',
@@ -273,7 +277,7 @@ async function fetchPastStreamsByDateRange(
       channelTitle: video.snippet.channelTitle,
       channelThumbnail: channelThumbnail || undefined,
       publishedAt: video.snippet.publishedAt,
-      liveBroadcastContent: 'none',
+      liveBroadcastContent: video.snippet.liveBroadcastContent || 'none',
       scheduledStartTime: video.liveStreamingDetails?.scheduledStartTime,
       actualStartTime: video.liveStreamingDetails?.actualStartTime,
       actualEndTime: video.liveStreamingDetails?.actualEndTime,
@@ -295,7 +299,7 @@ async function fetchPastStreams(
   publishedAfter.setDate(publishedAfter.getDate() - daysAgo);
 
   try {
-    // Search APIで過去の配信を検索
+    // Search APIで完了済みの配信のみ検索
     const searchResponse = await youtubeApi.get('/search', {
       params: {
         part: 'snippet',
@@ -341,7 +345,7 @@ async function fetchPastStreams(
       channelTitle: video.snippet.channelTitle,
       channelThumbnail: channelThumbnail || undefined,
       publishedAt: video.snippet.publishedAt,
-      liveBroadcastContent: 'none',
+      liveBroadcastContent: video.snippet.liveBroadcastContent || 'none',
       scheduledStartTime: video.liveStreamingDetails?.scheduledStartTime,
       actualStartTime: video.liveStreamingDetails?.actualStartTime,
       actualEndTime: video.liveStreamingDetails?.actualEndTime,
