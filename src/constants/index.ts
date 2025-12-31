@@ -170,6 +170,8 @@ export const UI_TEXT = {
     NOT_SUPPORTED: 'このブラウザは通知をサポートしていません',
     STREAMING_LIVE: '配信中',
     STREAMING_START: '配信開始',
+    TOGGLE_ON: 'ON',
+    TOGGLE_OFF: 'OFF',
   },
   // サイドバー関連
   SIDEBAR: {

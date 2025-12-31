@@ -39,7 +39,9 @@ export function NotificationSettings({
               disabled={permission === 'denied'}
               type='button'
             >
-              {isEnabled ? 'OFF' : 'ON'}
+              {isEnabled
+                ? UI_TEXT.NOTIFICATION.TOGGLE_OFF
+                : UI_TEXT.NOTIFICATION.TOGGLE_ON}
             </button>
           </div>
           {permission === 'default' && (
@@ -54,7 +56,7 @@ export function NotificationSettings({
             <label>{UI_TEXT.NOTIFICATION.ENABLE}</label>
           </div>
           <button type='button' className={styles.toggleButton} disabled>
-            ON
+            {UI_TEXT.NOTIFICATION.TOGGLE_ON}
           </button>
         </div>
       )}
