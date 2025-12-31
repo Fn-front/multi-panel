@@ -112,6 +112,12 @@
     flex-direction: column;
     gap: var(--spacing-sm, 8px);
 
+    @include mobile {
+      flex: 0 0 auto;
+      flex-direction: initial;
+      flex-wrap: wrap;
+    }
+
     &::-webkit-scrollbar {
       width: 8px;
     }
@@ -143,6 +149,7 @@
     cursor: pointer;
 
     @include mobile {
+      width: calc(50% - var(--spacing-sm, 8px) / 2);
       gap: var(--spacing-xs, 4px);
       padding: var(--spacing-xs, 6px);
       min-height: 44px; // タッチ操作しやすい最小サイズ
@@ -161,8 +168,8 @@
       flex-shrink: 0;
 
       @include mobile {
-        width: 36px;
-        height: 36px;
+        width: 28px;
+        height: 28px;
       }
 
       img {
@@ -219,8 +226,8 @@
       flex-shrink: 0;
 
       @include mobile {
-        width: 28px;
-        height: 28px;
+        width: 24px;
+        height: 24px;
       }
 
       &:hover {
@@ -242,9 +249,8 @@
       justify-content: center;
 
       @include mobile {
-        padding: 6px;
-        min-width: 32px;
-        min-height: 32px;
+        min-width: 24px;
+        min-height: 24px;
       }
 
       svg {
