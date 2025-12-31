@@ -1,6 +1,11 @@
 // Learn more: https://github.com/testing-library/jest-dom
 import '@testing-library/jest-dom'
 
+// テスト用の環境変数を設定
+process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://test.supabase.co'
+process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = 'test-anon-key'
+process.env.NEXT_PUBLIC_YOUTUBE_API_KEY = 'test-youtube-api-key'
+
 // fetchのpolyfillを追加
 global.fetch = jest.fn(() =>
   Promise.resolve({
