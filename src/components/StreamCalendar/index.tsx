@@ -98,7 +98,9 @@ const StreamCalendar = memo(function StreamCalendar({
         <div className={styles.error}>
           <div className={styles.errorMessage}>{error}</div>
           {onRefresh && (
-            <button onClick={onRefresh}>{UI_TEXT.CALENDAR.RELOAD}</button>
+            <button onClick={onRefresh} aria-label={UI_TEXT.CALENDAR.RELOAD}>
+              {UI_TEXT.CALENDAR.RELOAD}
+            </button>
           )}
         </div>
       </div>
@@ -121,7 +123,11 @@ const StreamCalendar = memo(function StreamCalendar({
                 <HiArrowPath />
               </button>
             )}
-            <button onClick={open} type='button'>
+            <button
+              onClick={open}
+              type='button'
+              aria-label={UI_TEXT.CALENDAR.MONTH_VIEW_TITLE}
+            >
               {UI_TEXT.CALENDAR.MONTH}
             </button>
           </div>

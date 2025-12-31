@@ -3,6 +3,7 @@
 import { useAuth } from '@/contexts/AuthContext';
 import { useTimeout } from '@/hooks/useTimeout';
 import { Spinner } from '@/components/Spinner';
+import { UI_TEXT } from '@/constants';
 import styles from './LoadingOverlay.module.scss';
 
 /**
@@ -18,13 +19,16 @@ export function LoadingOverlay() {
   return (
     <div className={styles['loading-overlay']}>
       <Spinner size={50} />
-      <div className={styles['loading-overlay__text']}>読み込み中...</div>
+      <div className={styles['loading-overlay__text']}>
+        {UI_TEXT.LOADING.TEXT}
+      </div>
       {hasTimeout && (
         <button
           onClick={() => window.location.reload()}
           className={styles['loading-overlay__reload-button']}
+          aria-label={UI_TEXT.LOADING.RELOAD}
         >
-          ページをリロード
+          {UI_TEXT.LOADING.RELOAD}
         </button>
       )}
     </div>

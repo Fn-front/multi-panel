@@ -131,6 +131,7 @@ export const UI_TEXT = {
     URL_TOO_LONG: (maxLength: number) =>
       `URLが長すぎます（最大${maxLength}文字）`,
     REMOVE: 'パネルを削除',
+    TOGGLE_COLUMNS: (columns: number) => `${columns}カラム表示`,
   },
   // チャンネル関連
   CHANNEL: {
@@ -181,6 +182,15 @@ export const UI_TEXT = {
   // 設定関連
   SETTINGS: {
     TITLE: '設定',
+  },
+  // モーダル関連
+  MODAL: {
+    CLOSE: '閉じる',
+  },
+  // ローディング関連
+  LOADING: {
+    TEXT: '読み込み中...',
+    RELOAD: 'ページをリロード',
   },
   // 接続状態関連
   CONNECTION: {

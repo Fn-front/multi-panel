@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import { UI_TEXT } from '@/constants';
 import styles from './Modal.module.scss';
 
 type ModalProps = {
@@ -49,6 +50,7 @@ export function Modal({
               className={styles.closeButton}
               onClick={onClose}
               type='button'
+              aria-label={UI_TEXT.MODAL.CLOSE}
             >
               ✕
             </button>

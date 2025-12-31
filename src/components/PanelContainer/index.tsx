@@ -142,7 +142,7 @@ export function PanelContainer() {
             type='button'
             className={styles.columnButton}
             onClick={toggleMobileColumns}
-            aria-label={`${mobileColumns}カラム表示`}
+            aria-label={UI_TEXT.PANEL.TOGGLE_COLUMNS(mobileColumns)}
           >
             {mobileColumns === 1 ? <HiRectangleStack /> : <HiSquares2X2 />}
           </button>
