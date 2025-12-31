@@ -52,6 +52,34 @@ describe('youtube utils', () => {
       });
     });
 
+    it('should parse youtube.com/live URLs', () => {
+      const result = parseYouTubeUrl('https://www.youtube.com/live/IJa1U202qkQ');
+      expect(result).toEqual({
+        type: 'video',
+        videoId: 'IJa1U202qkQ',
+      });
+    });
+
+    it('should parse youtube.com/live URLs with query parameters', () => {
+      const result = parseYouTubeUrl(
+        'https://www.youtube.com/live/IJa1U202qkQ?si=C1sRdc-FGCLhfNQ_',
+      );
+      expect(result).toEqual({
+        type: 'video',
+        videoId: 'IJa1U202qkQ',
+      });
+    });
+
+    it('should parse youtube.com/watch URLs with si parameter', () => {
+      const result = parseYouTubeUrl(
+        'https://www.youtube.com/watch?v=dQw4w9WgXcQ&si=abcd1234',
+      );
+      expect(result).toEqual({
+        type: 'video',
+        videoId: 'dQw4w9WgXcQ',
+      });
+    });
+
     it('should return unknown for invalid URLs', () => {
       expect(parseYouTubeUrl('https://example.com')).toEqual({
         type: 'unknown',
@@ -84,6 +112,14 @@ describe('youtube utils', () => {
         isValidYouTubeVideoUrl('https://m.youtube.com/watch?v=dQw4w9WgXcQ'),
       ).toBe(true);
       expect(isValidYouTubeVideoUrl('https://youtu.be/dQw4w9WgXcQ')).toBe(true);
+      expect(
+        isValidYouTubeVideoUrl('https://www.youtube.com/live/IJa1U202qkQ'),
+      ).toBe(true);
+      expect(
+        isValidYouTubeVideoUrl(
+          'https://www.youtube.com/live/IJa1U202qkQ?si=C1sRdc-FGCLhfNQ_',
+        ),
+      ).toBe(true);
     });
 
     it('should reject non-YouTube URLs', () => {
@@ -137,6 +173,9 @@ describe('youtube utils', () => {
       expect(extractVideoId('https://youtu.be/jNQXAC9IVRw')).toBe(
         'jNQXAC9IVRw',
       );
+      expect(
+        extractVideoId('https://www.youtube.com/live/IJa1U202qkQ?si=test'),
+      ).toBe('IJa1U202qkQ');
     });
 
     it('should return null for non-video URLs', () => {
