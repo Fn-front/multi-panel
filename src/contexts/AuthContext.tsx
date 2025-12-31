@@ -84,26 +84,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       // セッション期限チェック（スキップオプションがある場合はスキップ）
       let isExpired = false;
-      if (!skipExpiryCheck && data.last_login_at) {
+      if (skipExpiryCheck) {
+        isExpired = false;
+      } else if (data.last_login_at) {
         const lastLogin = new Date(data.last_login_at);
         const now = new Date();
         const hoursSinceLogin =
           (now.getTime() - lastLogin.getTime()) / (1000 * 60 * 60);
         isExpired = hoursSinceLogin >= SESSION_EXPIRY_HOURS;
+      } else {
+        isExpired = true;
       }
 
       // 最終ログイン日時を更新（必要な場合のみ）
       if (updateLogin && !isExpired) {
-        // 非同期で更新（待たない）- レスポンスタイムを優先
-        supabase
+        const newLoginTime = new Date().toISOString();
+        const { error: updateError } = await supabase
           .from('allowed_users')
-          .update({ last_login_at: new Date().toISOString() })
-          .eq('user_id', userId)
-          .then(({ error: updateError }) => {
-            if (updateError) {
-              console.error('最終ログイン日時の更新エラー:', updateError);
-            }
-          });
+          .update({ last_login_at: newLoginTime })
+          .eq('user_id', userId);
+
+        if (updateError) {
+          console.error('最終ログイン日時の更新エラー:', updateError);
+        }
       }
 
       return { isAllowed: true, isExpired };
@@ -117,8 +120,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // ログイン時: 今日〜月末の配信予定を取得
   const fetchStreamsUntilMonthEnd = async () => {
     try {
-      const result = await callSupabaseFunction('fetch-channel-streams', {});
-      console.log('[AuthContext] Fetched streams until month end:', result);
+      await callSupabaseFunction('fetch-channel-streams', {});
     } catch (error) {
       console.error('Failed to fetch streams until month end:', error);
     }
@@ -132,7 +134,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const checkSessionExpiry = async () => {
       const { isExpired } = await checkAndUpdateAllowedUser(
         user.id,
-        false, // 最終ログイン日時は更新しない
+        true, // 最終ログイン日時を更新（アクティブな操作として記録）
         false, // セッション期限チェックを実行
       );
 
@@ -150,7 +152,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       checkSessionExpiry();
     }, KEEP_ALIVE_INTERVAL);
 
-    return () => clearInterval(intervalId);
+    // タブがアクティブになったときにセッション期限チェック
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        checkSessionExpiry();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      clearInterval(intervalId);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
@@ -164,10 +178,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(session?.user ?? null);
 
         if (session?.user) {
-          // ページリロード時: ホワイトリストチェックのみ（期限チェックはTOKEN_REFRESHEDで行う）
+          // ページリロード時: ホワイトリストチェック + last_login_at更新
           const { isAllowed } = await checkAndUpdateAllowedUser(
             session.user.id,
-            false, // ページリロード時は最終ログイン日時を更新しない
+            true, // ページリロード時も最終ログイン日時を更新
             true, // セッション期限チェックをスキップ
           );
 
@@ -193,7 +207,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('[AuthContext] onAuthStateChange event:', event);
 
       // SIGNED_OUTイベントの場合は早期リターン（無限ループ防止）
       if (event === 'SIGNED_OUT') {
