@@ -26,6 +26,7 @@
         "./src/*"
       ]
     },
+    "types": ["jest", "@testing-library/jest-dom"],
     "target": "ES2017"
   },
   "include": [
