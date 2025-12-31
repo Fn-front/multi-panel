@@ -1,3 +1,5 @@
+@use '@/styles/foundation/mixins' as *;
+
 .container {
   width: 100%;
   height: 100vh;
@@ -14,7 +16,7 @@
   border-bottom: 1px solid var(--border-color, #404040);
   flex-shrink: 0;
 
-  @media (max-width: 768px) {
+  @include mobile {
     padding-left: 60px; // ハンバーガーメニュー分のスペースを確保
   }
 }
@@ -91,7 +93,7 @@
   overflow: auto;
   position: relative;
 
-  @media (max-width: 768px) {
+  @include mobile {
     // モバイルでは横スクロールを防止
     overflow-x: hidden;
   }
@@ -101,7 +103,7 @@
   position: relative;
   min-height: 100%;
 
-  @media (max-width: 768px) {
+  @include mobile {
     // モバイルでは幅100%
     width: 100% !important;
   }

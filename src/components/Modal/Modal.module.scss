@@ -1,3 +1,5 @@
+@use '@/styles/foundation/mixins' as *;
+
 .modal {
   position: fixed;
   top: 0;
@@ -24,7 +26,7 @@
     overflow: hidden;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
 
-    @media (max-width: 768px) {
+    @include mobile {
       max-width: calc(100vw - 40px);
     }
   }
