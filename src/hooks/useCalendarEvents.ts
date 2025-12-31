@@ -43,10 +43,20 @@ export function useCalendarEvents({ channelIds }: UseCalendarEventsOptions) {
           if (!event.scheduled_start_time) return;
 
           const startDate = new Date(event.scheduled_start_time);
-          // 終了時刻: actual_end_time があればそれを使用、なければ開始時刻+2時間
-          const endDate = event.actual_end_time
-            ? new Date(event.actual_end_time)
-            : new Date(startDate.getTime() + 2 * 60 * 60 * 1000);
+          const isLive = event.live_broadcast_content === 'live';
+
+          // 終了時刻の決定:
+          // - actual_end_timeがあればそれを使用
+          // - 配信中(live)の場合は現在時刻
+          // - それ以外は開始時刻+2時間
+          let endDate: Date;
+          if (event.actual_end_time) {
+            endDate = new Date(event.actual_end_time);
+          } else if (isLive) {
+            endDate = new Date(); // 現在時刻
+          } else {
+            endDate = new Date(startDate.getTime() + 2 * 60 * 60 * 1000);
+          }
 
           calendarEvents.push({
             id: event.video_id,
