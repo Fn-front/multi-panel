@@ -1,3 +1,5 @@
+@use '@/styles/foundation/mixins' as *;
+
 .container {
   background: var(--bg-secondary, #1e1e1e);
   border-radius: var(--radius-md, 8px);
@@ -6,6 +8,11 @@
   display: flex;
   flex-direction: column;
   gap: var(--spacing-md, 16px);
+
+  @include mobile {
+    padding: var(--spacing-sm, 8px);
+    gap: var(--spacing-sm, 8px);
+  }
 
   .header {
     display: flex;
@@ -17,12 +24,20 @@
       font-weight: var(--font-bold, 700);
       color: var(--text-primary, #ffffff);
       margin: 0;
+
+      @include mobile {
+        font-size: var(--text-base, 16px);
+      }
     }
   }
 
   .addForm {
     display: flex;
     gap: var(--spacing-sm, 8px);
+
+    @include mobile {
+      gap: var(--spacing-xs, 4px);
+    }
 
     input {
       flex: 1;
@@ -32,6 +47,11 @@
       border-radius: var(--radius-sm, 4px);
       color: var(--text-primary, #ffffff);
       font-size: var(--text-sm, 14px);
+
+      @include mobile {
+        padding: var(--spacing-xs, 6px) var(--spacing-sm, 8px);
+        font-size: var(--text-xs, 12px);
+      }
 
       &::placeholder {
         color: var(--text-tertiary, #707070);
@@ -55,6 +75,11 @@
       transition: all var(--transition-base, 200ms ease-in-out);
       white-space: nowrap;
 
+      @include mobile {
+        padding: var(--spacing-xs, 6px) var(--spacing-sm, 10px);
+        font-size: var(--text-xs, 12px);
+      }
+
       &:hover:not(:disabled) {
         background: var(--accent-hover, #2563eb);
       }
@@ -73,6 +98,11 @@
     border-radius: var(--radius-sm, 4px);
     color: var(--error, #ef4444);
     font-size: var(--text-sm, 14px);
+
+    @include mobile {
+      padding: var(--spacing-xs, 6px);
+      font-size: var(--text-xs, 12px);
+    }
   }
 
   .channelList {
@@ -112,6 +142,12 @@
     transition: all var(--transition-base, 200ms ease-in-out);
     cursor: pointer;
 
+    @include mobile {
+      gap: var(--spacing-xs, 4px);
+      padding: var(--spacing-xs, 6px);
+      min-height: 44px; // タッチ操作しやすい最小サイズ
+    }
+
     &:hover {
       background: var(--bg-hover, #353535);
       border-color: var(--accent-primary, #3b82f6);
@@ -123,6 +159,11 @@
       border-radius: 50%;
       overflow: hidden;
       flex-shrink: 0;
+
+      @include mobile {
+        width: 36px;
+        height: 36px;
+      }
 
       img {
         width: 100%;
@@ -143,6 +184,10 @@
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
+
+        @include mobile {
+          font-size: var(--text-xs, 12px);
+        }
       }
 
       .description {
@@ -151,6 +196,10 @@
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
+
+        @include mobile {
+          font-size: 10px;
+        }
       }
     }
 
@@ -168,6 +217,11 @@
       cursor: pointer;
       transition: all var(--transition-base, 200ms ease-in-out);
       flex-shrink: 0;
+
+      @include mobile {
+        width: 28px;
+        height: 28px;
+      }
 
       &:hover {
         transform: scale(1.15);
@@ -187,9 +241,20 @@
       align-items: center;
       justify-content: center;
 
+      @include mobile {
+        padding: 6px;
+        min-width: 32px;
+        min-height: 32px;
+      }
+
       svg {
         width: 16px;
         height: 16px;
+
+        @include mobile {
+          width: 18px;
+          height: 18px;
+        }
       }
 
       &:hover {
@@ -211,10 +276,20 @@
     text-align: center;
     padding: var(--spacing-lg, 24px);
 
+    @include mobile {
+      padding: var(--spacing-md, 16px);
+      font-size: var(--text-xs, 12px);
+    }
+
     svg {
       width: 48px;
       height: 48px;
       opacity: 0.5;
+
+      @include mobile {
+        width: 40px;
+        height: 40px;
+      }
     }
   }
 
@@ -225,5 +300,10 @@
     padding: var(--spacing-md, 16px);
     color: var(--text-secondary, #a0a0a0);
     font-size: var(--text-sm, 14px);
+
+    @include mobile {
+      padding: var(--spacing-sm, 8px);
+      font-size: var(--text-xs, 12px);
+    }
   }
 }
