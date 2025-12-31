@@ -12,3 +12,14 @@ global.fetch = jest.fn(() =>
     clone: () => ({ ok: true }),
   })
 )
+
+// HTMLFormElement.prototype.requestSubmit のpolyfill
+if (!HTMLFormElement.prototype.requestSubmit) {
+  HTMLFormElement.prototype.requestSubmit = function (submitter) {
+    if (submitter) {
+      submitter.click()
+    } else {
+      this.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }))
+    }
+  }
+}

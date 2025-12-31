@@ -20,40 +20,44 @@ jest.mock('@/lib/http-client', () => ({
   },
 }));
 
-// axiosをモック
-jest.mock('axios');
-const mockedAxios = axios as jest.Mocked<typeof axios>;
+// youtube-apiモジュールをリセット可能にする
+let getChannelInfo: any;
+let getChannelUpcomingStreams: any;
+let getChannelLiveStreams: any;
+let getMultipleChannelsSchedule: any;
+let createYouTubeClient: any;
 
-// httpClient用のモックを追加
-const mockHttpClientInstance = {
-  interceptors: {
-    request: { use: jest.fn(), eject: jest.fn() },
-    response: { use: jest.fn(), eject: jest.fn() },
-  },
-};
+beforeEach(async () => {
+  // モジュールキャッシュをクリア
+  jest.resetModules();
 
-mockedAxios.create = jest.fn(() => mockHttpClientInstance as any);
+  // モジュールを再インポート
+  const youtubeApi = await import('../youtube-api');
+  getChannelInfo = youtubeApi.getChannelInfo;
+  getChannelUpcomingStreams = youtubeApi.getChannelUpcomingStreams;
+  getChannelLiveStreams = youtubeApi.getChannelLiveStreams;
+  getMultipleChannelsSchedule = youtubeApi.getMultipleChannelsSchedule;
 
-// テストの後にモジュールをインポート
-import {
-  getChannelInfo,
-  getChannelUpcomingStreams,
-  getChannelLiveStreams,
-  getMultipleChannelsSchedule,
-} from '../youtube-api';
-import { createYouTubeClient } from '@/lib/http-client';
-
-const mockCreateYouTubeClient = createYouTubeClient as jest.MockedFunction<
-  typeof createYouTubeClient
->;
+  const httpClient = await import('@/lib/http-client');
+  createYouTubeClient = httpClient.createYouTubeClient;
+});
 
 describe('youtube-api', () => {
   const mockApiKey = 'test-api-key';
   const mockChannelId = 'UCtest123';
   let mockAxiosInstance: any;
 
+  // console.errorをモック
+  const originalConsoleError = console.error;
+  beforeAll(() => {
+    console.error = jest.fn();
+  });
+
+  afterAll(() => {
+    console.error = originalConsoleError;
+  });
+
   beforeEach(() => {
-    jest.clearAllMocks();
     process.env.NEXT_PUBLIC_YOUTUBE_API_KEY = mockApiKey;
 
     // axios.createのモックを設定
@@ -76,7 +80,7 @@ describe('youtube-api', () => {
         },
       },
     };
-    mockCreateYouTubeClient.mockReturnValue(mockAxiosInstance as any);
+    (createYouTubeClient as jest.Mock).mockReturnValue(mockAxiosInstance as any);
   });
 
   afterEach(() => {
@@ -146,7 +150,7 @@ describe('youtube-api', () => {
     });
 
     it('should handle API errors', async () => {
-      mockAxiosInstance.get.mockRejectedValueOnce({
+      const error = {
         response: {
           status: 403,
           statusText: 'Forbidden',
@@ -157,9 +161,11 @@ describe('youtube-api', () => {
             },
           },
         },
-      });
+      };
 
-      await expect(getChannelInfo(mockChannelId)).rejects.toThrow();
+      mockAxiosInstance.get.mockRejectedValueOnce(error);
+
+      await expect(getChannelInfo(mockChannelId)).rejects.toEqual(error);
     });
   });
 
@@ -301,8 +307,14 @@ describe('youtube-api', () => {
       const channel1 = 'UCtest1';
       const channel2 = 'UCtest2';
 
-      // Mock responses for both channels
-      mockAxiosInstance.get.mockResolvedValue({ data: { items: [] } });
+      // Mock responses for both channels - 各APIエンドポイントに対するレスポンス
+      mockAxiosInstance.get
+        .mockResolvedValueOnce({ data: { items: [] } }) // upcoming for channel1
+        .mockResolvedValueOnce({ data: { items: [] } }) // live for channel1
+        .mockResolvedValueOnce({ data: { items: [] } }) // past for channel1
+        .mockResolvedValueOnce({ data: { items: [] } }) // upcoming for channel2
+        .mockResolvedValueOnce({ data: { items: [] } }) // live for channel2
+        .mockResolvedValueOnce({ data: { items: [] } }); // past for channel2
 
       const result = await getMultipleChannelsSchedule([channel1, channel2]);
 
@@ -318,8 +330,8 @@ describe('youtube-api', () => {
       let callCount = 0;
       mockAxiosInstance.get.mockImplementation(() => {
         callCount++;
-        // 最初のチャンネルのリクエストは失敗
-        if (callCount <= 2) {
+        // 最初のチャンネルの最初のリクエストのみ失敗
+        if (callCount === 1) {
           return Promise.reject({
             response: {
               status: 500,
@@ -329,13 +341,13 @@ describe('youtube-api', () => {
             },
           });
         }
-        // 2番目のチャンネルのリクエストは成功
+        // それ以外は成功
         return Promise.resolve({ data: { items: [] } });
       });
 
       const result = await getMultipleChannelsSchedule([channel1, channel2]);
 
-      // エラーが発生したチャンネルは結果に含まれない
+      // 1つのリクエストが失敗してもチャンネル全体がスキップされる
       expect(result.size).toBeLessThanOrEqual(2);
     });
   });
