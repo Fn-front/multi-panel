@@ -219,3 +219,66 @@ export const FULL_CALENDAR_CONFIG = {
     right: '',
   },
 } as const;
+
+// ========================================
+// アクセシビリティ
+// ========================================
+export const ACCESSIBILITY = {
+  COLOR_PICKER: {
+    CHANGE_COLOR: '色を変更',
+    CHANGE_COLOR_TO: (color: string) => `色を${color}に変更`,
+  },
+} as const;
+
+// ========================================
+// カラー設定
+// ========================================
+export const COLORS = {
+  PRESET: [
+    { hex: '#ef4444', name: '赤' },
+    { hex: '#f59e0b', name: 'オレンジ' },
+    { hex: '#eab308', name: '黄' },
+    { hex: '#22c55e', name: '緑' },
+    { hex: '#10b981', name: 'エメラルド' },
+    { hex: '#06b6d4', name: 'シアン' },
+    { hex: '#3b82f6', name: '青' },
+    { hex: '#6366f1', name: 'インディゴ' },
+    { hex: '#a855f7', name: '紫' },
+    { hex: '#ec4899', name: 'ピンク' },
+  ],
+  DEFAULT: '#3b82f6',
+} as const;
+
+// ========================================
+// エラーメッセージ
+// ========================================
+export const ERROR_MESSAGES = {
+  // 環境設定エラー
+  ENV: {
+    SUPABASE_NOT_SET: 'Supabase環境変数が設定されていません',
+  },
+  // HTTP通信エラー
+  HTTP: {
+    UNAUTHORIZED: 'Unauthorized - 認証エラー',
+    FORBIDDEN: 'Forbidden - アクセス権限なし',
+    NOT_FOUND: 'Not Found - リソースが見つかりません',
+    SERVER_ERROR: 'Server Error - サーバーエラー',
+  },
+  // 認証関連エラー
+  AUTH: {
+    SESSION_EXPIRED: 'セッション期限切れ - 自動ログアウト',
+    WHITELIST_CHECK_ERROR: 'ホワイトリストチェックエラー:',
+    LAST_LOGIN_UPDATE_ERROR: '最終ログイン日時の更新エラー:',
+    WHITELIST_CHECK_EXCEPTION: 'ホワイトリストチェック例外:',
+    LOGIN_ERROR: 'ログインエラー:',
+    LOGOUT_ERROR: 'ログアウトエラー:',
+  },
+} as const;
+
+// ========================================
+// メタデータ
+// ========================================
+export const METADATA = {
+  TITLE: 'Multi Panel - YouTube動画タイリング',
+  DESCRIPTION: 'ブラウザでYouTube動画をタイリング表示',
+} as const;

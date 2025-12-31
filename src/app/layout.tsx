@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Noto_Sans_JP } from 'next/font/google';
 import { GlobalProvider } from '@/contexts/GlobalProvider';
 import { ConnectionStatusIndicator } from '@/components/ConnectionStatusIndicator';
+import { METADATA } from '@/constants';
 
 import '@/styles/app.scss';
 
@@ -12,8 +13,8 @@ const noto = Noto_Sans_JP({
 });
 
 export const metadata: Metadata = {
-  title: 'Multi Panel - YouTube動画タイリング',
-  description: 'ブラウザでYouTube動画をタイリング表示',
+  title: METADATA.TITLE,
+  description: METADATA.DESCRIPTION,
 };
 
 export default function RootLayout({

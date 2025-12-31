@@ -4,7 +4,7 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import type { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
 import { callSupabaseFunction } from '@/utils/supabase';
-import { UI_TEXT } from '@/constants';
+import { UI_TEXT, ERROR_MESSAGES } from '@/constants';
 import { useTimeout } from '@/hooks/useTimeout';
 
 interface AuthContextType {
@@ -37,7 +37,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
    * セッション期限切れ時の処理
    */
   const handleSessionExpired = async () => {
-    console.log('セッション期限切れ - 自動ログアウト');
+    console.log(ERROR_MESSAGES.AUTH.SESSION_EXPIRED);
     setSession(null);
     setUser(null);
     setIsAllowed(false);
@@ -74,7 +74,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .single();
 
       if (error) {
-        console.error('ホワイトリストチェックエラー:', error);
+        console.error(ERROR_MESSAGES.AUTH.WHITELIST_CHECK_ERROR, error);
         return { isAllowed: false, isExpired: true };
       }
 
@@ -105,13 +105,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           .eq('user_id', userId);
 
         if (updateError) {
-          console.error('最終ログイン日時の更新エラー:', updateError);
+          console.error(ERROR_MESSAGES.AUTH.LAST_LOGIN_UPDATE_ERROR, updateError);
         }
       }
 
       return { isAllowed: true, isExpired };
     } catch (error) {
-      console.error('ホワイトリストチェック例外:', error);
+      console.error(ERROR_MESSAGES.AUTH.WHITELIST_CHECK_EXCEPTION, error);
       setHasTimeout(true);
       return { isAllowed: false, isExpired: true };
     }
@@ -284,7 +284,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
 
       if (error) {
-        console.error('ログインエラー:', error);
+        console.error(ERROR_MESSAGES.AUTH.LOGIN_ERROR, error);
         setIsLoading(false);
         throw error;
       }
@@ -302,7 +302,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const { error } = await supabase.auth.signOut();
 
       if (error) {
-        console.error('ログアウトエラー:', error);
+        console.error(ERROR_MESSAGES.AUTH.LOGOUT_ERROR, error);
         // エラーが発生してもローカル状態とストレージをクリア
         setSession(null);
         setUser(null);

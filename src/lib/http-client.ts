@@ -3,6 +3,7 @@
  */
 
 import axios, { type AxiosError, type AxiosInstance } from 'axios';
+import { ERROR_MESSAGES } from '@/constants';
 
 /**
  * 共通エラーハンドリング用のaxiosインスタンス
@@ -51,13 +52,13 @@ httpClient.interceptors.response.use(
 
       // ステータスコード別の処理（必要に応じて拡張）
       if (status === 401) {
-        console.error('Unauthorized - 認証エラー');
+        console.error(ERROR_MESSAGES.HTTP.UNAUTHORIZED);
       } else if (status === 403) {
-        console.error('Forbidden - アクセス権限なし');
+        console.error(ERROR_MESSAGES.HTTP.FORBIDDEN);
       } else if (status === 404) {
-        console.error('Not Found - リソースが見つかりません');
+        console.error(ERROR_MESSAGES.HTTP.NOT_FOUND);
       } else if (status >= 500) {
-        console.error('Server Error - サーバーエラー');
+        console.error(ERROR_MESSAGES.HTTP.SERVER_ERROR);
       }
     } else if (error.request) {
       // リクエストは送信されたがレスポンスがない

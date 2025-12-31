@@ -3,7 +3,7 @@
 import { useCallback, useState, memo } from 'react';
 import { HiXMark, HiUserGroup } from 'react-icons/hi2';
 import type { Channel } from '@/types/channel';
-import { UI_TEXT } from '@/constants';
+import { UI_TEXT, ACCESSIBILITY, COLORS } from '@/constants';
 import { useChannelManagement } from './hooks/useChannelManagement';
 import { ColorPicker } from '@/components/ColorPicker';
 import styles from './FavoriteChannels.module.scss';
@@ -152,8 +152,8 @@ const FavoriteChannels = memo(function FavoriteChannels({
                   <button
                     className={styles.colorButton}
                     onClick={(e) => handleColorClick(channel.id, e)}
-                    style={{ backgroundColor: channel.color || '#3b82f6' }}
-                    aria-label='色を変更'
+                    style={{ backgroundColor: channel.color || COLORS.DEFAULT }}
+                    aria-label={ACCESSIBILITY.COLOR_PICKER.CHANGE_COLOR}
                     type='button'
                   />
                   <button
@@ -175,7 +175,7 @@ const FavoriteChannels = memo(function FavoriteChannels({
         <ColorPicker
           selectedColor={
             channels.find((ch) => ch.id === colorPickerState.channelId)
-              ?.color || '#3b82f6'
+              ?.color || COLORS.DEFAULT
           }
           onChange={handleColorChange}
           onClose={handleColorPickerClose}

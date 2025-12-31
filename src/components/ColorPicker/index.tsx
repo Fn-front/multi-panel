@@ -1,20 +1,8 @@
 'use client';
 
 import { useRef, useEffect, memo } from 'react';
+import { COLORS, ACCESSIBILITY } from '@/constants';
 import styles from './ColorPicker.module.scss';
-
-const PRESET_COLORS = [
-  '#ef4444', // 赤
-  '#f59e0b', // オレンジ
-  '#eab308', // 黄
-  '#22c55e', // 緑
-  '#10b981', // エメラルド
-  '#06b6d4', // シアン
-  '#3b82f6', // 青
-  '#6366f1', // インディゴ
-  '#a855f7', // 紫
-  '#ec4899', // ピンク
-];
 
 interface ColorPickerProps {
   /** 現在選択されている色 */
@@ -58,17 +46,17 @@ export const ColorPicker = memo(function ColorPicker({
       style={{ top: position.top, left: position.left }}
     >
       <div className={styles.colorGrid}>
-        {PRESET_COLORS.map((color) => (
+        {COLORS.PRESET.map((color) => (
           <button
-            key={color}
+            key={color.hex}
             type='button'
-            className={`${styles.colorOption} ${selectedColor === color ? styles.selected : ''}`}
-            style={{ backgroundColor: color }}
+            className={`${styles.colorOption} ${selectedColor === color.hex ? styles.selected : ''}`}
+            style={{ backgroundColor: color.hex }}
             onClick={() => {
-              onChange(color);
+              onChange(color.hex);
               onClose();
             }}
-            aria-label={`色を${color}に変更`}
+            aria-label={ACCESSIBILITY.COLOR_PICKER.CHANGE_COLOR_TO(color.name)}
           />
         ))}
       </div>

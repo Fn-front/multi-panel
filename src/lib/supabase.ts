@@ -1,10 +1,11 @@
 import { createClient } from '@supabase/supabase-js';
+import { ERROR_MESSAGES } from '@/constants';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
 if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Supabase環境変数が設定されていません');
+  throw new Error(ERROR_MESSAGES.ENV.SUPABASE_NOT_SET);
 }
 
 // リトライ状態を管理するグローバルイベント
