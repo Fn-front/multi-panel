@@ -1,13 +1,22 @@
 import { render, screen, fireEvent } from '@testing-library/react';
-import { FavoriteChannels } from '../index';
+import FavoriteChannels from '../index';
 import { useChannelManagement } from '../hooks/useChannelManagement';
 import type { Channel } from '@/types/channel';
 
 // モックの設定
 jest.mock('../hooks/useChannelManagement');
 jest.mock('@/components/ColorPicker', () => ({
-  ColorPicker: ({ selectedColor, onChange, onClose, position }: any) => (
-    <div data-testid="color-picker" data-position={JSON.stringify(position)}>
+  ColorPicker: ({
+    onChange,
+    onClose,
+    position,
+  }: {
+    selectedColor: string;
+    onChange: (color: string) => void;
+    onClose: () => void;
+    position: { top: number; left: number };
+  }) => (
+    <div data-testid='color-picker' data-position={JSON.stringify(position)}>
       <button onClick={() => onChange('#ff0000')}>Red</button>
       <button onClick={onClose}>Close</button>
     </div>
@@ -21,7 +30,6 @@ describe('FavoriteChannels component', () => {
   const mockOnAddChannel = jest.fn();
   const mockOnRemoveChannel = jest.fn();
   const mockOnChannelClick = jest.fn();
-  const mockOnColorChange = jest.fn();
   const mockHandleSubmit = jest.fn();
   const mockHandleInputChange = jest.fn();
 

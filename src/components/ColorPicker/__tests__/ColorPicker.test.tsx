@@ -27,7 +27,7 @@ describe('ColorPicker component', () => {
     it('カラーピッカーが表示される', () => {
       const { container } = render(
         <ColorPicker
-          selectedColor="#ef4444"
+          selectedColor='#ef4444'
           onChange={mockOnChange}
           onClose={mockOnClose}
           position={defaultPosition}
@@ -41,7 +41,7 @@ describe('ColorPicker component', () => {
     it('プリセットカラーがすべて表示される', () => {
       render(
         <ColorPicker
-          selectedColor="#ef4444"
+          selectedColor='#ef4444'
           onChange={mockOnChange}
           onClose={mockOnClose}
           position={defaultPosition}
@@ -57,7 +57,7 @@ describe('ColorPicker component', () => {
     it('カラーボタンの数が正しい', () => {
       render(
         <ColorPicker
-          selectedColor="#ef4444"
+          selectedColor='#ef4444'
           onChange={mockOnChange}
           onClose={mockOnClose}
           position={defaultPosition}
@@ -72,16 +72,16 @@ describe('ColorPicker component', () => {
   describe('位置の設定', () => {
     it('指定された位置にポップアップが表示される', () => {
       const position = { top: 150, left: 250 };
-      const { container } = render(
+      render(
         <ColorPicker
-          selectedColor="#ef4444"
+          selectedColor='#ef4444'
           onChange={mockOnChange}
           onClose={mockOnClose}
           position={position}
         />,
       );
 
-      const popup = container.querySelector('.popup') as HTMLElement;
+      const popup = document.querySelector('.popup') as HTMLElement;
       expect(popup).toHaveStyle({
         top: '150px',
         left: '250px',
@@ -90,16 +90,16 @@ describe('ColorPicker component', () => {
 
     it('異なる位置でも正しく表示される', () => {
       const position = { top: 50, left: 100 };
-      const { container } = render(
+      render(
         <ColorPicker
-          selectedColor="#3b82f6"
+          selectedColor='#3b82f6'
           onChange={mockOnChange}
           onClose={mockOnClose}
           position={position}
         />,
       );
 
-      const popup = container.querySelector('.popup') as HTMLElement;
+      const popup = document.querySelector('.popup') as HTMLElement;
       expect(popup).toHaveStyle({
         top: '50px',
         left: '100px',
@@ -111,7 +111,7 @@ describe('ColorPicker component', () => {
     it('各カラーボタンに正しい背景色が設定される', () => {
       render(
         <ColorPicker
-          selectedColor="#ef4444"
+          selectedColor='#ef4444'
           onChange={mockOnChange}
           onClose={mockOnClose}
           position={defaultPosition}
@@ -125,9 +125,9 @@ describe('ColorPicker component', () => {
     });
 
     it('選択された色のボタンにselectedクラスが付与される', () => {
-      const { container } = render(
+      render(
         <ColorPicker
-          selectedColor="#ef4444"
+          selectedColor='#ef4444'
           onChange={mockOnChange}
           onClose={mockOnClose}
           position={defaultPosition}
@@ -141,7 +141,7 @@ describe('ColorPicker component', () => {
     it('選択されていない色のボタンにselectedクラスが付与されない', () => {
       render(
         <ColorPicker
-          selectedColor="#ef4444"
+          selectedColor='#ef4444'
           onChange={mockOnChange}
           onClose={mockOnClose}
           position={defaultPosition}
@@ -155,7 +155,7 @@ describe('ColorPicker component', () => {
     it('カラーボタンのtype属性がbuttonである', () => {
       render(
         <ColorPicker
-          selectedColor="#ef4444"
+          selectedColor='#ef4444'
           onChange={mockOnChange}
           onClose={mockOnClose}
           position={defaultPosition}
@@ -171,7 +171,7 @@ describe('ColorPicker component', () => {
     it('カラーボタンをクリックするとonChangeが呼ばれる', () => {
       render(
         <ColorPicker
-          selectedColor="#ef4444"
+          selectedColor='#ef4444'
           onChange={mockOnChange}
           onClose={mockOnClose}
           position={defaultPosition}
@@ -187,7 +187,7 @@ describe('ColorPicker component', () => {
     it('カラーボタンをクリックするとonCloseが呼ばれる', () => {
       render(
         <ColorPicker
-          selectedColor="#ef4444"
+          selectedColor='#ef4444'
           onChange={mockOnChange}
           onClose={mockOnClose}
           position={defaultPosition}
@@ -203,7 +203,7 @@ describe('ColorPicker component', () => {
     it('異なる色をクリックすると正しい色が渡される', () => {
       render(
         <ColorPicker
-          selectedColor="#ef4444"
+          selectedColor='#ef4444'
           onChange={mockOnChange}
           onClose={mockOnClose}
           position={defaultPosition}
@@ -220,11 +220,11 @@ describe('ColorPicker component', () => {
 
   describe('外部クリック検知', () => {
     it('ポップアップ外をクリックするとonCloseが呼ばれる', () => {
-      const { container } = render(
+      render(
         <div>
-          <div data-testid="outside">外部要素</div>
+          <div data-testid='outside'>外部要素</div>
           <ColorPicker
-            selectedColor="#ef4444"
+            selectedColor='#ef4444'
             onChange={mockOnChange}
             onClose={mockOnClose}
             position={defaultPosition}
@@ -241,7 +241,7 @@ describe('ColorPicker component', () => {
     it('ポップアップ内をクリックしてもonCloseが呼ばれない（カラーボタン以外）', () => {
       const { container } = render(
         <ColorPicker
-          selectedColor="#ef4444"
+          selectedColor='#ef4444'
           onChange={mockOnChange}
           onClose={mockOnClose}
           position={defaultPosition}
@@ -265,7 +265,7 @@ describe('ColorPicker component', () => {
 
       const { unmount } = render(
         <ColorPicker
-          selectedColor="#ef4444"
+          selectedColor='#ef4444'
           onChange={mockOnChange}
           onClose={mockOnClose}
           position={defaultPosition}
@@ -287,7 +287,7 @@ describe('ColorPicker component', () => {
     it('propsが変更されない場合は再レンダリングされない', () => {
       const { rerender } = render(
         <ColorPicker
-          selectedColor="#ef4444"
+          selectedColor='#ef4444'
           onChange={mockOnChange}
           onClose={mockOnClose}
           position={defaultPosition}
@@ -297,7 +297,7 @@ describe('ColorPicker component', () => {
       // 同じpropsで再レンダリング
       rerender(
         <ColorPicker
-          selectedColor="#ef4444"
+          selectedColor='#ef4444'
           onChange={mockOnChange}
           onClose={mockOnClose}
           position={defaultPosition}

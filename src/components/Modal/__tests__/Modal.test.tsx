@@ -36,7 +36,7 @@ describe('Modal component', () => {
 
   describe('タイトルの表示', () => {
     it('titleが指定された場合にヘッダーが表示される', () => {
-      render(<Modal {...defaultProps} title="Test Title" />);
+      render(<Modal {...defaultProps} title='Test Title' />);
       expect(screen.getByText('Test Title')).toBeInTheDocument();
     });
 
@@ -46,7 +46,7 @@ describe('Modal component', () => {
     });
 
     it('閉じるボタンが表示される', () => {
-      render(<Modal {...defaultProps} title="Test Title" />);
+      render(<Modal {...defaultProps} title='Test Title' />);
       const closeButton = screen.getByRole('button', { name: '✕' });
       expect(closeButton).toBeInTheDocument();
     });
@@ -68,7 +68,7 @@ describe('Modal component', () => {
     });
 
     it('閉じるボタンをクリックするとonCloseが呼ばれる', () => {
-      render(<Modal {...defaultProps} title="Test Title" />);
+      render(<Modal {...defaultProps} title='Test Title' />);
       const closeButton = screen.getByRole('button', { name: '✕' });
       fireEvent.click(closeButton);
       expect(mockOnClose).toHaveBeenCalledTimes(1);
@@ -97,7 +97,7 @@ describe('Modal component', () => {
 
   describe('スタイルのカスタマイズ', () => {
     it('maxWidthが指定された場合にスタイルが適用される', () => {
-      render(<Modal {...defaultProps} maxWidth="600px" />);
+      render(<Modal {...defaultProps} maxWidth='600px' />);
       const modalContent = screen
         .getByText('Modal Content')
         .closest('.modalContent') as HTMLElement;
@@ -160,7 +160,7 @@ describe('Modal component', () => {
         <div>
           <h3>Section Title</h3>
           <p>Section Content</p>
-          <button type="button">Action</button>
+          <button type='button'>Action</button>
         </div>
       );
 

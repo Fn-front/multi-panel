@@ -345,7 +345,7 @@ describe('VolumeControl component', () => {
 
       render(
         <VolumeControl
-          volume={null as any}
+          volume={0}
           muted={false}
           onVolumeChange={mockOnVolumeChange}
           onMutedChange={mockOnMutedChange}

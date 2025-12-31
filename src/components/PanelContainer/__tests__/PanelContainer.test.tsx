@@ -7,7 +7,7 @@ import { useWindowSize } from '@/hooks/useWindowSize';
 jest.mock('@/contexts/PanelsContext');
 jest.mock('@/hooks/useWindowSize');
 jest.mock('@/components/VideoPanel', () => ({
-  VideoPanel: ({ panel }: any) => <div data-testid={`video-panel-${panel.id}`}>VideoPanel</div>,
+  VideoPanel: ({ panel }: { panel: { id: string } }) => <div data-testid={`video-panel-${panel.id}`}>VideoPanel</div>,
 }));
 
 const mockUsePanels = usePanels as jest.MockedFunction<typeof usePanels>;
@@ -33,7 +33,7 @@ describe('PanelContainer component', () => {
         isLoading: true,
         updateLayout: mockUpdateLayout,
         addPanel: mockAddPanel,
-      } as any);
+      } as ReturnType<typeof usePanels>);
 
       const { container } = render(<PanelContainer />);
       const skeletons = container.querySelectorAll('.skeleton');
@@ -46,7 +46,7 @@ describe('PanelContainer component', () => {
         isLoading: true,
         updateLayout: mockUpdateLayout,
         addPanel: mockAddPanel,
-      } as any);
+      } as ReturnType<typeof usePanels>);
 
       render(<PanelContainer />);
       const { container } = render(<PanelContainer />);
@@ -62,7 +62,7 @@ describe('PanelContainer component', () => {
         isLoading: false,
         updateLayout: mockUpdateLayout,
         addPanel: mockAddPanel,
-      } as any);
+      } as ReturnType<typeof usePanels>);
     });
 
     it('空メッセージが表示される', () => {
@@ -119,7 +119,7 @@ describe('PanelContainer component', () => {
         isLoading: false,
         updateLayout: mockUpdateLayout,
         addPanel: mockAddPanel,
-      } as any);
+      } as ReturnType<typeof usePanels>);
     });
 
     it('パネルが表示される', () => {
@@ -171,7 +171,7 @@ describe('PanelContainer component', () => {
         isLoading: false,
         updateLayout: mockUpdateLayout,
         addPanel: mockAddPanel,
-      } as any);
+      } as ReturnType<typeof usePanels>);
     });
 
     it('カラム切り替えボタンが表示される', () => {
@@ -225,7 +225,7 @@ describe('PanelContainer component', () => {
         isLoading: false,
         updateLayout: mockUpdateLayout,
         addPanel: mockAddPanel,
-      } as any);
+      } as ReturnType<typeof usePanels>);
     });
 
     it('カラム切り替えボタンが表示されない', () => {
@@ -241,7 +241,7 @@ describe('PanelContainer component', () => {
         isLoading: false,
         updateLayout: mockUpdateLayout,
         addPanel: mockAddPanel,
-      } as any);
+      } as ReturnType<typeof usePanels>);
     });
 
     it('追加ボタンのtype属性がbuttonである', () => {

@@ -66,21 +66,21 @@ describe('SettingsModal component', () => {
     });
 
     it('permissionが正しく渡される（granted）', () => {
-      render(<SettingsModal {...defaultProps} permission="granted" />);
+      render(<SettingsModal {...defaultProps} permission='granted' />);
       expect(
         screen.queryByText('ブラウザの通知許可が必要です'),
       ).not.toBeInTheDocument();
     });
 
     it('permissionが正しく渡される（default）', () => {
-      render(<SettingsModal {...defaultProps} permission="default" />);
+      render(<SettingsModal {...defaultProps} permission='default' />);
       expect(
         screen.getByText('ブラウザの通知許可が必要です'),
       ).toBeInTheDocument();
     });
 
     it('permissionが正しく渡される（denied）', () => {
-      render(<SettingsModal {...defaultProps} permission="denied" />);
+      render(<SettingsModal {...defaultProps} permission='denied' />);
       expect(screen.getByText('通知が拒否されています')).toBeInTheDocument();
     });
 
@@ -133,7 +133,7 @@ describe('SettingsModal component', () => {
         <SettingsModal
           {...defaultProps}
           isMounted={true}
-          permission="granted"
+          permission='granted'
           isEnabled={true}
           notifiedCount={20}
         />,
@@ -149,7 +149,7 @@ describe('SettingsModal component', () => {
         <SettingsModal
           {...defaultProps}
           isMounted={false}
-          permission="default"
+          permission='default'
           isEnabled={false}
           notifiedCount={0}
         />,
@@ -165,7 +165,7 @@ describe('SettingsModal component', () => {
         <SettingsModal
           {...defaultProps}
           isMounted={true}
-          permission="denied"
+          permission='denied'
           isEnabled={false}
           notifiedCount={0}
         />,

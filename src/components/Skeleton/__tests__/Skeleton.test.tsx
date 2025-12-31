@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import { Skeleton } from '../index';
 
 describe('Skeleton component', () => {
@@ -13,7 +13,7 @@ describe('Skeleton component', () => {
     });
 
     it('指定したclassNameが適用される', () => {
-      const { container } = render(<Skeleton className="custom-class" />);
+      const { container } = render(<Skeleton className='custom-class' />);
       const skeleton = container.firstChild as HTMLElement;
 
       expect(skeleton).toHaveClass('skeleton');
@@ -33,7 +33,7 @@ describe('Skeleton component', () => {
     });
 
     it('文字列で幅と高さを指定できる', () => {
-      const { container } = render(<Skeleton width="50%" height="2rem" />);
+      const { container } = render(<Skeleton width='50%' height='2rem' />);
       const skeleton = container.firstChild as HTMLElement;
 
       expect(skeleton).toHaveStyle({
@@ -55,7 +55,7 @@ describe('Skeleton component', () => {
 
   describe('バリアント', () => {
     it('box variantが適用される', () => {
-      const { container } = render(<Skeleton variant="box" />);
+      const { container } = render(<Skeleton variant='box' />);
       const skeleton = container.firstChild as HTMLElement;
 
       expect(skeleton).toHaveClass('box');
@@ -63,7 +63,7 @@ describe('Skeleton component', () => {
     });
 
     it('circle variantが適用される', () => {
-      const { container } = render(<Skeleton variant="circle" />);
+      const { container } = render(<Skeleton variant='circle' />);
       const skeleton = container.firstChild as HTMLElement;
 
       expect(skeleton).toHaveClass('circle');
@@ -71,7 +71,7 @@ describe('Skeleton component', () => {
     });
 
     it('text variantはboxクラスが適用される', () => {
-      const { container } = render(<Skeleton variant="text" />);
+      const { container } = render(<Skeleton variant='text' />);
       const skeleton = container.firstChild as HTMLElement;
 
       expect(skeleton).toHaveClass('box');
@@ -91,8 +91,8 @@ describe('Skeleton component', () => {
         <Skeleton
           width={150}
           height={150}
-          variant="circle"
-          className="avatar-skeleton"
+          variant='circle'
+          className='avatar-skeleton'
         />,
       );
       const skeleton = container.firstChild as HTMLElement;

@@ -14,18 +14,20 @@ describe('LoadingOverlay component', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     // window.location.reload のモック
-    delete (window as any).location;
-    window.location = { reload: jest.fn() } as any;
+    Object.defineProperty(window, 'location', {
+      value: { reload: jest.fn() },
+      writable: true,
+    });
   });
 
   describe('基本レンダリング', () => {
     it('isLoadingがfalseの場合は何も表示されない', () => {
       mockUseAuth.mockReturnValue({
         isLoading: false,
-      } as any);
+      } as ReturnType<typeof useAuth>);
       mockUseTimeout.mockReturnValue({
         hasTimeout: false,
-      } as any);
+      } as ReturnType<typeof useTimeout>);
 
       const { container } = render(<LoadingOverlay />);
       expect(container.firstChild).toBeNull();
@@ -34,10 +36,10 @@ describe('LoadingOverlay component', () => {
     it('isLoadingがtrueの場合にオーバーレイが表示される', () => {
       mockUseAuth.mockReturnValue({
         isLoading: true,
-      } as any);
+      } as ReturnType<typeof useAuth>);
       mockUseTimeout.mockReturnValue({
         hasTimeout: false,
-      } as any);
+      } as ReturnType<typeof useTimeout>);
 
       render(<LoadingOverlay />);
       expect(screen.getByText('読み込み中...')).toBeInTheDocument();
@@ -46,10 +48,10 @@ describe('LoadingOverlay component', () => {
     it('Spinnerコンポーネントが表示される', () => {
       mockUseAuth.mockReturnValue({
         isLoading: true,
-      } as any);
+      } as ReturnType<typeof useAuth>);
       mockUseTimeout.mockReturnValue({
         hasTimeout: false,
-      } as any);
+      } as ReturnType<typeof useTimeout>);
 
       const { container } = render(<LoadingOverlay />);
       const spinner = container.querySelector('.spinner');
@@ -61,10 +63,10 @@ describe('LoadingOverlay component', () => {
     it('hasTimeoutがfalseの場合はリロードボタンが表示されない', () => {
       mockUseAuth.mockReturnValue({
         isLoading: true,
-      } as any);
+      } as ReturnType<typeof useAuth>);
       mockUseTimeout.mockReturnValue({
         hasTimeout: false,
-      } as any);
+      } as ReturnType<typeof useTimeout>);
 
       render(<LoadingOverlay />);
       expect(
@@ -75,10 +77,10 @@ describe('LoadingOverlay component', () => {
     it('hasTimeoutがtrueの場合はリロードボタンが表示される', () => {
       mockUseAuth.mockReturnValue({
         isLoading: true,
-      } as any);
+      } as ReturnType<typeof useAuth>);
       mockUseTimeout.mockReturnValue({
         hasTimeout: true,
-      } as any);
+      } as ReturnType<typeof useTimeout>);
 
       render(<LoadingOverlay />);
       expect(
@@ -89,10 +91,10 @@ describe('LoadingOverlay component', () => {
     it('リロードボタンをクリックするとページがリロードされる', () => {
       mockUseAuth.mockReturnValue({
         isLoading: true,
-      } as any);
+      } as ReturnType<typeof useAuth>);
       mockUseTimeout.mockReturnValue({
         hasTimeout: true,
-      } as any);
+      } as ReturnType<typeof useTimeout>);
 
       render(<LoadingOverlay />);
       const reloadButton = screen.getByRole('button', {
@@ -108,10 +110,10 @@ describe('LoadingOverlay component', () => {
     it('ローディング中かつタイムアウト時は両方の要素が表示される', () => {
       mockUseAuth.mockReturnValue({
         isLoading: true,
-      } as any);
+      } as ReturnType<typeof useAuth>);
       mockUseTimeout.mockReturnValue({
         hasTimeout: true,
-      } as any);
+      } as ReturnType<typeof useTimeout>);
 
       render(<LoadingOverlay />);
       expect(screen.getByText('読み込み中...')).toBeInTheDocument();
@@ -123,10 +125,10 @@ describe('LoadingOverlay component', () => {
     it('ローディング中でもタイムアウトしていない場合はリロードボタンが表示されない', () => {
       mockUseAuth.mockReturnValue({
         isLoading: true,
-      } as any);
+      } as ReturnType<typeof useAuth>);
       mockUseTimeout.mockReturnValue({
         hasTimeout: false,
-      } as any);
+      } as ReturnType<typeof useTimeout>);
 
       render(<LoadingOverlay />);
       expect(screen.getByText('読み込み中...')).toBeInTheDocument();
@@ -140,10 +142,10 @@ describe('LoadingOverlay component', () => {
     it('Spinnerに正しいsizeが渡される', () => {
       mockUseAuth.mockReturnValue({
         isLoading: true,
-      } as any);
+      } as ReturnType<typeof useAuth>);
       mockUseTimeout.mockReturnValue({
         hasTimeout: false,
-      } as any);
+      } as ReturnType<typeof useTimeout>);
 
       const { container } = render(<LoadingOverlay />);
       const spinner = container.querySelector('.spinner') as HTMLElement;

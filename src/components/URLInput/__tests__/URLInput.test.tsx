@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { URLInput } from '../index';
 import { useURLInput } from '../hooks/useURLInput';
@@ -25,20 +25,20 @@ describe('URLInput component', () => {
 
   describe('基本レンダリング', () => {
     it('入力フィールドが表示される', () => {
-      render(<URLInput currentUrl="" onUrlChange={mockOnUrlChange} />);
+      render(<URLInput currentUrl='' onUrlChange={mockOnUrlChange} />);
       const input = screen.getByPlaceholderText('YouTube動画URLを入力');
       expect(input).toBeInTheDocument();
     });
 
     it('送信ボタンが表示される', () => {
-      render(<URLInput currentUrl="" onUrlChange={mockOnUrlChange} />);
+      render(<URLInput currentUrl='' onUrlChange={mockOnUrlChange} />);
       const button = screen.getByLabelText('動画を読み込み');
       expect(button).toBeInTheDocument();
     });
 
     it('フォームが表示される', () => {
       const { container } = render(
-        <URLInput currentUrl="" onUrlChange={mockOnUrlChange} />,
+        <URLInput currentUrl='' onUrlChange={mockOnUrlChange} />,
       );
       const form = container.querySelector('form');
       expect(form).toBeInTheDocument();
@@ -47,25 +47,25 @@ describe('URLInput component', () => {
 
   describe('入力フィールドの属性', () => {
     it('type属性がtextである', () => {
-      render(<URLInput currentUrl="" onUrlChange={mockOnUrlChange} />);
+      render(<URLInput currentUrl='' onUrlChange={mockOnUrlChange} />);
       const input = screen.getByPlaceholderText('YouTube動画URLを入力');
       expect(input).toHaveAttribute('type', 'text');
     });
 
     it('maxLength属性が設定されている', () => {
-      render(<URLInput currentUrl="" onUrlChange={mockOnUrlChange} />);
+      render(<URLInput currentUrl='' onUrlChange={mockOnUrlChange} />);
       const input = screen.getByPlaceholderText('YouTube動画URLを入力');
       expect(input).toHaveAttribute('maxLength', '2000');
     });
 
     it('autoComplete属性がoffである', () => {
-      render(<URLInput currentUrl="" onUrlChange={mockOnUrlChange} />);
+      render(<URLInput currentUrl='' onUrlChange={mockOnUrlChange} />);
       const input = screen.getByPlaceholderText('YouTube動画URLを入力');
       expect(input).toHaveAttribute('autoComplete', 'off');
     });
 
     it('spellCheck属性がfalseである', () => {
-      render(<URLInput currentUrl="" onUrlChange={mockOnUrlChange} />);
+      render(<URLInput currentUrl='' onUrlChange={mockOnUrlChange} />);
       const input = screen.getByPlaceholderText('YouTube動画URLを入力');
       expect(input).toHaveAttribute('spellCheck', 'false');
     });
@@ -80,7 +80,7 @@ describe('URLInput component', () => {
         handleSubmit: mockHandleSubmit,
       });
 
-      render(<URLInput currentUrl="" onUrlChange={mockOnUrlChange} />);
+      render(<URLInput currentUrl='' onUrlChange={mockOnUrlChange} />);
       const input = screen.getByPlaceholderText(
         'YouTube動画URLを入力',
       ) as HTMLInputElement;
@@ -95,7 +95,7 @@ describe('URLInput component', () => {
         handleSubmit: mockHandleSubmit,
       });
 
-      render(<URLInput currentUrl="" onUrlChange={mockOnUrlChange} />);
+      render(<URLInput currentUrl='' onUrlChange={mockOnUrlChange} />);
       const input = screen.getByPlaceholderText(
         'YouTube動画URLを入力',
       ) as HTMLInputElement;
@@ -106,7 +106,7 @@ describe('URLInput component', () => {
   describe('入力変更イベント', () => {
     it('入力時にhandleInputChangeが呼ばれる', async () => {
       const user = userEvent.setup();
-      render(<URLInput currentUrl="" onUrlChange={mockOnUrlChange} />);
+      render(<URLInput currentUrl='' onUrlChange={mockOnUrlChange} />);
 
       const input = screen.getByPlaceholderText('YouTube動画URLを入力');
       await user.type(input, 'test');
@@ -115,7 +115,7 @@ describe('URLInput component', () => {
     });
 
     it('onChangeイベントがhandleInputChangeにバインドされる', () => {
-      render(<URLInput currentUrl="" onUrlChange={mockOnUrlChange} />);
+      render(<URLInput currentUrl='' onUrlChange={mockOnUrlChange} />);
 
       const input = screen.getByPlaceholderText('YouTube動画URLを入力');
       fireEvent.change(input, { target: { value: 'new value' } });
@@ -126,13 +126,13 @@ describe('URLInput component', () => {
 
   describe('フォーム送信', () => {
     it('送信ボタンのtype属性がsubmitである', () => {
-      render(<URLInput currentUrl="" onUrlChange={mockOnUrlChange} />);
+      render(<URLInput currentUrl='' onUrlChange={mockOnUrlChange} />);
       const button = screen.getByLabelText('動画を読み込み');
       expect(button).toHaveAttribute('type', 'submit');
     });
 
     it('フォーム送信時にhandleSubmitが呼ばれる', () => {
-      render(<URLInput currentUrl="" onUrlChange={mockOnUrlChange} />);
+      render(<URLInput currentUrl='' onUrlChange={mockOnUrlChange} />);
 
       const form = screen.getByRole('textbox').closest('form')!;
       fireEvent.submit(form);
@@ -141,7 +141,7 @@ describe('URLInput component', () => {
     });
 
     it('送信ボタンクリックでフォームが送信される', () => {
-      render(<URLInput currentUrl="" onUrlChange={mockOnUrlChange} />);
+      render(<URLInput currentUrl='' onUrlChange={mockOnUrlChange} />);
 
       const button = screen.getByLabelText('動画を読み込み');
       fireEvent.click(button);
@@ -159,7 +159,7 @@ describe('URLInput component', () => {
         handleSubmit: mockHandleSubmit,
       });
 
-      render(<URLInput currentUrl="" onUrlChange={mockOnUrlChange} />);
+      render(<URLInput currentUrl='' onUrlChange={mockOnUrlChange} />);
       const errorElement = screen.queryByText(/エラー/);
       expect(errorElement).not.toBeInTheDocument();
     });
@@ -173,7 +173,7 @@ describe('URLInput component', () => {
         handleSubmit: mockHandleSubmit,
       });
 
-      render(<URLInput currentUrl="" onUrlChange={mockOnUrlChange} />);
+      render(<URLInput currentUrl='' onUrlChange={mockOnUrlChange} />);
       expect(screen.getByText(errorMessage)).toBeInTheDocument();
     });
 
@@ -186,16 +186,14 @@ describe('URLInput component', () => {
         handleSubmit: mockHandleSubmit,
       });
 
-      render(<URLInput currentUrl="" onUrlChange={mockOnUrlChange} />);
+      render(<URLInput currentUrl='' onUrlChange={mockOnUrlChange} />);
       expect(screen.getByText(errorMessage)).toBeInTheDocument();
     });
   });
 
   describe('アイコンの表示', () => {
     it('送信ボタンにアイコンが含まれる', () => {
-      const { container } = render(
-        <URLInput currentUrl="" onUrlChange={mockOnUrlChange} />,
-      );
+      render(<URLInput currentUrl='' onUrlChange={mockOnUrlChange} />);
       const button = screen.getByLabelText('動画を読み込み');
       const svg = button.querySelector('svg');
       expect(svg).toBeInTheDocument();

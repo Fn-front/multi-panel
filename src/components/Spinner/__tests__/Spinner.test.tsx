@@ -69,7 +69,6 @@ describe('Spinner component', () => {
     });
 
     it('デフォルトサイズのボーダー幅が正しい', () => {
-      const defaultSize = 50;
       const expectedBorderWidth = 5; // Math.max(5, 50 / 10) = Math.max(5, 5) = 5
       const { container } = render(<Spinner />);
       const spinner = container.firstChild as HTMLElement;

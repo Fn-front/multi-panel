@@ -6,8 +6,8 @@ import { useYouTubePlayerReady } from '../hooks/useYouTubePlayerReady';
 jest.mock('../hooks/useYouTubePlayerReady');
 jest.mock('react-player', () => ({
   __esModule: true,
-  default: ({ src, volume, muted, onReady, onError }: any) => (
-    <div data-testid="react-player" data-url={src}>
+  default: ({ src }: { src: string; volume: number; muted: boolean; onReady?: () => void; onError?: () => void }) => (
+    <div data-testid='react-player' data-url={src}>
       ReactPlayer: {src}
     </div>
   ),
@@ -33,7 +33,7 @@ describe('VideoPlayer component', () => {
     it('コンテナが表示される', () => {
       const { container } = render(
         <VideoPlayer
-          url="https://www.youtube.com/watch?v=test123"
+          url='https://www.youtube.com/watch?v=test123'
           volume={0.5}
           muted={false}
         />,
@@ -45,7 +45,7 @@ describe('VideoPlayer component', () => {
     it('ReactPlayerが表示される', () => {
       const { container } = render(
         <VideoPlayer
-          url="https://www.youtube.com/watch?v=test123"
+          url='https://www.youtube.com/watch?v=test123'
           volume={0.5}
           muted={false}
         />,
@@ -65,7 +65,7 @@ describe('VideoPlayer component', () => {
 
       const { container } = render(
         <VideoPlayer
-          url="https://www.youtube.com/watch?v=test123"
+          url='https://www.youtube.com/watch?v=test123'
           volume={0.5}
           muted={false}
         />,
@@ -83,7 +83,7 @@ describe('VideoPlayer component', () => {
 
       const { container } = render(
         <VideoPlayer
-          url="https://www.youtube.com/watch?v=test123"
+          url='https://www.youtube.com/watch?v=test123'
           volume={0.5}
           muted={false}
         />,
@@ -102,7 +102,7 @@ describe('VideoPlayer component', () => {
 
       const { container } = render(
         <VideoPlayer
-          url="https://www.youtube.com/watch?v=test123"
+          url='https://www.youtube.com/watch?v=test123'
           volume={0.5}
           muted={false}
         />,
@@ -123,7 +123,7 @@ describe('VideoPlayer component', () => {
 
       const { container } = render(
         <VideoPlayer
-          url="https://www.youtube.com/watch?v=test123"
+          url='https://www.youtube.com/watch?v=test123'
           volume={0.5}
           muted={false}
         />,
@@ -193,7 +193,7 @@ describe('VideoPlayer component', () => {
       const mockOnReady = jest.fn();
       render(
         <VideoPlayer
-          url="https://www.youtube.com/watch?v=test123"
+          url='https://www.youtube.com/watch?v=test123'
           volume={0.5}
           muted={false}
           onReady={mockOnReady}
@@ -212,7 +212,7 @@ describe('VideoPlayer component', () => {
       const mockOnError = jest.fn();
       const { container } = render(
         <VideoPlayer
-          url="https://www.youtube.com/watch?v=test123"
+          url='https://www.youtube.com/watch?v=test123'
           volume={0.5}
           muted={false}
           onError={mockOnError}
@@ -229,7 +229,7 @@ describe('VideoPlayer component', () => {
     it('aspectRatio要素が表示される', () => {
       const { container } = render(
         <VideoPlayer
-          url="https://www.youtube.com/watch?v=test123"
+          url='https://www.youtube.com/watch?v=test123'
           volume={0.5}
           muted={false}
         />,
@@ -241,7 +241,7 @@ describe('VideoPlayer component', () => {
     it('aspectRatio要素にrefが設定される', () => {
       render(
         <VideoPlayer
-          url="https://www.youtube.com/watch?v=test123"
+          url='https://www.youtube.com/watch?v=test123'
           volume={0.5}
           muted={false}
         />,

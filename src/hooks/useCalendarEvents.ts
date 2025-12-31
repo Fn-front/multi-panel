@@ -2,7 +2,6 @@ import { useState, useCallback, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { UI_TEXT } from '@/constants';
-import { formatDate, getCurrentMonthRange } from '@/utils/date';
 import { callSupabaseFunction } from '@/utils/supabase';
 import type { CalendarEvent } from '@/types/youtube';
 

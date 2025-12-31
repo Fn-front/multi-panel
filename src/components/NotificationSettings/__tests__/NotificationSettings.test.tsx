@@ -13,7 +13,7 @@ describe('NotificationSettings component', () => {
       render(
         <NotificationSettings
           isMounted={true}
-          permission="default"
+          permission='default'
           isEnabled={false}
           notifiedCount={0}
           onToggle={mockOnToggle}
@@ -27,7 +27,7 @@ describe('NotificationSettings component', () => {
       const { container } = render(
         <NotificationSettings
           isMounted={true}
-          permission="default"
+          permission='default'
           isEnabled={false}
           notifiedCount={0}
           onToggle={mockOnToggle}
@@ -44,7 +44,7 @@ describe('NotificationSettings component', () => {
       render(
         <NotificationSettings
           isMounted={false}
-          permission="default"
+          permission='default'
           isEnabled={false}
           notifiedCount={0}
           onToggle={mockOnToggle}
@@ -59,7 +59,7 @@ describe('NotificationSettings component', () => {
       render(
         <NotificationSettings
           isMounted={false}
-          permission="default"
+          permission='default'
           isEnabled={false}
           notifiedCount={0}
           onToggle={mockOnToggle}
@@ -75,7 +75,7 @@ describe('NotificationSettings component', () => {
       render(
         <NotificationSettings
           isMounted={true}
-          permission="granted"
+          permission='granted'
           isEnabled={false}
           notifiedCount={0}
           onToggle={mockOnToggle}
@@ -89,7 +89,7 @@ describe('NotificationSettings component', () => {
       render(
         <NotificationSettings
           isMounted={true}
-          permission="granted"
+          permission='granted'
           isEnabled={false}
           notifiedCount={0}
           onToggle={mockOnToggle}
@@ -103,7 +103,7 @@ describe('NotificationSettings component', () => {
       render(
         <NotificationSettings
           isMounted={true}
-          permission="granted"
+          permission='granted'
           isEnabled={false}
           notifiedCount={0}
           onToggle={mockOnToggle}
@@ -120,7 +120,7 @@ describe('NotificationSettings component', () => {
       render(
         <NotificationSettings
           isMounted={true}
-          permission="granted"
+          permission='granted'
           isEnabled={true}
           notifiedCount={5}
           onToggle={mockOnToggle}
@@ -134,7 +134,7 @@ describe('NotificationSettings component', () => {
       render(
         <NotificationSettings
           isMounted={true}
-          permission="granted"
+          permission='granted'
           isEnabled={true}
           notifiedCount={10}
           onToggle={mockOnToggle}
@@ -148,7 +148,7 @@ describe('NotificationSettings component', () => {
       render(
         <NotificationSettings
           isMounted={true}
-          permission="granted"
+          permission='granted'
           isEnabled={true}
           notifiedCount={3}
           onToggle={mockOnToggle}
@@ -164,7 +164,7 @@ describe('NotificationSettings component', () => {
       render(
         <NotificationSettings
           isMounted={true}
-          permission="default"
+          permission='default'
           isEnabled={false}
           notifiedCount={0}
           onToggle={mockOnToggle}
@@ -180,7 +180,7 @@ describe('NotificationSettings component', () => {
       render(
         <NotificationSettings
           isMounted={true}
-          permission="granted"
+          permission='granted'
           isEnabled={false}
           notifiedCount={0}
           onToggle={mockOnToggle}
@@ -196,7 +196,7 @@ describe('NotificationSettings component', () => {
       render(
         <NotificationSettings
           isMounted={true}
-          permission="denied"
+          permission='denied'
           isEnabled={false}
           notifiedCount={0}
           onToggle={mockOnToggle}
@@ -210,7 +210,7 @@ describe('NotificationSettings component', () => {
       render(
         <NotificationSettings
           isMounted={true}
-          permission="denied"
+          permission='denied'
           isEnabled={false}
           notifiedCount={0}
           onToggle={mockOnToggle}
@@ -222,10 +222,10 @@ describe('NotificationSettings component', () => {
     });
 
     it('permissionがdeniedの場合はdisabledクラスが付与される', () => {
-      const { container } = render(
+      render(
         <NotificationSettings
           isMounted={true}
-          permission="denied"
+          permission='denied'
           isEnabled={false}
           notifiedCount={0}
           onToggle={mockOnToggle}
@@ -242,7 +242,7 @@ describe('NotificationSettings component', () => {
       render(
         <NotificationSettings
           isMounted={true}
-          permission="granted"
+          permission='granted'
           isEnabled={false}
           notifiedCount={0}
           onToggle={mockOnToggle}
@@ -259,7 +259,7 @@ describe('NotificationSettings component', () => {
       render(
         <NotificationSettings
           isMounted={true}
-          permission="granted"
+          permission='granted'
           isEnabled={true}
           notifiedCount={5}
           onToggle={mockOnToggle}
@@ -276,7 +276,7 @@ describe('NotificationSettings component', () => {
       render(
         <NotificationSettings
           isMounted={true}
-          permission="denied"
+          permission='denied'
           isEnabled={false}
           notifiedCount={0}
           onToggle={mockOnToggle}
@@ -295,7 +295,7 @@ describe('NotificationSettings component', () => {
       render(
         <NotificationSettings
           isMounted={true}
-          permission="granted"
+          permission='granted'
           isEnabled={false}
           notifiedCount={0}
           onToggle={mockOnToggle}

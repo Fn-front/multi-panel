@@ -15,7 +15,7 @@ describe('LoginModal component', () => {
     jest.clearAllMocks();
     mockUseAuth.mockReturnValue({
       signInWithGitHub: mockSignInWithGitHub,
-    } as any);
+    } as ReturnType<typeof useAuth>);
     // window.alertのモック
     jest.spyOn(window, 'alert').mockImplementation(() => {});
     // console.errorのモック
