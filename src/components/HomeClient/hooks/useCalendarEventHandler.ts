@@ -1,18 +1,22 @@
 import { useCallback } from 'react';
 import type { CalendarEvent } from '@/types/youtube';
 import type { Panel } from '@/types/panel';
+import { isMobileDevice } from '@/utils/device';
 
 type UseCalendarEventHandlerOptions = {
   onAddPanel: (panel: Panel) => void;
+  onCloseSidebar?: () => void;
 };
 
 /**
  * カレンダーイベントクリック時の処理を管理するフック
  *
  * イベントをクリックすると新しいパネルを追加
+ * モバイルではサイドバーを閉じる
  */
 export function useCalendarEventHandler({
   onAddPanel,
+  onCloseSidebar,
 }: UseCalendarEventHandlerOptions) {
   const handleEventClick = useCallback(
     (event: CalendarEvent) => {
@@ -31,8 +35,13 @@ export function useCalendarEventHandler({
         },
       };
       onAddPanel(newPanel);
+
+      // モバイルでサイドバーを閉じる
+      if (onCloseSidebar && isMobileDevice()) {
+        onCloseSidebar();
+      }
     },
-    [onAddPanel],
+    [onAddPanel, onCloseSidebar],
   );
 
   return { handleEventClick };

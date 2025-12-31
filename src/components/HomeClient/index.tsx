@@ -63,7 +63,8 @@ export function HomeClient({ initialSidebarVisible }: HomeClientProps) {
   );
 
   // サイドバー管理
-  const { sidebarVisible, toggleSidebar } = useSidebar(initialSidebarVisible);
+  const { sidebarVisible, toggleSidebar, closeSidebar } =
+    useSidebar(initialSidebarVisible);
 
   // 認証ハンドラ
   const { isLoginModalOpen, openLoginModal, closeLoginModal, handleLogout } =
@@ -102,6 +103,7 @@ export function HomeClient({ initialSidebarVisible }: HomeClientProps) {
   // カレンダーイベントクリックハンドラ
   const { handleEventClick } = useCalendarEventHandler({
     onAddPanel: addPanel,
+    onCloseSidebar: closeSidebar,
   });
 
   // モバイルでサイドバーが開いているときスクロールをロック

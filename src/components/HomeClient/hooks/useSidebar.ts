@@ -17,5 +17,11 @@ export function useSidebar(initialVisible: boolean) {
     });
   }, []);
 
-  return { sidebarVisible, toggleSidebar };
+  const closeSidebar = useCallback(() => {
+    setSidebarVisible(false);
+    // Cookieに保存（1年間有効）
+    document.cookie = `sidebar-visible=false; path=/; max-age=${60 * 60 * 24 * 365}`;
+  }, []);
+
+  return { sidebarVisible, toggleSidebar, closeSidebar };
 }
