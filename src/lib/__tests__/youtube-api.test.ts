@@ -74,19 +74,19 @@ describe('youtube-api', () => {
             mockAxiosInstance.requestInterceptor = fn;
             return 0;
           }),
-          eject: jest.fn()
+          eject: jest.fn(),
         },
         response: {
           use: jest.fn((fn) => {
             mockAxiosInstance.responseInterceptor = fn;
             return 0;
           }),
-          eject: jest.fn()
+          eject: jest.fn(),
         },
       },
     };
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (createYouTubeClient as jest.Mock).mockReturnValue(mockAxiosInstance as any);
+    (createYouTubeClient as jest.Mock).mockReturnValue(mockAxiosInstance);
   });
 
   afterEach(() => {

@@ -203,7 +203,9 @@ describe('URLInput component', () => {
   describe('propsの変更', () => {
     it('useURLInputに正しいpropsが渡される', () => {
       const currentUrl = 'https://www.youtube.com/watch?v=test123';
-      render(<URLInput currentUrl={currentUrl} onUrlChange={mockOnUrlChange} />);
+      render(
+        <URLInput currentUrl={currentUrl} onUrlChange={mockOnUrlChange} />,
+      );
 
       expect(mockUseURLInput).toHaveBeenCalledWith({
         currentUrl,

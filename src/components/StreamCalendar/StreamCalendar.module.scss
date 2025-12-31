@@ -1,3 +1,5 @@
+@use '@/styles/foundation/mixins' as *;
+
 .calendarContainer {
   background: var(--bg-secondary, #1e1e1e);
   border-radius: var(--radius-md, 8px);
@@ -7,6 +9,10 @@
   display: flex;
   flex-direction: column;
 
+  @include mobile {
+    padding: var(--spacing-sm, 8px);
+  }
+
   .header {
     display: flex;
     justify-content: space-between;
@@ -14,16 +20,29 @@
     margin-bottom: var(--spacing-md, 16px);
     gap: var(--spacing-sm, 8px);
 
+    @include mobile {
+      margin-bottom: var(--spacing-sm, 8px);
+      gap: var(--spacing-xs, 4px);
+    }
+
     h2 {
       font-size: var(--text-lg, 18px);
       font-weight: var(--font-bold, 700);
       color: var(--text-primary, #ffffff);
       margin: 0;
+
+      @include mobile {
+        font-size: var(--text-base, 16px);
+      }
     }
 
     .controls {
       display: flex;
       gap: var(--spacing-xs, 4px);
+
+      @include mobile {
+        gap: 2px;
+      }
 
       button {
         display: flex;
@@ -37,6 +56,11 @@
         font-size: var(--text-sm, 14px);
         cursor: pointer;
         transition: all var(--transition-base, 200ms ease-in-out);
+
+        @include mobile {
+          padding: var(--spacing-xs, 4px) var(--spacing-sm, 8px);
+          font-size: var(--text-xs, 12px);
+        }
 
         &:hover {
           background: var(--bg-hover, #353535);
@@ -57,6 +81,11 @@
         svg {
           width: 16px;
           height: 16px;
+
+          @include mobile {
+            width: 14px;
+            height: 14px;
+          }
         }
       }
     }
@@ -74,6 +103,11 @@
     flex-direction: column;
     gap: var(--spacing-md, 16px);
     min-height: 400px;
+
+    @include mobile {
+      min-height: 300px;
+      gap: var(--spacing-sm, 8px);
+    }
   }
 
   .error {
@@ -84,9 +118,18 @@
     min-height: 400px;
     gap: var(--spacing-md, 16px);
 
+    @include mobile {
+      min-height: 300px;
+      gap: var(--spacing-sm, 8px);
+    }
+
     .errorMessage {
       color: var(--error, #ef4444);
       font-size: var(--text-base, 16px);
+
+      @include mobile {
+        font-size: var(--text-sm, 14px);
+      }
     }
 
     button {
@@ -100,6 +143,11 @@
       cursor: pointer;
       transition: all var(--transition-base, 200ms ease-in-out);
 
+      @include mobile {
+        padding: var(--spacing-xs, 6px) var(--spacing-sm, 12px);
+        font-size: var(--text-xs, 12px);
+      }
+
       &:hover {
         background: var(--accent-hover, #2563eb);
       }
@@ -109,4 +157,50 @@
 
 .modalCalendar {
   height: 800px;
+
+  @include mobile {
+    height: 600px;
+  }
+}
+
+// FullCalendar スタイルのカスタマイズ
+.calendarContainer {
+  :global(.fc-timegrid-slot-label) {
+    @include mobile {
+      font-size: 9px !important;
+    }
+  }
+
+  // 週表示・月表示共通のイベントスタイル
+  @include mobile {
+    :global(.fc-event-time) {
+      font-size: 9px !important;
+    }
+
+    :global(.fc-event-title) {
+      font-size: 9px !important;
+    }
+
+    :global(.fc-daygrid-event) {
+      font-size: 9px !important;
+      padding: 0 1px !important;
+    }
+
+    :global(.fc-timegrid-event) {
+      font-size: 9px !important;
+    }
+
+    :global(.fc-daygrid-day-number) {
+      font-size: 10px !important;
+    }
+
+    :global(.fc-col-header-cell-cushion) {
+      font-size: 11px !important;
+      padding: 2px !important;
+    }
+
+    :global(.fc-daygrid-day-top) {
+      font-size: 10px !important;
+    }
+  }
 }

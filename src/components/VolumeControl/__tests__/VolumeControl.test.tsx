@@ -5,8 +5,9 @@ import { usePopoverControl } from '../hooks/usePopoverControl';
 // usePopoverControlフックをモック
 jest.mock('../hooks/usePopoverControl');
 
-const mockUsePopoverControl =
-  usePopoverControl as jest.MockedFunction<typeof usePopoverControl>;
+const mockUsePopoverControl = usePopoverControl as jest.MockedFunction<
+  typeof usePopoverControl
+>;
 
 describe('VolumeControl component', () => {
   const mockOnVolumeChange = jest.fn();

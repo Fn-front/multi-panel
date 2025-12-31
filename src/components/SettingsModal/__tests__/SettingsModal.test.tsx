@@ -96,11 +96,7 @@ describe('SettingsModal component', () => {
 
     it('notifiedCountが正しく渡される', () => {
       render(
-        <SettingsModal
-          {...defaultProps}
-          isEnabled={true}
-          notifiedCount={15}
-        />,
+        <SettingsModal {...defaultProps} isEnabled={true} notifiedCount={15} />,
       );
       expect(screen.getByText(/15件通知済み/)).toBeInTheDocument();
     });
@@ -177,5 +173,4 @@ describe('SettingsModal component', () => {
       expect(button).toBeDisabled();
     });
   });
-
 });

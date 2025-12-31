@@ -7,11 +7,15 @@ import { useWindowSize } from '@/hooks/useWindowSize';
 jest.mock('@/contexts/PanelsContext');
 jest.mock('@/hooks/useWindowSize');
 jest.mock('@/components/VideoPanel', () => ({
-  VideoPanel: ({ panel }: { panel: { id: string } }) => <div data-testid={`video-panel-${panel.id}`}>VideoPanel</div>,
+  VideoPanel: ({ panel }: { panel: { id: string } }) => (
+    <div data-testid={`video-panel-${panel.id}`}>VideoPanel</div>
+  ),
 }));
 
 const mockUsePanels = usePanels as jest.MockedFunction<typeof usePanels>;
-const mockUseWindowSize = useWindowSize as jest.MockedFunction<typeof useWindowSize>;
+const mockUseWindowSize = useWindowSize as jest.MockedFunction<
+  typeof useWindowSize
+>;
 
 describe('PanelContainer component', () => {
   const mockUpdateLayout = jest.fn();
@@ -246,7 +250,9 @@ describe('PanelContainer component', () => {
 
     it('追加ボタンのtype属性がbuttonである', () => {
       render(<PanelContainer />);
-      const addButtons = screen.getAllByRole('button', { name: 'パネルを追加' });
+      const addButtons = screen.getAllByRole('button', {
+        name: 'パネルを追加',
+      });
       addButtons.forEach((button) => {
         expect(button).toHaveAttribute('type', 'button');
       });
