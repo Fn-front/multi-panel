@@ -37,6 +37,17 @@ export function parseYouTubeUrl(url: string): ParsedYouTubeUrl {
       }
     }
 
+    // ライブURL: https://www.youtube.com/live/VIDEO_ID
+    if (
+      (hostname === 'youtube.com' || hostname === 'm.youtube.com') &&
+      urlObj.pathname.startsWith('/live/')
+    ) {
+      const videoId = urlObj.pathname.split('/live/')[1]?.split('?')[0];
+      if (videoId && isValidYouTubeVideoId(videoId)) {
+        return { videoId, type: 'video' };
+      }
+    }
+
     // チャンネルURL: https://www.youtube.com/channel/CHANNEL_ID
     if (
       (hostname === 'youtube.com' || hostname === 'm.youtube.com') &&
