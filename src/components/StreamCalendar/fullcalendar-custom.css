@@ -214,6 +214,10 @@
     padding: 3px 6px;
   }
 
+  .fc .fc-button-group {
+    display: flex !important;
+  }
+
   .fc .fc-toolbar-title {
     font-size: 12px;
   }
