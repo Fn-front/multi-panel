@@ -276,10 +276,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signInWithGitHub = async () => {
     setIsLoading(true);
     try {
+      // 環境変数からリダイレクトURLを取得、未設定の場合は現在のオリジンを使用
+      const redirectUrl =
+        process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
+
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'github',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
+          redirectTo: `${redirectUrl}/auth/callback`,
         },
       });
 
