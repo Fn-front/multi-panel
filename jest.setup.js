@@ -6,6 +6,28 @@ process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://test.supabase.co'
 process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = 'test-anon-key'
 process.env.NEXT_PUBLIC_YOUTUBE_API_KEY = 'test-youtube-api-key'
 
+// テスト警告を抑制
+const originalError = console.error
+beforeAll(() => {
+  console.error = (...args) => {
+    if (typeof args[0] === 'string') {
+      // react-playerの動的ロードによるact警告を抑制
+      if (args[0].includes('An update to ForwardRef(LoadableComponent) inside a test was not wrapped in act')) {
+        return
+      }
+      // HTMLFormElement.requestSubmitの未実装警告を抑制（polyfillで対応済み）
+      if (args[0].includes('Not implemented: HTMLFormElement.prototype.requestSubmit')) {
+        return
+      }
+    }
+    originalError.call(console, ...args)
+  }
+})
+
+afterAll(() => {
+  console.error = originalError
+})
+
 // fetchのpolyfillを追加
 global.fetch = jest.fn(() =>
   Promise.resolve({
