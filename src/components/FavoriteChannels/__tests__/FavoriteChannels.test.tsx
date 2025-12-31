@@ -23,8 +23,9 @@ jest.mock('@/components/ColorPicker', () => ({
   ),
 }));
 
-const mockUseChannelManagement =
-  useChannelManagement as jest.MockedFunction<typeof useChannelManagement>;
+const mockUseChannelManagement = useChannelManagement as jest.MockedFunction<
+  typeof useChannelManagement
+>;
 
 describe('FavoriteChannels component', () => {
   const mockOnAddChannel = jest.fn();

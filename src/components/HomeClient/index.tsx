@@ -63,8 +63,9 @@ export function HomeClient({ initialSidebarVisible }: HomeClientProps) {
   );
 
   // サイドバー管理
-  const { sidebarVisible, toggleSidebar, closeSidebar } =
-    useSidebar(initialSidebarVisible);
+  const { sidebarVisible, toggleSidebar, closeSidebar } = useSidebar(
+    initialSidebarVisible,
+  );
 
   // 認証ハンドラ
   const { isLoginModalOpen, openLoginModal, closeLoginModal, handleLogout } =

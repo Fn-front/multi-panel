@@ -6,10 +6,18 @@ import type { Panel } from '@/types';
 // モックの設定
 jest.mock('@/contexts/PanelsContext');
 jest.mock('@/components/VideoPlayer', () => ({
-  VideoPlayer: ({ url }: { url: string }) => <div data-testid='video-player'>{url}</div>,
+  VideoPlayer: ({ url }: { url: string }) => (
+    <div data-testid='video-player'>{url}</div>
+  ),
 }));
 jest.mock('@/components/URLInput', () => ({
-  URLInput: ({ currentUrl, onUrlChange }: { currentUrl: string; onUrlChange: (url: string) => void }) => (
+  URLInput: ({
+    currentUrl,
+    onUrlChange,
+  }: {
+    currentUrl: string;
+    onUrlChange: (url: string) => void;
+  }) => (
     <input
       data-testid='url-input'
       value={currentUrl}
@@ -18,7 +26,17 @@ jest.mock('@/components/URLInput', () => ({
   ),
 }));
 jest.mock('@/components/VolumeControl', () => ({
-  VolumeControl: ({ volume, muted, onVolumeChange, onMutedChange }: { volume: number; muted: boolean; onVolumeChange: (volume: number) => void; onMutedChange: (muted: boolean) => void }) => (
+  VolumeControl: ({
+    volume,
+    muted,
+    onVolumeChange,
+    onMutedChange,
+  }: {
+    volume: number;
+    muted: boolean;
+    onVolumeChange: (volume: number) => void;
+    onMutedChange: (muted: boolean) => void;
+  }) => (
     <div data-testid='volume-control'>
       <input
         data-testid='volume-slider'
@@ -26,10 +44,7 @@ jest.mock('@/components/VolumeControl', () => ({
         value={volume}
         onChange={(e) => onVolumeChange(parseFloat(e.target.value))}
       />
-      <button
-        data-testid='mute-button'
-        onClick={() => onMutedChange(!muted)}
-      >
+      <button data-testid='mute-button' onClick={() => onMutedChange(!muted)}>
         {muted ? 'Unmute' : 'Mute'}
       </button>
     </div>

@@ -55,7 +55,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-
   /**
    * ホワイトリストチェック + セッション期限チェック + 最終ログイン更新を1回のクエリで実行
    * 最適化: 3回のクエリ → 1回のクエリに統合してコールドスタート時間を短縮
@@ -105,7 +104,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           .eq('user_id', userId);
 
         if (updateError) {
-          console.error(ERROR_MESSAGES.AUTH.LAST_LOGIN_UPDATE_ERROR, updateError);
+          console.error(
+            ERROR_MESSAGES.AUTH.LAST_LOGIN_UPDATE_ERROR,
+            updateError,
+          );
         }
       }
 
@@ -207,7 +209,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
-
       // SIGNED_OUTイベントの場合は早期リターン（無限ループ防止）
       if (event === 'SIGNED_OUT') {
         setSession(null);

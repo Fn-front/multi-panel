@@ -5,8 +5,9 @@ import { useConnectionStatus } from '@/hooks/useConnectionStatus';
 // useConnectionStatusフックをモック
 jest.mock('@/hooks/useConnectionStatus');
 
-const mockUseConnectionStatus =
-  useConnectionStatus as jest.MockedFunction<typeof useConnectionStatus>;
+const mockUseConnectionStatus = useConnectionStatus as jest.MockedFunction<
+  typeof useConnectionStatus
+>;
 
 describe('ConnectionStatusIndicator component', () => {
   beforeEach(() => {
@@ -76,7 +77,9 @@ describe('ConnectionStatusIndicator component', () => {
       render(<ConnectionStatusIndicator />);
 
       expect(screen.getByText('接続を再試行中')).toBeInTheDocument();
-      expect(screen.queryByText('接続プールがスリープ中')).not.toBeInTheDocument();
+      expect(
+        screen.queryByText('接続プールがスリープ中'),
+      ).not.toBeInTheDocument();
     });
   });
 
@@ -96,7 +99,9 @@ describe('ConnectionStatusIndicator component', () => {
       expect(screen.getByRole('status')).toBeInTheDocument();
       expect(screen.getByText('⏳')).toBeInTheDocument();
       expect(screen.getByText('接続プールがスリープ中')).toBeInTheDocument();
-      expect(screen.getByText(/次のリクエストに 3.0秒 かかる可能性があります/)).toBeInTheDocument();
+      expect(
+        screen.getByText(/次のリクエストに 3.0秒 かかる可能性があります/),
+      ).toBeInTheDocument();
     });
 
     it('lastResponseTimeがnullの場合にデフォルトメッセージが表示される', () => {
@@ -112,7 +117,9 @@ describe('ConnectionStatusIndicator component', () => {
       render(<ConnectionStatusIndicator />);
 
       expect(screen.getByText('接続プールがスリープ中')).toBeInTheDocument();
-      expect(screen.getByText(/次のリクエストに 1-2秒 かかる可能性があります/)).toBeInTheDocument();
+      expect(
+        screen.getByText(/次のリクエストに 1-2秒 かかる可能性があります/),
+      ).toBeInTheDocument();
     });
 
     it('isColdStartがfalseの場合は何も表示されない', () => {
@@ -192,7 +199,9 @@ describe('ConnectionStatusIndicator component', () => {
       render(<ConnectionStatusIndicator />);
 
       expect(screen.getByText('接続を再試行中')).toBeInTheDocument();
-      expect(screen.queryByText('接続プールがスリープ中')).not.toBeInTheDocument();
+      expect(
+        screen.queryByText('接続プールがスリープ中'),
+      ).not.toBeInTheDocument();
     });
   });
 });

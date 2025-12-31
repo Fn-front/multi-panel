@@ -168,7 +168,9 @@ describe('Modal component', () => {
 
       expect(screen.getByText('Section Title')).toBeInTheDocument();
       expect(screen.getByText('Section Content')).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: 'Action' })).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: 'Action' }),
+      ).toBeInTheDocument();
     });
   });
 });

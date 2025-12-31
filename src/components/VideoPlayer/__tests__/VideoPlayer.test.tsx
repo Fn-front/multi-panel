@@ -6,15 +6,24 @@ import { useYouTubePlayerReady } from '../hooks/useYouTubePlayerReady';
 jest.mock('../hooks/useYouTubePlayerReady');
 jest.mock('react-player', () => ({
   __esModule: true,
-  default: ({ src }: { src: string; volume: number; muted: boolean; onReady?: () => void; onError?: () => void }) => (
+  default: ({
+    src,
+  }: {
+    src: string;
+    volume: number;
+    muted: boolean;
+    onReady?: () => void;
+    onError?: () => void;
+  }) => (
     <div data-testid='react-player' data-url={src}>
       ReactPlayer: {src}
     </div>
   ),
 }));
 
-const mockUseYouTubePlayerReady =
-  useYouTubePlayerReady as jest.MockedFunction<typeof useYouTubePlayerReady>;
+const mockUseYouTubePlayerReady = useYouTubePlayerReady as jest.MockedFunction<
+  typeof useYouTubePlayerReady
+>;
 
 describe('VideoPlayer component', () => {
   const mockPlayerRef = { current: document.createElement('div') };
