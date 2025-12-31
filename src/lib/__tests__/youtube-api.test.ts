@@ -7,7 +7,6 @@ import type {
   YouTubeSearchResponse,
   YouTubeVideosResponse,
 } from '@/types/youtube';
-import axios from 'axios';
 
 // http-clientをモック
 jest.mock('@/lib/http-client', () => ({
@@ -21,10 +20,15 @@ jest.mock('@/lib/http-client', () => ({
 }));
 
 // youtube-apiモジュールをリセット可能にする
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 let getChannelInfo: any;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 let getChannelUpcomingStreams: any;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 let getChannelLiveStreams: any;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 let getMultipleChannelsSchedule: any;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 let createYouTubeClient: any;
 
 beforeEach(async () => {
@@ -45,6 +49,7 @@ beforeEach(async () => {
 describe('youtube-api', () => {
   const mockApiKey = 'test-api-key';
   const mockChannelId = 'UCtest123';
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let mockAxiosInstance: any;
 
   // console.errorをモック
@@ -80,6 +85,7 @@ describe('youtube-api', () => {
         },
       },
     };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (createYouTubeClient as jest.Mock).mockReturnValue(mockAxiosInstance as any);
   });
 
