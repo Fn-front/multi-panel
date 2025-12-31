@@ -86,9 +86,7 @@ describe('youtube-api', () => {
       },
     };
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (createYouTubeClient as jest.Mock).mockReturnValue(
-      mockAxiosInstance as any,
-    );
+    (createYouTubeClient as jest.Mock).mockReturnValue(mockAxiosInstance);
   });
 
   afterEach(() => {
