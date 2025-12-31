@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import { HiXMark } from 'react-icons/hi2';
 import { UI_TEXT } from '@/constants';
 import styles from './Modal.module.scss';
 
@@ -52,7 +53,7 @@ export function Modal({
               type='button'
               aria-label={UI_TEXT.MODAL.CLOSE}
             >
-              ✕
+              <HiXMark />
             </button>
           </div>
         )}
