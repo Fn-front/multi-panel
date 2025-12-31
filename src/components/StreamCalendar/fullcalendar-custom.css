@@ -201,3 +201,52 @@
 .fc-h-event .fc-event-time {
   overflow: visible;
 }
+
+/* モバイル対応 */
+@media (max-width: 767px) {
+  .fc .fc-toolbar {
+    padding: 4px;
+    margin-bottom: 4px;
+  }
+
+  .fc .fc-button {
+    font-size: 10px;
+    padding: 3px 6px;
+  }
+
+  .fc .fc-toolbar-title {
+    font-size: 12px;
+  }
+
+  .fc .fc-col-header-cell {
+    font-size: 8px;
+    padding: 1px;
+  }
+
+  .fc .fc-col-header-cell-cushion {
+    padding: 1px 0;
+    font-size: 9px;
+  }
+
+  .fc .fc-daygrid-day-number {
+    font-size: 9px;
+  }
+
+  .fc .fc-event {
+    font-size: 9px;
+    padding: 0 1px;
+  }
+
+  .fc .fc-event-time,
+  .fc .fc-event-title {
+    font-size: 9px;
+  }
+
+  .fc .fc-event-main svg,
+  .fc .fc-daygrid-event svg {
+    width: 12px !important;
+    height: 12px !important;
+    min-width: 12px !important;
+    min-height: 12px !important;
+  }
+}
