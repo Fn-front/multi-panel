@@ -65,10 +65,11 @@ serve(async (req) => {
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-    // favorite_channelsから全チャンネルIDを取得（重複排除）
+    // favorite_channelsから全チャンネルIDを取得（論理削除されていないもののみ）
     const { data: channels, error: channelsError } = await supabase
       .from('favorite_channels')
-      .select('channel_id, channel_title, channel_thumbnail');
+      .select('channel_id, channel_title, channel_thumbnail')
+      .is('deleted_at', null);
 
     if (channelsError) throw channelsError;
 
@@ -109,11 +110,17 @@ serve(async (req) => {
 
         // レート制限対策（100ms待機）
         await new Promise((resolve) => setTimeout(resolve, 100));
-      } catch (error) {
+      } catch (error: any) {
         console.error(
           `Failed to fetch streams for channel ${channel.channel_id}:`,
           error
         );
+
+        // クォータ超過の場合は早期リターン
+        if (error.message?.includes('403')) {
+          console.warn('YouTube API quota likely exceeded - stopping fetch');
+          break;
+        }
       }
     }
 
@@ -215,6 +222,7 @@ async function fetchVideoDetails(
   try {
     const response = await youtubeApi.get('/videos', {
       params: {
+        key: YOUTUBE_API_KEY,
         part: 'snippet,liveStreamingDetails',
         id: videoIds.join(','),
       },
@@ -256,12 +264,13 @@ async function fetchChannelStreams(
   channelThumbnail?: string | null
 ): Promise<YouTubeVideo[]> {
   try {
-    // Search APIで配信を検索
+    // Search APIで最新の動画を取得（eventTypeパラメータは使わない）
+    // order=dateは公開日の新しい順
     const searchResponse = await youtubeApi.get('/search', {
       params: {
+        key: YOUTUBE_API_KEY,
         part: 'snippet',
         channelId,
-        eventType,
         type: 'video',
         maxResults: '50',
         order: 'date',
@@ -286,6 +295,7 @@ async function fetchChannelStreams(
     // Videos APIで詳細情報を取得
     const videosResponse = await youtubeApi.get('/videos', {
       params: {
+        key: YOUTUBE_API_KEY,
         part: 'snippet,liveStreamingDetails',
         id: videoIds.join(','),
       },
@@ -293,19 +303,22 @@ async function fetchChannelStreams(
 
     const videosData = videosResponse.data;
 
-    return videosData.items.map((video: any) => ({
-      id: video.id,
-      title: video.snippet.title,
-      thumbnail: video.snippet.thumbnails.high.url,
-      channelId: video.snippet.channelId,
-      channelTitle: video.snippet.channelTitle,
-      channelThumbnail: channelThumbnail || undefined,
-      publishedAt: video.snippet.publishedAt,
-      liveBroadcastContent: eventType,
-      scheduledStartTime: video.liveStreamingDetails?.scheduledStartTime,
-      actualStartTime: video.liveStreamingDetails?.actualStartTime,
-      actualEndTime: video.liveStreamingDetails?.actualEndTime,
-    }));
+    // liveBroadcastContentでフィルタリング
+    return videosData.items
+      .filter((video: any) => video.snippet.liveBroadcastContent === eventType)
+      .map((video: any) => ({
+        id: video.id,
+        title: video.snippet.title,
+        thumbnail: video.snippet.thumbnails.high.url,
+        channelId: video.snippet.channelId,
+        channelTitle: video.snippet.channelTitle,
+        channelThumbnail: channelThumbnail || undefined,
+        publishedAt: video.snippet.publishedAt,
+        liveBroadcastContent: video.snippet.liveBroadcastContent,
+        scheduledStartTime: video.liveStreamingDetails?.scheduledStartTime,
+        actualStartTime: video.liveStreamingDetails?.actualStartTime,
+        actualEndTime: video.liveStreamingDetails?.actualEndTime,
+      }));
   } catch (error: any) {
     if (error.response?.status === 403) {
       const errorData = error.response.data;

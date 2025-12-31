@@ -98,6 +98,7 @@ export function useCalendarEvents({ channelIds }: UseCalendarEventsOptions) {
       setError(
         err instanceof Error ? err.message : UI_TEXT.CALENDAR.FETCH_ERROR,
       );
+    } finally {
       setIsLoading(false);
     }
   }, [user, channelIds, fetchSchedule]);
