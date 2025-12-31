@@ -37,7 +37,7 @@ export function parseYouTubeUrl(url: string): ParsedYouTubeUrl {
       }
     }
 
-    // ライブURL: https://www.youtube.com/live/VIDEO_ID
+    // 共有URL（ライブ・動画）: https://www.youtube.com/live/VIDEO_ID or https://www.youtube.com/live/VIDEO_ID?si=xxx
     if (
       (hostname === 'youtube.com' || hostname === 'm.youtube.com') &&
       urlObj.pathname.startsWith('/live/')

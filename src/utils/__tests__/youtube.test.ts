@@ -70,6 +70,16 @@ describe('youtube utils', () => {
       });
     });
 
+    it('should parse youtube.com/watch URLs with si parameter', () => {
+      const result = parseYouTubeUrl(
+        'https://www.youtube.com/watch?v=dQw4w9WgXcQ&si=abcd1234',
+      );
+      expect(result).toEqual({
+        type: 'video',
+        videoId: 'dQw4w9WgXcQ',
+      });
+    });
+
     it('should return unknown for invalid URLs', () => {
       expect(parseYouTubeUrl('https://example.com')).toEqual({
         type: 'unknown',
