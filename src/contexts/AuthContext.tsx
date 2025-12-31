@@ -124,15 +124,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  // Keep-aliveポーリング（10分ごと）
+  // Keep-aliveポーリング + セッション期限チェック（10分ごと）
   useEffect(() => {
     if (!user) return;
+
+    // セッション期限チェック
+    const checkSessionExpiry = async () => {
+      const { isExpired } = await checkAndUpdateAllowedUser(
+        user.id,
+        false, // 最終ログイン日時は更新しない
+        false, // セッション期限チェックを実行
+      );
+
+      if (isExpired) {
+        await handleSessionExpired();
+      }
+    };
 
     // 初回実行
     keepAlive();
 
-    // 10分ごとに実行
-    const intervalId = setInterval(keepAlive, KEEP_ALIVE_INTERVAL);
+    // 10分ごとに実行（セッション期限チェック含む）
+    const intervalId = setInterval(() => {
+      keepAlive();
+      checkSessionExpiry();
+    }, KEEP_ALIVE_INTERVAL);
 
     return () => clearInterval(intervalId);
     // eslint-disable-next-line react-hooks/exhaustive-deps
