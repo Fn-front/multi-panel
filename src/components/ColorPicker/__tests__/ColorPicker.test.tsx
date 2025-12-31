@@ -2,16 +2,16 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { ColorPicker } from '../index';
 
 const PRESET_COLORS = [
-  '#ef4444',
-  '#f59e0b',
-  '#eab308',
-  '#22c55e',
-  '#10b981',
-  '#06b6d4',
-  '#3b82f6',
-  '#6366f1',
-  '#a855f7',
-  '#ec4899',
+  { hex: '#ef4444', name: '赤' },
+  { hex: '#f59e0b', name: 'オレンジ' },
+  { hex: '#eab308', name: '黄' },
+  { hex: '#22c55e', name: '緑' },
+  { hex: '#10b981', name: 'エメラルド' },
+  { hex: '#06b6d4', name: 'シアン' },
+  { hex: '#3b82f6', name: '青' },
+  { hex: '#6366f1', name: 'インディゴ' },
+  { hex: '#a855f7', name: '紫' },
+  { hex: '#ec4899', name: 'ピンク' },
 ];
 
 describe('ColorPicker component', () => {
@@ -49,7 +49,7 @@ describe('ColorPicker component', () => {
       );
 
       PRESET_COLORS.forEach((color) => {
-        const button = screen.getByLabelText(`色を${color}に変更`);
+        const button = screen.getByLabelText(`色を${color.name}に変更`);
         expect(button).toBeInTheDocument();
       });
     });
@@ -119,8 +119,8 @@ describe('ColorPicker component', () => {
       );
 
       PRESET_COLORS.forEach((color) => {
-        const button = screen.getByLabelText(`色を${color}に変更`);
-        expect(button).toHaveStyle({ backgroundColor: color });
+        const button = screen.getByLabelText(`色を${color.name}に変更`);
+        expect(button).toHaveStyle({ backgroundColor: color.hex });
       });
     });
 
@@ -134,7 +134,7 @@ describe('ColorPicker component', () => {
         />,
       );
 
-      const selectedButton = screen.getByLabelText('色を#ef4444に変更');
+      const selectedButton = screen.getByLabelText('色を赤に変更');
       expect(selectedButton).toHaveClass('selected');
     });
 
@@ -148,7 +148,7 @@ describe('ColorPicker component', () => {
         />,
       );
 
-      const notSelectedButton = screen.getByLabelText('色を#3b82f6に変更');
+      const notSelectedButton = screen.getByLabelText('色を青に変更');
       expect(notSelectedButton).not.toHaveClass('selected');
     });
 
@@ -162,7 +162,7 @@ describe('ColorPicker component', () => {
         />,
       );
 
-      const button = screen.getByLabelText('色を#ef4444に変更');
+      const button = screen.getByLabelText('色を赤に変更');
       expect(button).toHaveAttribute('type', 'button');
     });
   });
@@ -178,7 +178,7 @@ describe('ColorPicker component', () => {
         />,
       );
 
-      const button = screen.getByLabelText('色を#3b82f6に変更');
+      const button = screen.getByLabelText('色を青に変更');
       fireEvent.click(button);
 
       expect(mockOnChange).toHaveBeenCalledWith('#3b82f6');
@@ -194,7 +194,7 @@ describe('ColorPicker component', () => {
         />,
       );
 
-      const button = screen.getByLabelText('色を#22c55e に変更');
+      const button = screen.getByLabelText('色を緑に変更');
       fireEvent.click(button);
 
       expect(mockOnClose).toHaveBeenCalledTimes(1);
@@ -211,9 +211,9 @@ describe('ColorPicker component', () => {
       );
 
       PRESET_COLORS.forEach((color) => {
-        const button = screen.getByLabelText(`色を${color}に変更`);
+        const button = screen.getByLabelText(`色を${color.name}に変更`);
         fireEvent.click(button);
-        expect(mockOnChange).toHaveBeenCalledWith(color);
+        expect(mockOnChange).toHaveBeenCalledWith(color.hex);
       });
     });
   });

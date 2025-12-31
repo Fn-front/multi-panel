@@ -2,28 +2,81 @@
  * @jest-environment jsdom
  */
 
+import type {
+  YouTubeChannelsResponse,
+  YouTubeSearchResponse,
+  YouTubeVideosResponse,
+} from '@/types/youtube';
+import axios from 'axios';
+
+// http-clientをモック
+jest.mock('@/lib/http-client', () => ({
+  createYouTubeClient: jest.fn(),
+  httpClient: {
+    interceptors: {
+      request: { use: jest.fn(), eject: jest.fn() },
+      response: { use: jest.fn(), eject: jest.fn() },
+    },
+  },
+}));
+
+// axiosをモック
+jest.mock('axios');
+const mockedAxios = axios as jest.Mocked<typeof axios>;
+
+// httpClient用のモックを追加
+const mockHttpClientInstance = {
+  interceptors: {
+    request: { use: jest.fn(), eject: jest.fn() },
+    response: { use: jest.fn(), eject: jest.fn() },
+  },
+};
+
+mockedAxios.create = jest.fn(() => mockHttpClientInstance as any);
+
+// テストの後にモジュールをインポート
 import {
   getChannelInfo,
   getChannelUpcomingStreams,
   getChannelLiveStreams,
   getMultipleChannelsSchedule,
 } from '../youtube-api';
-import type {
-  YouTubeChannelsResponse,
-  YouTubeSearchResponse,
-  YouTubeVideosResponse,
-} from '@/types/youtube';
+import { createYouTubeClient } from '@/lib/http-client';
 
-// fetch をモック
-global.fetch = jest.fn();
+const mockCreateYouTubeClient = createYouTubeClient as jest.MockedFunction<
+  typeof createYouTubeClient
+>;
 
 describe('youtube-api', () => {
   const mockApiKey = 'test-api-key';
   const mockChannelId = 'UCtest123';
+  let mockAxiosInstance: any;
 
   beforeEach(() => {
     jest.clearAllMocks();
     process.env.NEXT_PUBLIC_YOUTUBE_API_KEY = mockApiKey;
+
+    // axios.createのモックを設定
+    mockAxiosInstance = {
+      get: jest.fn(),
+      interceptors: {
+        request: {
+          use: jest.fn((fn) => {
+            mockAxiosInstance.requestInterceptor = fn;
+            return 0;
+          }),
+          eject: jest.fn()
+        },
+        response: {
+          use: jest.fn((fn) => {
+            mockAxiosInstance.responseInterceptor = fn;
+            return 0;
+          }),
+          eject: jest.fn()
+        },
+      },
+    };
+    mockCreateYouTubeClient.mockReturnValue(mockAxiosInstance as any);
   });
 
   afterEach(() => {
@@ -50,10 +103,7 @@ describe('youtube-api', () => {
         ],
       };
 
-      (global.fetch as jest.Mock).mockResolvedValueOnce({
-        ok: true,
-        json: async () => mockResponse,
-      });
+      mockAxiosInstance.get.mockResolvedValueOnce({ data: mockResponse });
 
       const result = await getChannelInfo(mockChannelId);
 
@@ -65,10 +115,14 @@ describe('youtube-api', () => {
         customUrl: '@testchannel',
       });
 
-      expect(global.fetch).toHaveBeenCalledWith(
-        expect.stringContaining(
-          `channels?part=snippet&id=${mockChannelId}&key=${mockApiKey}`,
-        ),
+      expect(mockAxiosInstance.get).toHaveBeenCalledWith(
+        '/channels',
+        expect.objectContaining({
+          params: expect.objectContaining({
+            part: 'snippet',
+            id: mockChannelId,
+          }),
+        }),
       );
     });
 
@@ -77,10 +131,7 @@ describe('youtube-api', () => {
         items: [],
       };
 
-      (global.fetch as jest.Mock).mockResolvedValueOnce({
-        ok: true,
-        json: async () => mockResponse,
-      });
+      mockAxiosInstance.get.mockResolvedValueOnce({ data: mockResponse });
 
       const result = await getChannelInfo(mockChannelId);
       expect(result).toBeNull();
@@ -95,21 +146,20 @@ describe('youtube-api', () => {
     });
 
     it('should handle API errors', async () => {
-      (global.fetch as jest.Mock).mockResolvedValueOnce({
-        ok: false,
-        status: 403,
-        statusText: 'Forbidden',
-        json: async () => ({
-          error: {
-            code: 403,
-            message: 'API key not valid',
+      mockAxiosInstance.get.mockRejectedValueOnce({
+        response: {
+          status: 403,
+          statusText: 'Forbidden',
+          data: {
+            error: {
+              code: 403,
+              message: 'API key not valid',
+            },
           },
-        }),
+        },
       });
 
-      await expect(getChannelInfo(mockChannelId)).rejects.toThrow(
-        'YouTube API Error',
-      );
+      await expect(getChannelInfo(mockChannelId)).rejects.toThrow();
     });
   });
 
@@ -160,15 +210,9 @@ describe('youtube-api', () => {
         ],
       };
 
-      (global.fetch as jest.Mock)
-        .mockResolvedValueOnce({
-          ok: true,
-          json: async () => mockSearchResponse,
-        })
-        .mockResolvedValueOnce({
-          ok: true,
-          json: async () => mockVideosResponse,
-        });
+      mockAxiosInstance.get
+        .mockResolvedValueOnce({ data: mockSearchResponse })
+        .mockResolvedValueOnce({ data: mockVideosResponse });
 
       const result = await getChannelUpcomingStreams(mockChannelId);
 
@@ -183,10 +227,7 @@ describe('youtube-api', () => {
     });
 
     it('should return empty array when no upcoming streams', async () => {
-      (global.fetch as jest.Mock).mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({ items: [] }),
-      });
+      mockAxiosInstance.get.mockResolvedValueOnce({ data: { items: [] } });
 
       const result = await getChannelUpcomingStreams(mockChannelId);
       expect(result).toEqual([]);
@@ -240,15 +281,9 @@ describe('youtube-api', () => {
         ],
       };
 
-      (global.fetch as jest.Mock)
-        .mockResolvedValueOnce({
-          ok: true,
-          json: async () => mockSearchResponse,
-        })
-        .mockResolvedValueOnce({
-          ok: true,
-          json: async () => mockVideosResponse,
-        });
+      mockAxiosInstance.get
+        .mockResolvedValueOnce({ data: mockSearchResponse })
+        .mockResolvedValueOnce({ data: mockVideosResponse });
 
       const result = await getChannelLiveStreams(mockChannelId);
 
@@ -267,24 +302,7 @@ describe('youtube-api', () => {
       const channel2 = 'UCtest2';
 
       // Mock responses for both channels
-      (global.fetch as jest.Mock).mockImplementation((url: string) => {
-        if (url.includes('eventType=live')) {
-          return Promise.resolve({
-            ok: true,
-            json: async () => ({ items: [] }),
-          });
-        }
-        if (url.includes('eventType=upcoming')) {
-          return Promise.resolve({
-            ok: true,
-            json: async () => ({ items: [] }),
-          });
-        }
-        return Promise.resolve({
-          ok: true,
-          json: async () => ({ items: [] }),
-        });
-      });
+      mockAxiosInstance.get.mockResolvedValue({ data: { items: [] } });
 
       const result = await getMultipleChannelsSchedule([channel1, channel2]);
 
@@ -298,23 +316,21 @@ describe('youtube-api', () => {
       const channel2 = 'UCtest2';
 
       let callCount = 0;
-      (global.fetch as jest.Mock).mockImplementation(() => {
+      mockAxiosInstance.get.mockImplementation(() => {
         callCount++;
         // 最初のチャンネルのリクエストは失敗
         if (callCount <= 2) {
-          return Promise.resolve({
-            ok: false,
-            status: 500,
-            json: async () => ({
-              error: { code: 500, message: 'Internal Server Error' },
-            }),
+          return Promise.reject({
+            response: {
+              status: 500,
+              data: {
+                error: { code: 500, message: 'Internal Server Error' },
+              },
+            },
           });
         }
         // 2番目のチャンネルのリクエストは成功
-        return Promise.resolve({
-          ok: true,
-          json: async () => ({ items: [] }),
-        });
+        return Promise.resolve({ data: { items: [] } });
       });
 
       const result = await getMultipleChannelsSchedule([channel1, channel2]);

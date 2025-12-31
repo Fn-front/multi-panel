@@ -36,15 +36,15 @@ describe('FavoriteChannels component', () => {
   const mockChannels: Channel[] = [
     {
       id: 'channel-1',
-      title: 'Test Channel 1',
-      customUrl: '@testchannel1',
+      channelId: 'UC-test-1',
+      name: 'Test Channel 1',
       thumbnail: 'https://example.com/thumb1.jpg',
       color: '#ef4444',
     },
     {
       id: 'channel-2',
-      title: 'Test Channel 2',
-      customUrl: '@testchannel2',
+      channelId: 'UC-test-2',
+      name: 'Test Channel 2',
       thumbnail: 'https://example.com/thumb2.jpg',
       color: '#3b82f6',
     },
@@ -56,7 +56,7 @@ describe('FavoriteChannels component', () => {
       inputValue: '',
       isLoading: false,
       error: null,
-      channelInfoCache: {},
+      channelInfoCache: new Map(),
       handleSubmit: mockHandleSubmit,
       handleInputChange: mockHandleInputChange,
     });

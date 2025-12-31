@@ -1,5 +1,5 @@
 import { render, screen, fireEvent } from '@testing-library/react';
-import { LoadingOverlay } from '../LoadingOverlay';
+import { LoadingOverlay } from '../index';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTimeout } from '@/hooks/useTimeout';
 
@@ -11,13 +11,16 @@ const mockUseAuth = useAuth as jest.MockedFunction<typeof useAuth>;
 const mockUseTimeout = useTimeout as jest.MockedFunction<typeof useTimeout>;
 
 describe('LoadingOverlay component', () => {
+  const mockReload = jest.fn();
+
+  beforeAll(() => {
+    // window.location.reload のモック
+    delete (window as any).location;
+    window.location = { reload: mockReload } as any;
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
-    // window.location.reload のモック
-    Object.defineProperty(window, 'location', {
-      value: { reload: jest.fn() },
-      writable: true,
-    });
   });
 
   describe('基本レンダリング', () => {

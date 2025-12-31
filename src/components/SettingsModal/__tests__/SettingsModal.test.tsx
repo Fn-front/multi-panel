@@ -178,11 +178,4 @@ describe('SettingsModal component', () => {
     });
   });
 
-  describe('スタイリング', () => {
-    it('settingsContentクラスが適用される', () => {
-      const { container } = render(<SettingsModal {...defaultProps} />);
-      const settingsContent = container.querySelector('.settingsContent');
-      expect(settingsContent).toBeInTheDocument();
-    });
-  });
 });

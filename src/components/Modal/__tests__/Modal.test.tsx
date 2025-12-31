@@ -47,7 +47,7 @@ describe('Modal component', () => {
 
     it('閉じるボタンが表示される', () => {
       render(<Modal {...defaultProps} title='Test Title' />);
-      const closeButton = screen.getByRole('button', { name: '✕' });
+      const closeButton = screen.getByRole('button', { name: '閉じる' });
       expect(closeButton).toBeInTheDocument();
     });
   });
@@ -69,7 +69,7 @@ describe('Modal component', () => {
 
     it('閉じるボタンをクリックするとonCloseが呼ばれる', () => {
       render(<Modal {...defaultProps} title='Test Title' />);
-      const closeButton = screen.getByRole('button', { name: '✕' });
+      const closeButton = screen.getByRole('button', { name: '閉じる' });
       fireEvent.click(closeButton);
       expect(mockOnClose).toHaveBeenCalledTimes(1);
     });

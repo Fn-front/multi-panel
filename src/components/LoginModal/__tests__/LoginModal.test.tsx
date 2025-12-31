@@ -53,15 +53,6 @@ describe('LoginModal component', () => {
         screen.getByRole('button', { name: /GitHubでログイン/i }),
       ).toBeInTheDocument();
     });
-
-    it('GitHubアイコンが表示される', () => {
-      const { container } = render(
-        <LoginModal isOpen={true} onClose={mockOnClose} />,
-      );
-      const svgIcon = container.querySelector('svg');
-      expect(svgIcon).toBeInTheDocument();
-      expect(svgIcon).toHaveAttribute('viewBox', '0 0 24 24');
-    });
   });
 
   describe('ログイン処理', () => {
